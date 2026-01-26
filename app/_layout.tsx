@@ -1,24 +1,53 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+// app/_layout.tsx
+import { Slot } from "expo-router";
+import { View, StyleSheet } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import AnimatedBackground from "@/components/Background";
+import { AuthProvider } from "@/context/AuthContext";
+import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <View style={styles.container}>
+              <View style={styles.darkBg} />
+              <AnimatedBackground />
+              <Slot />
+            </View>
+          </WishlistProvider>
+        </CartProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  darkBg: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#ffffff",
+  },
+});
+
+
+// import { AuthProvider } from "@/context/AuthContext";
+// import { CartProvider } from "@/context/CartContext";
+// import { WishlistProvider } from "@/context/WishlistContext";
+// import { FilterProvider } from "@/context/FilterContext";
+// import GlobalBackground from "@/components/Background";
+// return (
+//   <AuthProvider>
+//     <CartProvider>
+//       <WishlistProvider>
+//         <FilterProvider>
+//             <Slot />
+//         </FilterProvider>
+//       </WishlistProvider>
+//     </CartProvider>
+//   </AuthProvider>
+// );
