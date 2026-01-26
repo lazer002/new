@@ -14,9 +14,11 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
+  withDelay,
   Easing,
   runOnJS,
 } from "react-native-reanimated";
+
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams } from "expo-router";
 
@@ -65,32 +67,56 @@ export default function ProductScreen() {
     zIndex: 20,
   }));
 
-  useEffect(() => {
-    /* animate hero */
-    animX.value = withTiming(0, {
-      duration: 2500,
-      easing: Easing.out(Easing.cubic),
-    });
-    animY.value = withTiming(0, {
-      duration: 2500,
-      easing: Easing.out(Easing.cubic),
-    });
-    animW.value = withTiming(width, {
-      duration: 2500,
-      easing: Easing.out(Easing.cubic),
-    });
-    animH.value = withTiming(height * 0.6, {
-      duration: 2500,
-      easing: Easing.out(Easing.cubic),
-    });
-    animRadius.value = withTiming(0, { duration: 2500 });
+useEffect(() => {
+  const DURATION = 1800;
 
-    overlayOpacity.value = withTiming(
-      1,
-      { duration: 1200 },
-      () => runOnJS(setShowContent)(true)
-    );
-  }, []);
+  animX.value = withDelay(
+    50,
+    withTiming(0, {
+      duration: DURATION,
+      easing: Easing.out(Easing.cubic),
+    })
+  );
+
+  animY.value = withDelay(
+    50,
+    withTiming(0, {
+      duration: DURATION,
+      easing: Easing.out(Easing.cubic),
+    })
+  );
+
+  animW.value = withDelay(
+    50,
+    withTiming(width, {
+      duration: DURATION,
+      easing: Easing.out(Easing.cubic),
+    })
+  );
+
+  animH.value = withDelay(
+    50,
+    withTiming(height * 0.6, {
+      duration: DURATION,
+      easing: Easing.out(Easing.cubic),
+    })
+  );
+
+  animRadius.value = withDelay(
+    50,
+    withTiming(0, {
+      duration: DURATION,
+      easing: Easing.out(Easing.cubic),
+    })
+  );
+
+  overlayOpacity.value = withTiming(
+    1,
+    { duration: 800 },
+    () => runOnJS(setShowContent)(true)
+  );
+}, []);
+
 
   /* ---------- LOAD PRODUCT ---------- */
   useEffect(() => {
@@ -122,7 +148,7 @@ export default function ProductScreen() {
 
       <Animated.View style={[styles.fadeOverlay, overlayStyle]}>
         <LinearGradient
-          colors={["transparent", "rgba(0,0,0,0.9)"]}
+          colors={["transparent", "#080808"]}
           style={StyleSheet.absoluteFill}
         />
       </Animated.View>
