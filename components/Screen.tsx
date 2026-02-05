@@ -23,7 +23,7 @@ export default function Screen({ children, style }: ScreenProps) {
       {children}
 
       {/* 🌫️ BOTTOM GRADIENT FADE */}
-      <LinearGradient
+      {/* <LinearGradient
         pointerEvents="none"
         colors={[
           "rgba(86, 255, 8, 0)",
@@ -32,7 +32,7 @@ export default function Screen({ children, style }: ScreenProps) {
         ]}
         locations={[0, 0.6, 1]}
         style={styles.bottomFade}
-      />
+      /> */}
     </View>
   );
 }

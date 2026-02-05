@@ -311,10 +311,10 @@ const styles = StyleSheet.create({
   heroTitleMain: {
     fontSize: width * 0.12,
     fontWeight: "800",
-    fontFamily: Platform.select({
-      ios: "Georgia",
-      android: "serif",
-    }),
+    // fontFamily: Platform.select({
+    //   ios: "Georgia",
+    //   android: "serif",
+    // }),
   },
 
   heroTitleSub: {
