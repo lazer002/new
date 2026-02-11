@@ -8,17 +8,20 @@ import {
   Dimensions,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { AuthContext } from "../context/AuthContext";
+import { useRouter } from "expo-router";
+import { useAuth } from "@/context/AuthContext";
 
 const { width } = Dimensions.get("window");
 
-export default function Profile({ navigation }) {
-  const { user, logout } = useContext(AuthContext);
+export default function Profile() {
+  const router = useRouter();
+  const { user, logout } = useAuth()
 
-  const go = (screen) => navigation.navigate(screen);
+  const go = (path: string) => router.push(path);
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      
       {/* --- HEADER SECTION --- */}
       <View style={styles.headerBox}>
         <Text style={styles.title}>
@@ -31,28 +34,46 @@ export default function Profile({ navigation }) {
         </Text>
       </View>
 
-            {/* --- ACCOUNT SECTION --- */}
+      {/* --- ACCOUNT SECTION --- */}
       <Section title="Account">
         {user ? (
           <>
             <Item icon="person-outline" label="Profile Details" />
-            <Item icon="heart-outline" label="Wishlist" onPress={() => go("FavoritesScreen")} />
+            <Item
+              icon="heart-outline"
+              label="Wishlist"
+              onPress={() => go("/wishlist")}
+            />
             <Item icon="map-outline" label="Saved Addresses" />
             <Item icon="card-outline" label="Payments" />
           </>
         ) : (
-          <Item icon="log-in-outline" label="Sign in / Create Account" onPress={() => go("Auth")} />
+          <Item
+            icon="log-in-outline"
+            label="Sign in / Create Account"
+            onPress={() => go("/auth")}
+          />
         )}
       </Section>
 
       {/* --- ORDER SECTION --- */}
       <Section title="Orders">
-        <Item icon="cube-outline" label="My Orders" onPress={() => go("OrdersScreen")} />
-        <Item icon="location-outline" label="Track Order" onPress={() => go("TrackOrderScreen")} />
-        <Item icon="location-outline" label="Return/Exchange" onPress={() => go("ReturnScreen")} />
+        <Item
+          icon="cube-outline"
+          label="My Orders"
+          onPress={() => go("/orders")}
+        />
+        <Item
+          icon="location-outline"
+          label="Track Order"
+          onPress={() => go("/track")}
+        />
+        <Item
+          icon="refresh-outline"
+          label="Return/Exchange"
+          onPress={() => go("/returns")}
+        />
       </Section>
-
-
 
       {/* --- SHOP SECTION --- */}
       {user && (
@@ -66,16 +87,29 @@ export default function Profile({ navigation }) {
       <Section title="Support">
         <Item icon="help-circle-outline" label="Help Center" />
         <Item icon="chatbubble-ellipses-outline" label="Contact Support" />
-        <Item icon="information-circle-outline" label="Terms & Policies" />
+        <Item
+          icon="information-circle-outline"
+          label="Terms & Policies"
+        />
       </Section>
 
       {/* --- FOOTER ACTIONS --- */}
       <View style={{ height: 10 }} />
+
       {user ? (
-        <FooterButton label="Logout" icon="log-out-outline" onPress={logout} />
+        <FooterButton
+          label="Logout"
+          icon="log-out-outline"
+          onPress={logout}
+        />
       ) : (
-        <FooterButton label="Login / Signup" icon="log-in-outline" onPress={() => go("Auth")} />
+        <FooterButton
+          label="Login / Signup"
+          icon="log-in-outline"
+          onPress={() => go("/auth")}
+        />
       )}
+
       <View style={{ height: 30 }} />
     </ScrollView>
   );
@@ -83,24 +117,41 @@ export default function Profile({ navigation }) {
 
 /* --- REUSABLE COMPONENTS --- */
 
-const Section = ({ title, children }) => (
+const Section = ({ title, children }: any) => (
   <View style={styles.section}>
     <Text style={styles.sectionTitle}>{title}</Text>
     <View style={styles.card}>{children}</View>
   </View>
 );
 
-const Item = ({ icon, label, onPress }) => (
-  <TouchableOpacity style={styles.row} activeOpacity={0.6} onPress={onPress}>
-    <Ionicons name={icon} size={22} color="#111" />
+const Item = ({ icon, label, onPress }: any) => (
+  <TouchableOpacity
+    style={styles.row}
+    activeOpacity={0.6}
+    onPress={onPress}
+  >
+    <Ionicons name={icon as any} size={22} color="#111" />
     <Text style={styles.rowLabel}>{label}</Text>
-    <MaterialIcons name="keyboard-arrow-right" size={22} color="#111" />
+    <MaterialIcons
+      name="keyboard-arrow-right"
+      size={22}
+      color="#111"
+    />
   </TouchableOpacity>
 );
 
-const FooterButton = ({ label, icon, onPress }) => (
-  <TouchableOpacity style={styles.footerBtn} activeOpacity={0.7} onPress={onPress}>
-    <Ionicons name={icon} size={20} color="#fff" style={{ marginRight: 6 }} />
+const FooterButton = ({ label, icon, onPress }: any) => (
+  <TouchableOpacity
+    style={styles.footerBtn}
+    activeOpacity={0.7}
+    onPress={onPress}
+  >
+    <Ionicons
+      name={icon as any}
+      size={20}
+      color="#fff"
+      style={{ marginRight: 6 }}
+    />
     <Text style={styles.footerBtnText}>{label}</Text>
   </TouchableOpacity>
 );
@@ -114,7 +165,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 
-  /* header */
   headerBox: {
     paddingTop: 20,
     paddingBottom: 10,
@@ -131,7 +181,6 @@ const styles = StyleSheet.create({
     maxWidth: width * 0.8,
   },
 
-  /* generic section */
   section: {
     marginTop: 25,
   },
@@ -154,7 +203,6 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
 
-  /* row */
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -171,7 +219,6 @@ const styles = StyleSheet.create({
     color: "#111",
   },
 
-  /* footer button */
   footerBtn: {
     backgroundColor: "#111",
     paddingVertical: 16,

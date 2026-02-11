@@ -21,11 +21,29 @@ const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 48) / 2;
 
 /* ───────────────── PRODUCT CARD ───────────────── */
+const getProductMeta = (id: string) => {
+  let hash = 0;
+
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  const positiveHash = Math.abs(hash);
+
+  // ⭐ Rating between 4.0 - 4.9
+  const rating = (4 + (positiveHash % 10) / 10).toFixed(1);
+
+  // 🛒 Buy count between 50 - 100
+  const buyCount = 50 + (positiveHash % 51); // 50 to 100
+
+  return { rating, buyCount };
+};
+
 
 function ProductCard({ item }: { item: any }) {
   const router = useRouter();
   const imageRef = useRef<View>(null);
-
+const { rating, buyCount } = getProductMeta(item._id);
   return (
     <View style={styles.card}>
       <Pressable
@@ -54,20 +72,30 @@ function ProductCard({ item }: { item: any }) {
         </View>
       </Pressable>
 
-      <Text style={styles.category}>
-        {item.category?.name || "Outerwear"}
-      </Text>
+  <View style={{ paddingHorizontal: 7,paddingBottom: 12, paddingTop: 8 }}>
+      <View style={styles.ratingRow}>
+  <Ionicons name="star" size={14} color="#d37b09c5" />
+  <Text style={styles.ratingText}>{rating}</Text>
+
+  <Text style={styles.buyText}>  ({buyCount})</Text>
+</View>
+
 
       <Text style={styles.title} numberOfLines={1}>
         {item.title}
       </Text>
 
-      <View style={styles.priceRow}>
-        <Text style={styles.price}>₹{item.price}</Text>
-        {item.oldPrice && (
-          <Text style={styles.oldPrice}>₹{item.oldPrice}</Text>
-        )}
-      </View>
+    <View style={styles.priceRow}>
+  <Text style={styles.price}>₹{item.price}</Text>
+
+  {/* {item.oldPrice && ( */}
+    <View style={styles.oldPriceWrapper}>
+      <Text style={styles.oldPriceText}>₹999</Text>
+      <View style={styles.strikeLine} />
+    </View>
+  {/* )} */}
+</View>
+</View>
     </View>
   );
 }
@@ -90,6 +118,7 @@ export default function Home() {
       setProducts(res.data.items || [])
     );
   }, []);
+
 
   /* ───────── FILTER LOGIC (INVENTORY SAFE) ───────── */
 
@@ -141,6 +170,7 @@ export default function Home() {
         columnWrapperStyle={{ justifyContent: "space-between" }}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
+          <> 
           <Header
             categories={categories}
             activeCategory={filters.category}
@@ -154,9 +184,16 @@ export default function Home() {
             setSearchQuery={setSearchQuery}
             openFilter={() => setFilterVisible(true)} // ✅ FIXED
           />
+          <SectionHeader onSeeAll={() => console.log("See all pressed")} />
+            </>
         }
         contentContainerStyle={{ paddingBottom: 24 }}
-        renderItem={({ item }) => <ProductCard item={item} />}
+       renderItem={({ item, index }) => (
+  <View style={{ marginTop: index % 2 !== 0 ? 20 : 0 }}>
+    <ProductCard item={item} />
+  </View>
+)}
+
       />
 
       {/* ✅ BOTTOM FILTER SHEET */}
@@ -170,6 +207,18 @@ export default function Home() {
 }
 
 /* ───────────────── HEADER ───────────────── */
+function SectionHeader({ onSeeAll }: { onSeeAll: () => void }) {
+  return (
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionTitle}>Special For You</Text>
+
+      <Pressable onPress={onSeeAll}>
+        <Text style={styles.seeAll}>See All</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 
 function Header({
   categories,
@@ -186,10 +235,15 @@ function Header({
   setSearchQuery: (v: string) => void;
   openFilter: () => void;
 }) {
-  return (
-    <View style={styles.header}>
+return (
+  <View style={styles.header}>
+
+    {/* 🔎 SEARCH ROW */}
+    <View style={styles.searchRow}>
+
+      {/* SEARCH INPUT */}
       <View style={styles.search}>
-        <Ionicons name="search" size={18} color="#aaa" />
+        <Ionicons name="search-outline" size={25} color="#aaa" />
         <TextInput
           placeholder="Explore Fashion"
           placeholderTextColor="#aaa"
@@ -197,55 +251,76 @@ function Header({
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
-        <Pressable onPress={openFilter}>
-          <Ionicons name="options-outline" size={18} color="#aaa" />
-        </Pressable>
       </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.tabs}
-      >
-        <Pressable
-          onPress={() => setActiveCategory("all")}
-          style={[
-            styles.tab,
-            activeCategory === null && styles.tabActive,
-          ]}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeCategory === null && styles.tabTextActive,
-            ]}
-          >
-            All
-          </Text>
-        </Pressable>
+      {/* FILTER BUTTON (OUTSIDE INPUT) */}
+      <Pressable style={styles.filterBtn} onPress={openFilter}>
+        <Ionicons name="options-outline" size={23} color="#555" />
+      </Pressable>
 
-        {categories.map((cat) => (
-          <Pressable
-            key={cat._id}
-            onPress={() => setActiveCategory(cat._id)}
-            style={[
-              styles.tab,
-              activeCategory === cat._id && styles.tabActive,
-            ]}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeCategory === cat._id && styles.tabTextActive,
-              ]}
-            >
-              {cat.name}
-            </Text>
-          </Pressable>
-        ))}
-      </ScrollView>
     </View>
+
+    {/* CATEGORY TABS */}
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.tabs}
+    >
+ <Pressable
+  onPress={() => setActiveCategory("all")}
+  style={[
+    styles.tab,
+    activeCategory === null && styles.tabActive,
+  ]}
+>
+  <View style={styles.tabContent}>
+    {activeCategory === null && (
+      <Ionicons name="sparkles" size={14} color="#0af16bff" style={{ marginRight: 6 }} />
+    )}
+    <Text
+      style={[
+        styles.tabText,
+        activeCategory === null && styles.tabTextActive,
+      ]}
+    >
+      All
+    </Text>
+  </View>
+</Pressable>
+
+{categories.map((cat) => {
+  const isActive = activeCategory === cat._id;
+
+  return (
+    <Pressable
+      key={cat._id}
+      onPress={() => setActiveCategory(cat._id)}
+      style={[styles.tab, isActive && styles.tabActive]}
+    >
+      <View style={styles.tabContent}>
+        {isActive && (
+          <Ionicons
+            name="sparkles"
+            size={14}
+            color="#0af16bff"
+            style={{ marginRight: 6 }}
+          />
+        )}
+        <Text
+          style={[styles.tabText, isActive && styles.tabTextActive]}
+        >
+          {cat.name}
+        </Text>
+      </View>
+    </Pressable>
   );
+})}
+
+    </ScrollView>
+
+  </View>
+);
+
 }
 
 /* ───────────────── STYLES ───────────────── */
@@ -255,38 +330,58 @@ const styles = StyleSheet.create({
 
   header: { paddingHorizontal: 16, paddingTop: 16 },
 
-  search: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f2f2f2",
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    height: 44,
-  },
+search: {
+  flex: 1,
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#f2f2f2",
+  borderRadius: 30,
+  paddingHorizontal: 16,
+  paddingTop: 1,
+  height: 46,
+},
 
-  searchInput: {
-    flex: 1,
-    marginLeft: 8,
-    color: "#000",
-  },
+searchInput: {
+  flex: 1,
+  marginLeft: 2,
+  marginTop: -1,
+  fontSize: 18,
+  color: "#000",
+},
+
 
   tabs: { paddingVertical: 16 },
 
-  tab: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: "#eee",
-    borderRadius: 20,
-    marginRight: 10,
-  },
+tab: {
+  paddingHorizontal: 24,
+  paddingVertical: 10,
+  backgroundColor: "#eee",
+  borderRadius: 20,
+  marginRight: 10,
+},
 
-  tabActive: { backgroundColor: "#000" },
+tabActive: {
+  backgroundColor: "#000000ff", // green like your design
+},
 
-  tabText: { fontSize: 13, color: "#000" },
+tabText: {
+  fontSize: 16,
+  color: "#000",
+  fontWeight: "500",
+},
 
-  tabTextActive: { color: "#fff" },
+tabTextActive: {
+  color: "#fff",
+  fontWeight: "600",
+},
 
-  card: { width: CARD_WIDTH, marginBottom: 20 },
+tabContent: {
+  flexDirection: "row",
+  alignItems: "center",
+},
+
+
+  card: { width: CARD_WIDTH, marginBottom: 20, borderRadius: 20 },
 
   image: {
     width: "100%",
@@ -301,31 +396,105 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "#ffffffff",
     justifyContent: "center",
     alignItems: "center",
+    elevation: 2,
   },
 
   category: {
-    fontSize: 11,
+    fontSize: 14,
     color: "#999",
     marginTop: 6,
   },
 
   title: {
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: "600",
     marginTop: 2,
   },
 
-  priceRow: { flexDirection: "row", marginTop: 4 },
+  priceRow: { flexDirection: "row", marginTop: 4, alignItems: "center" },
 
-  price: { fontSize: 14, fontWeight: "700" },
+  price: { fontSize: 18, fontWeight: "700" },
 
   oldPrice: {
+    marginTop: 5,
     marginLeft: 6,
-    fontSize: 12,
-    color: "#999",
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#616161ff",
     textDecorationLine: "line-through",
   },
+  searchRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 10, // if not supported use marginRight
+},
+
+filterBtn: {
+  width: 46,
+  height: 46,
+  borderRadius: 23,
+  backgroundColor: "#f2f2f2",
+  justifyContent: "center",
+  alignItems: "center",
+},
+ratingRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginTop: 6,
+},
+
+ratingText: {
+  marginLeft: 4,
+  fontSize: 15,
+  fontWeight: "600",
+},
+buyText: {
+  fontSize: 12,
+  color: "#3f3e3eff",
+},
+
+oldPriceWrapper: {
+  marginLeft: 8,
+  position: "relative",
+  justifyContent: "center",
+},
+
+oldPriceText: {
+  fontSize: 16,
+  fontWeight: "500",
+  color: "#272727ff",
+},
+
+strikeLine: {
+  position: "absolute",
+  left: 0,
+  right: -2,
+  top: "55%",
+  height: 2,
+  backgroundColor: "red",
+  transform: [{ rotate: "-12deg" }], // 👈 diagonal slash
+},
+sectionHeader: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  paddingHorizontal: 16,
+  marginTop: 10,
+  marginBottom: 20,
+},
+
+sectionTitle: {
+  fontSize: 24,
+  fontWeight: "700",
+},
+
+seeAll: {
+  fontSize: 18,
+  color: "#464747ff", // green accent
+  fontWeight: "600",
+},
+
 });
