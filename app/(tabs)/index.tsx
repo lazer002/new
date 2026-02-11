@@ -5,162 +5,82 @@ import {
   StyleSheet,
   Pressable,
   Image,
+  FlatList,
   ScrollView,
   Dimensions,
-  Platform,
+  TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Screen from "@/components/Screen";
 import api from "@/utils/config";
 import { useRouter } from "expo-router";
+import { useFilter } from "@/context/FilterContext";
+import BottomFilterSheet from "@/components/BottomFilterSheet";
 
-import Animated, {
-  useSharedValue,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  interpolate,
-  Extrapolate,
-} from "react-native-reanimated";
-import type { SharedValue } from "react-native-reanimated";
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
+const CARD_WIDTH = (width - 48) / 2;
 
-/* helpers */
-const clamp = (v: number, min: number, max: number) =>
-  Math.min(Math.max(v, min), max);
+/* ───────────────── PRODUCT CARD ───────────────── */
 
-const CIRCLE_SIZE = clamp(width * 0.62, 260, 360);
-const ITEM_HEIGHT = CIRCLE_SIZE + clamp(height * 0.02, 80, 220);
-const HEADER_COLLAPSE = height * 0.22;
-
-/* ───────────────────────────────────────────── */
-/* PRODUCT ROW (EXTRACTED TO FIX HOOK RULES) */
-/* ───────────────────────────────────────────── */
-
-function ProductRow({
-  item,
-  index,
-  scrollY,
-}: {
-  item: any;
-  index: number;
- scrollY: SharedValue<number>;
-}) {
+function ProductCard({ item }: { item: any }) {
   const router = useRouter();
-  const firstWord = item.title?.split(" ")[0] || "";
-  const inputRange = [
-    (index - 1) * ITEM_HEIGHT,
-    index * ITEM_HEIGHT,
-    (index + 1) * ITEM_HEIGHT,
-  ];
+  const imageRef = useRef<View>(null);
 
-  const textStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        scale: interpolate(
-          scrollY.value,
-          inputRange,
-          [0.5, 1.2, 0.5],
-          Extrapolate.CLAMP
-        ),
-      },
-    ],
-    opacity: interpolate(
-      scrollY.value,
-      inputRange,
-      [0.4, 1, 0.4],
-      Extrapolate.CLAMP
-    ),
-  }));
-    const imageRef = useRef<View>(null);
   return (
-    <View style={styles.itemRow}>
-      {/* LEFT TEXT */}
-      <View style={styles.textColumn}>
-        <Animated.View
-          style={[
-            {
-              width: 60,
-              height: ITEM_HEIGHT,
-              justifyContent: "center",
-              alignItems: "center",
-            },
-            textStyle,
-          ]}
-        >
-          <View style={{ transform: [{ rotate: "-90deg" }] }}>
-            <Text style={styles.verticalText}>
-              {firstWord.toUpperCase()}
-            </Text>
-          </View>
-        </Animated.View>
-      </View>
-
-      {/* RIGHT IMAGE */}
-      <View style={styles.imageColumn}>
-        <View style={styles.pricePill}>
-          <Text style={styles.priceText}>${item.price}</Text>
+    <View style={styles.card}>
+      <Pressable
+        onPress={() => {
+          imageRef.current?.measureInWindow((x, y, w, h) => {
+            router.push({
+              pathname: "/product/[id]",
+              params: {
+                id: item._id,
+                image: item.images?.[0],
+                x,
+                y,
+                w,
+                h,
+              },
+            });
+          });
+        }}
+      >
+        <View ref={imageRef} collapsable={false}>
+          <Image source={{ uri: item.images?.[0] }} style={styles.image} />
         </View>
 
+        <View style={styles.heart}>
+          <Ionicons name="heart-outline" size={18} />
+        </View>
+      </Pressable>
 
-<View style={styles.imageCircle}>
-  <Pressable
-    style={StyleSheet.absoluteFill}
-    onPress={() => {
-      imageRef.current?.measureInWindow((x, y, w, h) => {
-        router.push({
-          pathname: "/product/[id]",
-          params: {
-            id: item._id,
-            image: item.images?.[0],
-            x,
-            y,
-            w,
-            h,
-          },
-        });
-      });
-    }}
-  >
-    <View
-      ref={imageRef}
-      collapsable={false}
-      style={StyleSheet.absoluteFill}
-    >
-      <Image
-        source={{ uri: item.images?.[0] }}
-        style={styles.productImage}
-      />
-    </View>
-  </Pressable>
+      <Text style={styles.category}>
+        {item.category?.name || "Outerwear"}
+      </Text>
 
-  <Text style={styles.productName}>{item.title}</Text>
-  <View style={styles.arrowBtn}>
-    <Ionicons name="arrow-forward" size={18} color="#fff" />
-  </View>
-</View>
+      <Text style={styles.title} numberOfLines={1}>
+        {item.title}
+      </Text>
 
-
-
-
-        <Pressable style={styles.wishlistBtn}>
-          <Ionicons name="heart" size={26} color="#c00000" />
-        </Pressable>
+      <View style={styles.priceRow}>
+        <Text style={styles.price}>₹{item.price}</Text>
+        {item.oldPrice && (
+          <Text style={styles.oldPrice}>₹{item.oldPrice}</Text>
+        )}
       </View>
     </View>
   );
 }
 
-/* ───────────────────────────────────────────── */
-/* HOME SCREEN */
-/* ───────────────────────────────────────────── */
+/* ───────────────── HOME ───────────────── */
 
 export default function Home() {
-  
   const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
-  const headerHeight = useRef(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterVisible, setFilterVisible] = useState(false); // ✅ single source
 
-  const scrollY = useSharedValue(0);
+  const { filters, setFilters } = useFilter();
 
   useEffect(() => {
     api.get("/api/categories").then((res) =>
@@ -171,291 +91,241 @@ export default function Home() {
     );
   }, []);
 
-  const onScroll = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      scrollY.value = event.contentOffset.y;
-    },
+  /* ───────── FILTER LOGIC (INVENTORY SAFE) ───────── */
+
+  const filteredProducts = products.filter((product) => {
+    const productCategoryId =
+      typeof product.category === "string"
+        ? product.category
+        : product.category?._id;
+
+    const categoryMatch =
+      !filters.category || productCategoryId === filters.category;
+
+    const searchMatch = product.title
+      ?.toLowerCase()
+      .includes(searchQuery.toLowerCase());
+
+    const sizeMatch =
+      filters.sizes.length === 0 ||
+      filters.sizes.some(
+        (size) => product.inventory?.[size] > 0
+      );
+
+    const colorMatch =
+      filters.colors.length === 0 ||
+      filters.colors.some((c) =>
+        product.description?.toLowerCase().includes(c.toLowerCase())
+      );
+
+    const priceMatch =
+      !filters.price ||
+      (product.price >= filters.price.min &&
+        product.price <= filters.price.max);
+
+    return (
+      categoryMatch &&
+      searchMatch &&
+      sizeMatch &&
+      colorMatch &&
+      priceMatch
+    );
   });
-
-  const headerStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateY: interpolate(
-          scrollY.value,
-          [0, HEADER_COLLAPSE],
-          [0, -HEADER_COLLAPSE],
-          Extrapolate.CLAMP
-        ),
-      },
-    ],
-    opacity: interpolate(
-      scrollY.value,
-      [HEADER_COLLAPSE * 8, HEADER_COLLAPSE * 9],
-      [1, 0],
-      Extrapolate.CLAMP
-    ),
-  }));
-
-  const categoryStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateY: interpolate(
-          scrollY.value,
-          [0, HEADER_COLLAPSE * 10],
-          [0, -20],
-          Extrapolate.CLAMP
-        ),
-      },
-    ],
-  }));
 
   return (
     <Screen style={styles.screen}>
-      <Animated.FlatList
-        data={products}
+      <FlatList
+        data={filteredProducts}
         keyExtractor={(item) => item._id}
+        numColumns={2}
+        columnWrapperStyle={{ justifyContent: "space-between" }}
         showsVerticalScrollIndicator={false}
-        snapToInterval={ITEM_HEIGHT}
-        snapToAlignment="start"
-        decelerationRate="fast"
-        onScroll={onScroll}
-        scrollEventThrottle={16}
         ListHeaderComponent={
-          <Animated.View
-            onLayout={(e) => {
-              headerHeight.current = e.nativeEvent.layout.height;
-            }}
-            style={headerStyle}
-          >
-            {/* TOP BAR */}
-            <View style={styles.topBar}>
-              <Pressable style={styles.iconBtn}>
-                <Ionicons name="menu-outline" size={32} />
-              </Pressable>
-              <Pressable style={styles.iconBtn}>
-                <Ionicons name="notifications-outline" size={32} />
-              </Pressable>
-            </View>
-
-            {/* HERO TITLE */}
-            <View style={styles.heroTitleWrap}>
-              <Text style={styles.heroTitleMain}>Beauty</Text>
-              <Text style={styles.heroTitleSub}>is the key</Text>
-              <View style={styles.heroLine} />
-            </View>
-
-            {/* CATEGORY HALO */}
-            <Animated.View
-              style={[styles.categoryHaloWrap, categoryStyle]}
-            >
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.categoryRow}
-              >
-                {categories.map((cat) => (
-                  <View key={cat._id} style={styles.haloItem}>
-                    <View style={styles.haloCircle}>
-                      <Image
-                        source={{ uri: cat.photo }}
-                        style={styles.haloImage}
-                      />
-                    </View>
-                    <Text style={styles.haloLabel}>{cat.name}</Text>
-                  </View>
-                ))}
-              </ScrollView>
-            </Animated.View>
-          </Animated.View>
-        }
-        renderItem={({ item, index }) => (
-          <ProductRow
-            item={item}
-            index={index}
-            scrollY={scrollY}
+          <Header
+            categories={categories}
+            activeCategory={filters.category}
+            setActiveCategory={(id) =>
+              setFilters((f) => ({
+                ...f,
+                category: id === "all" ? null : id,
+              }))
+            }
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            openFilter={() => setFilterVisible(true)} // ✅ FIXED
           />
-        )}
+        }
+        contentContainerStyle={{ paddingBottom: 24 }}
+        renderItem={({ item }) => <ProductCard item={item} />}
+      />
+
+      {/* ✅ BOTTOM FILTER SHEET */}
+      <BottomFilterSheet
+        visible={filterVisible}
+        categories={categories}
+        onClose={() => setFilterVisible(false)}
       />
     </Screen>
   );
 }
 
-/* ───────────────────────────────────────────── */
-/* STYLES (UNCHANGED) */
-/* ───────────────────────────────────────────── */
+/* ───────────────── HEADER ───────────────── */
+
+function Header({
+  categories,
+  activeCategory,
+  setActiveCategory,
+  searchQuery,
+  setSearchQuery,
+  openFilter,
+}: {
+  categories: any[];
+  activeCategory: string | null;
+  setActiveCategory: (id: string) => void;
+  searchQuery: string;
+  setSearchQuery: (v: string) => void;
+  openFilter: () => void;
+}) {
+  return (
+    <View style={styles.header}>
+      <View style={styles.search}>
+        <Ionicons name="search" size={18} color="#aaa" />
+        <TextInput
+          placeholder="Explore Fashion"
+          placeholderTextColor="#aaa"
+          style={styles.searchInput}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        <Pressable onPress={openFilter}>
+          <Ionicons name="options-outline" size={18} color="#aaa" />
+        </Pressable>
+      </View>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tabs}
+      >
+        <Pressable
+          onPress={() => setActiveCategory("all")}
+          style={[
+            styles.tab,
+            activeCategory === null && styles.tabActive,
+          ]}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeCategory === null && styles.tabTextActive,
+            ]}
+          >
+            All
+          </Text>
+        </Pressable>
+
+        {categories.map((cat) => (
+          <Pressable
+            key={cat._id}
+            onPress={() => setActiveCategory(cat._id)}
+            style={[
+              styles.tab,
+              activeCategory === cat._id && styles.tabActive,
+            ]}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeCategory === cat._id && styles.tabTextActive,
+              ]}
+            >
+              {cat.name}
+            </Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+    </View>
+  );
+}
+
+/* ───────────────── STYLES ───────────────── */
 
 const styles = StyleSheet.create({
   screen: { backgroundColor: "#fafafa" },
 
-  topBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: height * 0.02,
-  },
+  header: { paddingHorizontal: 16, paddingTop: 16 },
 
-  iconBtn: {
-    width: width * 0.18,
-    height: width * 0.18,
-    borderRadius: 999,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 1,
-  },
-
-  heroTitleWrap: {
-    alignItems: "center",
-    paddingVertical: height * 0.02,
-  },
-
-  heroTitleMain: {
-    fontSize: width * 0.12,
-    fontWeight: "800",
-    // fontFamily: Platform.select({
-    //   ios: "Georgia",
-    //   android: "serif",
-    // }),
-  },
-
-  heroTitleSub: {
-    fontSize: width * 0.06,
-    opacity: 0.6,
-    marginTop: 4,
-    fontWeight: "500",
-  },
-
-  heroLine: {
-    marginTop: 12,
-    height: 3,
-    width: 40,
-    borderRadius: 2,
-    backgroundColor: "#000",
-  },
-
-  categoryHaloWrap: {
-    marginBottom: height * 0.03,
-    borderRadius: 32,
-    backgroundColor: "rgba(255,255,255,0.75)",
-    paddingVertical: 18,
-  },
-
-  categoryRow: {
-    paddingHorizontal: width * 0.04,
-  },
-
-  haloItem: {
-    alignItems: "center",
-    marginRight: 22,
-  },
-
-  haloCircle: {
-    width: width * 0.18,
-    height: width * 0.18,
-    borderRadius: 999,
-    overflow: "hidden",
-    backgroundColor: "#fff",
-    elevation: 1,
-  },
-
-  haloImage: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
-  },
-
-  haloLabel: {
-    marginTop: 6,
-    fontSize: 12,
-    fontWeight: "600",
-    opacity: 0.8,
-  },
-
-  itemRow: {
+  search: {
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "#f2f2f2",
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    height: 44,
   },
 
-  textColumn: {
-    width: "10%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  verticalText: {
-    fontSize: 52,
-    letterSpacing: 14,
-    fontWeight: "800",
+  searchInput: {
+    flex: 1,
+    marginLeft: 8,
     color: "#000",
-    width: width,
-    position: "relative",
-    right: width * -0.2,
   },
 
-  imageColumn: {
-    width: "90%",
-    alignItems: "center",
-    paddingBottom: height * 0.02,
+  tabs: { paddingVertical: 16 },
+
+  tab: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: "#eee",
+    borderRadius: 20,
+    marginRight: 10,
   },
 
-  imageCircle: {
-    width: CIRCLE_SIZE,
-    height: CIRCLE_SIZE,
-    borderRadius: CIRCLE_SIZE / 2,
-    overflow: "hidden",
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  tabActive: { backgroundColor: "#000" },
 
-  productImage: {
+  tabText: { fontSize: 13, color: "#000" },
+
+  tabTextActive: { color: "#fff" },
+
+  card: { width: CARD_WIDTH, marginBottom: 20 },
+
+  image: {
     width: "100%",
-    height: "100%",
-    resizeMode: "cover",
+    height: CARD_WIDTH * 1.3,
+    borderRadius: 20,
   },
 
-  productName: {
+  heart: {
     position: "absolute",
-    bottom: CIRCLE_SIZE * 0.28,
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "600",
-  },
-
-  arrowBtn: {
-    position: "absolute",
-    bottom: CIRCLE_SIZE * 0.12,
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  pricePill: {
-    position: "absolute",
-    left: width * 0.03,
-    top: width * 0.02,
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 5,
-  },
-
-  priceText: {
-    color: "#c00000",
-    fontSize: 48,
-    fontWeight: "600",
-  },
-
-  wishlistBtn: {
-    position: "absolute",
-    right: 12,
-    top: 18,
-    height: width * 0.16,
-    width: width * 0.16,
-    borderRadius: 999,
+    top: 10,
+    right: 10,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
-    elevation: 1,
+  },
+
+  category: {
+    fontSize: 11,
+    color: "#999",
+    marginTop: 6,
+  },
+
+  title: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginTop: 2,
+  },
+
+  priceRow: { flexDirection: "row", marginTop: 4 },
+
+  price: { fontSize: 14, fontWeight: "700" },
+
+  oldPrice: {
+    marginLeft: 6,
+    fontSize: 12,
+    color: "#999",
+    textDecorationLine: "line-through",
   },
 });

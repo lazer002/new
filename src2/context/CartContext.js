@@ -9,9 +9,8 @@ import { useAuth } from './AuthContext';
 import api from '../utils/config';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import 'react-native-get-random-values';
-import { v4 as uuidv4 } from 'uuid';
 import Toast from 'react-native-toast-message';
+import * as Crypto from "expo-crypto";
 
 const CartContext = createContext(null);
 
@@ -20,7 +19,7 @@ async function ensureGuestId() {
   try {
     let gid = await AsyncStorage.getItem('ds_guest');
     if (!gid) {
-      gid = uuidv4();
+      gid = Crypto.randomUUID();
       await AsyncStorage.setItem('ds_guest', gid);
     }
     return gid;

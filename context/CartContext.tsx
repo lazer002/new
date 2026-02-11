@@ -7,7 +7,7 @@ import React, {
   ReactNode,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { v4 as uuidv4 } from "uuid";
+import * as Crypto from "expo-crypto";
 import { toast } from "@backpackapp-io/react-native-toast";
 
 import { useAuth } from "./AuthContext";
@@ -49,7 +49,7 @@ async function ensureGuestId(): Promise<string | null> {
   try {
     let gid = await AsyncStorage.getItem("ds_guest");
     if (!gid) {
-      gid = uuidv4();
+      gid = Crypto.randomUUID();
       await AsyncStorage.setItem("ds_guest", gid);
     }
     return gid;

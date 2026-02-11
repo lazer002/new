@@ -8,6 +8,7 @@ import AnimatedBackground from "@/components/Background";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
+import { FilterProvider } from "@/context/FilterContext";
 
 export default function RootLayout() {
 const [fontsLoaded] = useFonts({
@@ -43,19 +44,21 @@ const [fontsLoaded] = useFonts({
   if (!fontsLoaded) return null;
 
   return (
-    <SafeAreaProvider>
-      <AuthProvider>
-        <CartProvider>
-          <WishlistProvider>
+  <SafeAreaProvider>
+    <AuthProvider>
+      <CartProvider>
+        <WishlistProvider>
+          <FilterProvider>
             <View style={styles.container}>
               <View style={styles.darkBg} />
               <AnimatedBackground />
               <Slot />
             </View>
-          </WishlistProvider>
-        </CartProvider>
-      </AuthProvider>
-    </SafeAreaProvider>
+          </FilterProvider>
+        </WishlistProvider>
+      </CartProvider>
+    </AuthProvider>
+  </SafeAreaProvider>
   );
 }
 
