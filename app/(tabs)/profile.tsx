@@ -10,6 +10,7 @@ import {
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
+import Screen from "@/components/Screen";
 
 const { width } = Dimensions.get("window");
 
@@ -20,7 +21,8 @@ export default function Profile() {
   const go = (path: string) => router.push(path);
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <Screen>
+    
       
       {/* --- HEADER SECTION --- */}
       <View style={styles.headerBox}>
@@ -111,7 +113,7 @@ export default function Profile() {
       )}
 
       <View style={{ height: 30 }} />
-    </ScrollView>
+    </Screen>
   );
 }
 

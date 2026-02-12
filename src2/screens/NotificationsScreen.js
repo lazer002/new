@@ -18,7 +18,7 @@ import Animated, {
 import {SafeAreaView} from 'react-native-safe-area-context';
 const { width } = Dimensions.get("window");
 
-export default function NotificationsScreen({ navigation }) {
+export default function Notifications({ navigation }) {
   const [notifications, setNotifications] = React.useState([
     {
       id: "1",
