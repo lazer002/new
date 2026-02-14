@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Text,
   View,
+  Modal 
 } from "react-native";
 import Animated, {
   Easing,
@@ -24,7 +25,7 @@ import Screen from "@/components/Screen";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import api from "@/utils/config";
-
+import CartIcon from "@/components/CartIcon";
 const { width, height } = Dimensions.get("window");
 
 const IMAGE_WIDTH = width * 0.92;
@@ -41,6 +42,8 @@ export default function ProductScreen() {
   const [product, setProduct] = useState<any>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+const [viewerOpen, setViewerOpen] = useState(false);
+const viewerRef = useRef<FlatList>(null);
 
   const imageRef = useRef<FlatList>(null);
 
@@ -63,8 +66,28 @@ export default function ProductScreen() {
     borderRadius: animRadius.value,
     overflow: "hidden",
     zIndex:0,
-    elevation: 2
+    elevation: 1
   }));
+const heroTouchStyle = useAnimatedStyle(() => ({
+  position: "absolute",
+  top: animY.value,
+  left: animX.value,
+  width: animW.value,
+  height: animH.value,
+  zIndex: 5,
+}));
+
+  useEffect(() => {
+  if (viewerOpen) {
+    requestAnimationFrame(() => {
+      viewerRef.current?.scrollToIndex({
+        index: activeIndex,
+        animated: false,
+      });
+    });
+  }
+}, [viewerOpen, activeIndex]);
+
 
   const uiStyle = useAnimatedStyle(() => ({
     opacity: uiOpacity.value,
@@ -104,15 +127,33 @@ export default function ProductScreen() {
     })();
   }, [id]);
 
+
+
   if (!product) return null;
 
-  const images = product.images?.length ? product.images : [image];
+
+    const images = product.images?.length ? product.images : [image];
   const sizes = product.inventory ? Object.keys(product.inventory) : [];
+
+
+
 
   return (
     <Screen style={{ backgroundColor: "#f4f4f4" }}>
+
+<Animated.View style={heroTouchStyle} pointerEvents="box-none">
+  <Pressable
+    style={{ flex: 1 }}
+    onPress={() => {
+      console.log("HERO TOUCH OK");
+      setViewerOpen(true);
+    }}
+  />
+</Animated.View>
+
       {/* ================= HERO IMAGE ================= */}
       <Animated.View style={[styles.imageWrapper, heroStyle]}>
+
         <FlatList
           ref={imageRef}
           data={images}
@@ -147,29 +188,36 @@ export default function ProductScreen() {
         </View>
       </Animated.View>
 
+
       {/* ================= TOP BAR ================= */}
-      <Animated.View style={[styles.topBar, uiStyle]}>
-        <Pressable style={styles.circleBtn} onPress={router.back}>
-          <Ionicons name="arrow-back" size={20} />
-        </Pressable>
+     {/* ================= TOP OVERLAY BAR ================= */}
+<Animated.View style={[styles.topOverlay, uiStyle]}>
+  {/* Back */}
+  <Pressable style={styles.circleBtn} onPress={router.back}>
+    <Ionicons name="arrow-back" size={20} />
+  </Pressable>
 
-        <Text style={styles.headerTitle}>Details</Text>
+  {/* Right actions */}
+  <View style={styles.topRight}>
+    <CartIcon />
 
-        <Pressable
-          style={styles.circleBtn}
-          onPress={() =>
-            isInWishlist(product._id)
-              ? removeFromWishlist(product._id)
-              : addToWishlist(product)
-          }
-        >
-          <Ionicons
-            name={isInWishlist(product._id) ? "heart" : "heart-outline"}
-            size={20}
-            color={isInWishlist(product._id) ? "#c00000" : "#000"}
-          />
-        </Pressable>
-      </Animated.View>
+    <Pressable
+      style={styles.circleBtn}
+      onPress={() =>
+        isInWishlist(product._id)
+          ? removeFromWishlist(product._id)
+          : addToWishlist(product)
+      }
+    >
+      <Ionicons
+        name={isInWishlist(product._id) ? "heart" : "heart-outline"}
+        size={20}
+        color={isInWishlist(product._id) ? "#c00000" : "#000"}
+      />
+    </Pressable>
+  </View>
+</Animated.View>
+
 
       {/* ================= CONTENT ================= */}
       <ScrollView
@@ -276,6 +324,50 @@ export default function ProductScreen() {
           <Text style={styles.cartText}>Add To Cart</Text>
         </Pressable>
       </Animated.View>
+
+
+<Modal
+  visible={viewerOpen}
+  animationType="fade"
+  presentationStyle="fullScreen"
+  statusBarTranslucent
+  onRequestClose={() => setViewerOpen(false)}
+>
+  <View style={styles.fullscreenRoot}>
+    {/* Close */}
+    <Pressable
+      style={styles.fullscreenClose}
+      onPress={() => setViewerOpen(false)}
+    >
+      <Ionicons name="close" size={30} color="#fff" />
+    </Pressable>
+
+    {/* Swiper */}
+    <FlatList
+      ref={viewerRef}
+      data={images}
+      horizontal
+      pagingEnabled
+      showsHorizontalScrollIndicator={false}
+      keyExtractor={(_, i) => i.toString()}
+      getItemLayout={(_, index) => ({
+        length: width,
+        offset: width * index,
+        index,
+      })}
+      renderItem={({ item }) => (
+        <View style={styles.fullscreenSlide}>
+          <Image
+            source={{ uri: item }}
+            style={styles.fullscreenImage}
+          />
+        </View>
+      )}
+    />
+  </View>
+</Modal>
+
+
     </Screen>
   );
 }
@@ -283,6 +375,49 @@ export default function ProductScreen() {
 /* ================= STYLES ================= */
 
 const styles = StyleSheet.create({
+fullscreenRoot: {
+  flex: 1,
+  backgroundColor: "#000",
+},
+
+fullscreenClose: {
+  position: "absolute",
+  top: 50,
+  right: 20,
+  zIndex: 10,
+},
+
+fullscreenSlide: {
+  width,
+  height,
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+fullscreenImage: {
+  width: "100%",
+  height: "100%",
+  resizeMode: "contain",
+},
+
+topOverlay: {
+  position: "absolute",
+  top: 42,              // safe for status bar
+  left: 16,
+  right: 16,
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  zIndex: 20,           // 🔥 ABOVE HERO
+  elevation: 20,        // 🔥 ANDROID FIX
+},
+topRight: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 12,
+},
+
+
   imageWrapper: {
     backgroundColor: "#eee",
   },
@@ -311,7 +446,7 @@ const styles = StyleSheet.create({
   },
   topBar: {
     position: "absolute",
-    top: 40,
+    top: 42,
     left: 16,
     right: 16,
     flexDirection: "row",
@@ -324,9 +459,9 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   circleBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 99,
     backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
@@ -337,9 +472,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
+  borderBottomLeftRadius: 28,
+  borderBottomRightRadius: 28,
     padding: 20,
     zIndex: 2,
-     elevation: 1
+     elevation: 1,
+     paddingBottom: 100
   },
   thumbRow: {
     marginBottom: 16,
@@ -396,12 +534,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 10,
-    marginTop: 12,
+    marginVertical: 12,
   },
   sizePill: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 62,
+    height: 62,
+    borderRadius: 99,
     backgroundColor: "#f2f2f2",
     justifyContent: "center",
     alignItems: "center",
