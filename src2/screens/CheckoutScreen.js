@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import AppHeader from "../components/AppHeader";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import api from "../utils/config";
@@ -132,7 +131,6 @@ export default function CheckoutScreen({ navigation }) {
   /* ---------------- UI ---------------- */
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <AppHeader title="Checkout" />
 
       <ScrollView contentContainerStyle={styles.container}>
         {/* ---------- ADDRESS ---------- */}

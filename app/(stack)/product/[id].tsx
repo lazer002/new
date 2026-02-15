@@ -20,14 +20,13 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import RenderHTML from "react-native-render-html";
-
 import Screen from "@/components/Screen";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import api from "@/utils/config";
 import CartIcon from "@/components/CartIcon";
 const { width, height } = Dimensions.get("window");
-
+import Toast from "react-native-toast-message";
 const IMAGE_WIDTH = width * 0.92;
 const IMAGE_HEIGHT = Math.min(height * 0.45, 420); // ✅ responsive cap
 
@@ -314,8 +313,9 @@ const heroTouchStyle = useAnimatedStyle(() => ({
         <Pressable
           style={styles.cartBtn}
           onPress={() => {
+            console.log("ADD TO CART OK", selectedSize);
             if (!selectedSize) {
-              alert("Please select a size");
+             Toast.show({type: "error", text1: "Please select a size"});
               return;
             }
             add(product._id, selectedSize);

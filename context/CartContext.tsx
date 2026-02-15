@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Crypto from "expo-crypto";
-import { toast } from "@backpackapp-io/react-native-toast";
+import  Toast  from "react-native-toast-message";
 
 import { useAuth } from "./AuthContext";
 import api from "../utils/config";
@@ -108,7 +108,7 @@ export function CartProvider({ children }: CartProviderProps) {
       setItems(data.items || []);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to refresh cart");
+      Toast.show({type: "error", text1: "Failed to refresh cart"});
     } finally {
       setLoading(false);
     }
@@ -132,10 +132,10 @@ export function CartProvider({ children }: CartProviderProps) {
 
       await c.post("/merge", { guestId });
       await refresh();
-      toast.success("Guest cart merged successfully");
+      Toast.show({type: "success", text1: "Guest cart merged successfully"});
     } catch (err) {
       console.error(err);
-      toast.error("Failed to merge guest cart");
+      Toast.show({type: "error", text1: "Failed to merge guest cart"});
     }
   };
 
@@ -149,7 +149,7 @@ export function CartProvider({ children }: CartProviderProps) {
     if (!guestId) return;
 
     if (!size) {
-      toast.error("Please select a size");
+      Toast.show({type: "error", text1: "Please select a size"});
       return;
     }
 
@@ -159,14 +159,14 @@ export function CartProvider({ children }: CartProviderProps) {
 
       await c.post("/add", { productId, size, quantity });
       await refresh();
-      toast.success("Added to cart");
+      Toast.show({type: "success", text1: "Added to cart"});
     } catch (err: any) {
       console.error(err);
-      toast.error(
+      Toast.show({type: "error", text1: 
         err?.response?.data?.code === 11000
           ? "Already in cart"
           : "Failed to add item"
-      );
+      });
     }
   };
 
@@ -196,10 +196,10 @@ export function CartProvider({ children }: CartProviderProps) {
       });
 
       await refresh();
-      toast.success("Cart updated");
+      Toast.show({type: "success", text1: "Cart updated"});
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update cart");
+      Toast.show({type: "error", text1: "Failed to update cart"});
       await refresh();
     }
   };
@@ -221,7 +221,7 @@ export function CartProvider({ children }: CartProviderProps) {
       await refresh();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to remove item");
+      Toast.show({type: "error", text1: "Failed to remove item"});
       await refresh();
     }
   };
@@ -242,10 +242,10 @@ const clearCart = async (opts?: { server?: boolean }) => {
       if (c) await c.post("/clear");
     }
 
-    toast.success("Cart cleared");
+    Toast.show({type: "success", text1: "Cart cleared"});
   } catch (err) {
     console.error("Failed to clear cart:", err);
-    toast.error("Failed to clear cart");
+    Toast.show({type: "error", text1: "Failed to clear cart"});
     await refresh();
   } finally {
     setLoading(false);
@@ -272,10 +272,10 @@ const clearCart = async (opts?: { server?: boolean }) => {
       });
 
       await refresh();
-      toast.success("Bundle added to cart");
+      Toast.show({type: "success", text1: "Bundle added to cart"});
     } catch (err) {
       console.error(err);
-      toast.error("Failed to add bundle");
+      Toast.show({type: "error", text1: "Failed to add bundle"});
       await refresh();
     }
   };

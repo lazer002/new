@@ -3,13 +3,15 @@ import { Slot } from "expo-router";
 import { View, StyleSheet } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import AnimatedBackground from "@/components/Background";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 import { FilterProvider } from "@/context/FilterContext";
-
+import Toast from "react-native-toast-message";
+import { pillToastConfig } from "@/components/PillToast";
 export default function RootLayout() {
 const [fontsLoaded] = useFonts({
   "RobotoCondensed-Thin": require("../assets/font/RobotoCondensed-Thin.ttf"),
@@ -44,6 +46,7 @@ const [fontsLoaded] = useFonts({
   if (!fontsLoaded) return null;
 
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
   <SafeAreaProvider>
     <AuthProvider>
       <CartProvider>
@@ -53,12 +56,14 @@ const [fontsLoaded] = useFonts({
               <View style={styles.darkBg} />
               <AnimatedBackground />
               <Slot />
+              <Toast config={pillToastConfig} position="bottom" topOffset={50}/>
             </View>
           </FilterProvider>
         </WishlistProvider>
       </CartProvider>
     </AuthProvider>
   </SafeAreaProvider>
+</GestureHandlerRootView>
   );
 }
 

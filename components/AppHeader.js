@@ -2,7 +2,6 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { BlurView } from "expo-blur";
-import { Bell, ArrowLeft } from "phosphor-react-native";
 import { useNavigation } from "@react-navigation/native";
 
 export default function AppHeader({
@@ -33,7 +32,7 @@ export default function AppHeader({
         <View style={styles.side}>
           {showNotification && (
             <TouchableOpacity onPress={() => navigation.navigate("Notifications")}>
-              <Bell size={22} color="#fff" />
+              {/* <Bell size={22} color="#fff" /> */}
             </TouchableOpacity>
           )}
         </View>
