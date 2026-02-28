@@ -16,6 +16,8 @@ import api from "@/utils/config";
 import { useRouter } from "expo-router";
 import { useFilter } from "@/context/FilterContext";
 import BottomFilterSheet from "@/components/BottomFilterSheet";
+import { useWishlist } from "@/context/WishlistContext";
+
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 48) / 2;
@@ -40,66 +42,72 @@ const getProductMeta = (id: string) => {
 };
 
 
+
 function ProductCard({ item }: { item: any }) {
+const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const router = useRouter();
   const imageRef = useRef<View>(null);
-const { rating, buyCount } = getProductMeta(item._id);
+  const { rating, buyCount } = getProductMeta(item._id);
+ const isFav = isInWishlist(item._id);
+  const onOpenPDP = () => {
+    imageRef.current?.measureInWindow((x, y, w, h) => {
+      router.push({
+        pathname: "/product/[id]",
+        params: {
+          id: item._id,
+          image: item.images?.[0],
+          x,
+          y,
+          w,
+          h,
+        },
+      });
+    });
+  };
+
+
   return (
     <View style={styles.card}>
-      <Pressable
-        onPress={() => {
-          imageRef.current?.measureInWindow((x, y, w, h) => {
-            router.push({
-              pathname: "/product/[id]",
-              params: {
-                id: item._id,
-                image: item.images?.[0],
-                x,
-                y,
-                w,
-                h,
-              },
-            });
-          });
-        }}
-      >
+      {/* PDP PRESS */}
+      <Pressable onPress={onOpenPDP}>
         <View ref={imageRef} collapsable={false}>
           <Image source={{ uri: item.images?.[0] }} style={styles.image} />
         </View>
-
-        <View style={styles.heart}>
-          <Ionicons name="heart-outline" size={18} />
-        </View>
       </Pressable>
 
-  <View style={{ paddingHorizontal: 7,paddingBottom: 12, paddingTop: 8 }}>
-      <View style={styles.ratingRow}>
-  <Ionicons name="star" size={14} color="#d37b09c5" />
-  <Text style={styles.ratingText}>{rating}</Text>
+      {/* ❤️ WISHLIST PRESS */}
+      <Pressable
+        onPress={() => isFav ? removeFromWishlist(item._id) : addToWishlist(item._id)}
+        hitSlop={10}
+        style={styles.heart}
+      >
+        <Ionicons name={isFav ? "heart" : "heart-outline"} size={18} color={isFav ? "#000000" : "#000"} />
+      </Pressable>
 
-  <Text style={styles.buyText}>  ({buyCount})</Text>
-</View>
+      {/* DETAILS */}
+      <View style={{ paddingHorizontal: 7, paddingBottom: 12, paddingTop: 8 }}>
+        <View style={styles.ratingRow}>
+          <Ionicons name="star" size={14} color="#d37b09c5" />
+          <Text style={styles.ratingText}>{rating}</Text>
+          <Text style={styles.buyText}> ({buyCount})</Text>
+        </View>
 
+        <Text style={styles.title} numberOfLines={1}>
+          {item.title}
+        </Text>
 
-      <Text style={styles.title} numberOfLines={1}>
-        {item.title}
-      </Text>
+        <View style={styles.priceRow}>
+          <Text style={styles.price}>₹{item.price}</Text>
 
-    <View style={styles.priceRow}>
-  <Text style={styles.price}>₹{item.price}</Text>
-
-  {/* {item.oldPrice && ( */}
-    <View style={styles.oldPriceWrapper}>
-      <Text style={styles.oldPriceText}>₹999</Text>
-      <View style={styles.strikeLine} />
-    </View>
-  {/* )} */}
-</View>
-</View>
+          <View style={styles.oldPriceWrapper}>
+            <Text style={styles.oldPriceText}>₹999</Text>
+            <View style={styles.strikeLine} />
+          </View>
+        </View>
+      </View>
     </View>
   );
 }
-
 /* ───────────────── HOME ───────────────── */
 
 export default function Home() {
@@ -107,9 +115,7 @@ export default function Home() {
   const [products, setProducts] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterVisible, setFilterVisible] = useState(false); // ✅ single source
-
   const { filters, setFilters } = useFilter();
-
   useEffect(() => {
     api.get("/api/categories").then((res) =>
       setCategories(res.data.categories || [])

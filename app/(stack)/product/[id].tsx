@@ -205,7 +205,7 @@ const heroTouchStyle = useAnimatedStyle(() => ({
       onPress={() =>
         isInWishlist(product._id)
           ? removeFromWishlist(product._id)
-          : addToWishlist(product)
+          : addToWishlist(product._id)
       }
     >
       <Ionicons
