@@ -41,7 +41,7 @@ export default function ProductScreen() {
   const [product, setProduct] = useState<any>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
-const [viewerOpen, setViewerOpen] = useState(false);
+
 const viewerRef = useRef<FlatList>(null);
 
   const imageRef = useRef<FlatList>(null);
@@ -67,25 +67,9 @@ const viewerRef = useRef<FlatList>(null);
     zIndex:0,
     elevation: 1
   }));
-const heroTouchStyle = useAnimatedStyle(() => ({
-  position: "absolute",
-  top: animY.value,
-  left: animX.value,
-  width: animW.value,
-  height: animH.value,
-  zIndex: 5,
-}));
 
-  useEffect(() => {
-  if (viewerOpen) {
-    requestAnimationFrame(() => {
-      viewerRef.current?.scrollToIndex({
-        index: activeIndex,
-        animated: false,
-      });
-    });
-  }
-}, [viewerOpen, activeIndex]);
+
+
 
 
   const uiStyle = useAnimatedStyle(() => ({
@@ -140,52 +124,62 @@ const heroTouchStyle = useAnimatedStyle(() => ({
   return (
     <Screen style={{ backgroundColor: "#f4f4f4" }}>
 
-<Animated.View style={heroTouchStyle} pointerEvents="box-none">
-  <Pressable
-    style={{ flex: 1 }}
-    onPress={() => {
-      console.log("HERO TOUCH OK");
-      setViewerOpen(true);
-    }}
-  />
-</Animated.View>
+
 
       {/* ================= HERO IMAGE ================= */}
-      <Animated.View style={[styles.imageWrapper, heroStyle]}>
+  {/* ================= HERO IMAGE ================= */}
+<Animated.View style={[styles.imageWrapper, heroStyle]}>
 
-        <FlatList
-          ref={imageRef}
-          data={images}
-          horizontal
-          pagingEnabled
-          bounces={false}
-          overScrollMode="never"
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(_, i) => i.toString()}
-          onMomentumScrollEnd={(e) => {
-            const index = Math.round(
-              e.nativeEvent.contentOffset.x / IMAGE_WIDTH
-            );
-            setActiveIndex(index);
-          }}
-          renderItem={({ item }) => (
-            <Image source={{ uri: item }} style={styles.bigImage} />
-          )}
-        />
+    <FlatList
+      ref={imageRef}
+      data={images}
+      horizontal
+      pagingEnabled
+      bounces={false}
+      overScrollMode="never"
+      showsHorizontalScrollIndicator={false}
+      keyExtractor={(_, i) => i.toString()}
+      onMomentumScrollEnd={(e) => {
+        const index = Math.round(
+          e.nativeEvent.contentOffset.x / IMAGE_WIDTH
+        );
+        setActiveIndex(index);
+      }}
+  renderItem={({ item, index }) => (
+  <Pressable
+   style={({ pressed }) => ({
+    opacity: pressed ? 0.96 : 1,
+  })}
+    onPress={() => {
+      console.log("OPEN VIEWER", images, index);
+      router.push({
+        pathname: "/product/viewer",
+        params: {
+          images: JSON.stringify(images),
+          index,
+        },
+      });
+    }}
+  >
+    <Image source={{ uri: item }} style={styles.bigImage} />
+  </Pressable>
+)}
+    />
 
-        {/* DOTS */}
-        <View style={styles.dots}>
-          {images.map((_: any, i: number) => (
-            <View
-              key={i}
-              style={[
-                styles.dot,
-                activeIndex === i && styles.dotActive,
-              ]}
-            />
-          ))}
-        </View>
-      </Animated.View>
+
+  {/* DOTS */}
+  <View style={styles.dots}>
+    {images.map((_: any, i: number) => (
+      <View
+        key={i}
+        style={[
+          styles.dot,
+          activeIndex === i && styles.dotActive,
+        ]}
+      />
+    ))}
+  </View>
+</Animated.View>
 
 
       {/* ================= TOP BAR ================= */}
@@ -326,48 +320,6 @@ const heroTouchStyle = useAnimatedStyle(() => ({
       </Animated.View>
 
 
-<Modal
-  visible={viewerOpen}
-  animationType="fade"
-  presentationStyle="fullScreen"
-  statusBarTranslucent
-  onRequestClose={() => setViewerOpen(false)}
->
-  <View style={styles.fullscreenRoot}>
-    {/* Close */}
-    <Pressable
-      style={styles.fullscreenClose}
-      onPress={() => setViewerOpen(false)}
-    >
-      <Ionicons name="close" size={30} color="#fff" />
-    </Pressable>
-
-    {/* Swiper */}
-    <FlatList
-      ref={viewerRef}
-      data={images}
-      horizontal
-      pagingEnabled
-      showsHorizontalScrollIndicator={false}
-      keyExtractor={(_, i) => i.toString()}
-      getItemLayout={(_, index) => ({
-        length: width,
-        offset: width * index,
-        index,
-      })}
-      renderItem={({ item }) => (
-        <View style={styles.fullscreenSlide}>
-          <Image
-            source={{ uri: item }}
-            style={styles.fullscreenImage}
-          />
-        </View>
-      )}
-    />
-  </View>
-</Modal>
-
-
     </Screen>
   );
 }
@@ -375,24 +327,9 @@ const heroTouchStyle = useAnimatedStyle(() => ({
 /* ================= STYLES ================= */
 
 const styles = StyleSheet.create({
-fullscreenRoot: {
-  flex: 1,
-  backgroundColor: "#000",
-},
 
-fullscreenClose: {
-  position: "absolute",
-  top: 50,
-  right: 20,
-  zIndex: 10,
-},
 
-fullscreenSlide: {
-  width,
-  height,
-  justifyContent: "center",
-  alignItems: "center",
-},
+
 
 fullscreenImage: {
   width: "100%",
