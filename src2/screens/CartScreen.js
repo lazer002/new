@@ -443,4 +443,3 @@ const styles = StyleSheet.create({
     marginTop: 16
   }
 });
-MONGODB_URI=mongodb://lazer:BDL30AGo0Xu1Lvt9@cluster0-shard-00-00.xgyiu.mongodb.net:27017,cluster0-shard-00-01.xgyiu.mongodb.net:27017,cluster0-shard-00-02.xgyiu.mongodb.net:27017/dream?ssl=true&replicaSet=atlas-11c2dc-shard-0&authSource=admin&retryWrites=true&w=majority

@@ -61,11 +61,22 @@ export default function CartScreen() {
   }
 
   /* ---------- DELETE BACKGROUND ---------- */
-  const renderDelete = () => (
-    <View style={styles.deleteBox}>
-      <Ionicons name="trash-outline" size={26} color="#fff" />
-    </View>
-  );
+const renderDelete = (item: any) => (
+  <TouchableOpacity
+    style={styles.deleteBox}
+    onPress={() => {
+      const isBundle = !!item.bundle;
+
+      remove(
+        isBundle ? item.bundle._id : item.product._id,
+        isBundle ? undefined : item.size,
+        isBundle
+      );
+    }}
+  >
+    <Ionicons name="trash-outline" size={26} color="#fff" />
+  </TouchableOpacity>
+);
 
   return (
     <SafeAreaView style={styles.root}>
@@ -102,14 +113,8 @@ export default function CartScreen() {
             return (
               <Swipeable
                 key={it._id}
-                renderRightActions={renderDelete}
-                onSwipeableOpen={() =>
-                  remove(
-                    isBundle ? it.bundle._id : it.product._id,
-                    isBundle ? undefined : it.size,
-                    isBundle
-                  )
-                }
+               renderRightActions={() => renderDelete(it)}
+         
               >
                 <View style={styles.itemCard}>
                   <Image source={{ uri: image }} style={styles.itemImage} />
@@ -328,7 +333,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 16,
-    marginVertical: 6,
+    // marginVertical: 8,
+    marginBottom: height * 0.02,
+    marginLeft: width * 0.02,
   },
 
   /* Summary */
