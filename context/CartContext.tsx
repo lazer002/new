@@ -32,7 +32,7 @@ type CartContextType = {
   refresh: () => Promise<void>;
   mergeGuestCart: () => Promise<void>;
   addBundleToCart: (bundle: any, selectedSizes: Record<string, string>) => Promise<void>;
-  clearCart: (opts?: { server?: boolean }) => Promise<void>;
+  clearCart: (opts?: { server?: boolean,skipLocal?: boolean }) => Promise<void>;
 };
 
 type CartProviderProps = {
@@ -228,14 +228,16 @@ export function CartProvider({ children }: CartProviderProps) {
 
   /* ---------- CLEAR ---------- */
 
-const clearCart = async (opts?: { server?: boolean }) => {
+const clearCart = async (opts?: { server?: boolean, skipLocal?: boolean }) => {
   if (!guestId) return;
 
   const shouldClearServer = opts?.server ?? true;
 
   setLoading(true);
   try {
-    setItems([]);
+    if (!opts?.skipLocal) {
+      setItems([]);
+}
 
     if (shouldClearServer) {
       const c = client();

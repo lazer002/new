@@ -17,6 +17,7 @@ type AuthContextType = {
   user: User | null;
   api: typeof baseApi;
   loading: boolean;
+   guestId: string | null;
   login: (email: string, password: string) => Promise<any>;
   register: (name: string, email: string, password: string) => Promise<any>;
   loginWithGoogle: (googleToken: string) => Promise<any>;
@@ -34,6 +35,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 /* ================= PROVIDER ================= */
 
 export function AuthProvider({ children }: AuthProviderProps) {
+  const [guestId, setGuestId] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
@@ -47,6 +49,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const rawUser = await AsyncStorage.getItem("ds_user");
         const at = await AsyncStorage.getItem("ds_access");
         const rt = await AsyncStorage.getItem("ds_refresh");
+        const gid = await AsyncStorage.getItem("ds_guest_id");
+
+        
+        if (gid) {
+          setGuestId(gid);
+        } else {
+          const newGuestId = Math.random().toString(36).substring(2) + Date.now();
+          await AsyncStorage.setItem("ds_guest_id", newGuestId);
+          setGuestId(newGuestId);
+        }
 
         if (rawUser) setUser(JSON.parse(rawUser));
         if (at) setAccessToken(at);
@@ -183,6 +195,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   return (
     <AuthContext.Provider
       value={{
+        guestId,
         user,
         api,
         loading,

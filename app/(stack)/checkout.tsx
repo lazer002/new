@@ -144,39 +144,47 @@ export default function CheckoutScreen() {
   }, [items]);
   /* ---------- PLACE ORDER ---------- */
 
-  const placeOrder = async (): Promise<void> => {
+const placeOrder = async (): Promise<void> => {
+  if (
+    !address.firstName ||
+    !address.phone ||
+    !address.address ||
+    !address.city ||
+    !address.zip ||
+    !email
+  ) {
+    Toast.show({
+      type: "error",
+      text1: "Please fill all required fields",
+    });
+    return;
+  }
 
-    if (
-      !address.firstName ||
-      !address.phone ||
-      !address.address ||
-      !address.city ||
-      !address.zip ||
-      !email
-    ) {
-      Toast.show({
-        type: "error",
-        text1: "Please fill all required fields",
-      });
-      return;
-    }
+  if (!/^[6-9]\d{9}$/.test(address.phone)) {
+    Toast.show({ type: "error", text1: "Invalid Indian phone number" });
+    return;
+  }
 
-    if (address.phone.length !== 10) {
-      Toast.show({ type: "error", text1: "Invalid phone number" });
-      return;
-    }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    Toast.show({ type: "error", text1: "Invalid email" });
+    return;
+  }
 
-    if (!user && !guestId) {
-      Toast.show({
-        type: "error",
-        text1: "Something went wrong. Please try again.",
-      });
-      return;
-    }
+  if (!user && !guestId) {
+    Toast.show({
+      type: "error",
+      text1: "Something went wrong. Please try again.",
+    });
+    return;
+  }
 
-    setLoading(true);
-    try {
-      const res = await api.post("/api/orders/create", {
+  setLoading(true);
+
+  try {
+    const res = await api.post(
+      "/api/orders/create",
+      {
         items: orderItems,
         subtotal,
         shipping,
@@ -187,65 +195,53 @@ export default function CheckoutScreen() {
         contactEmail: email,
         paymentMethod,
         source: "mobile",
+
+        // ✅ IMPORTANT
         userId: user?._id || null,
         guestId: user ? null : guestId,
         userType: user ? "user" : "guest",
-      } , {
-    headers: {
-      "x-guest-id": guestId || "",
-    },
-  }
+      },
+      {
+        headers: {
+          "x-guest-id": guestId || "",
+        },
+      }
     );
 
+    // ✅ CLEAR CART (IMPORTANT FIX)
 
-    
 
-      if (paymentMethod === "razorpay") {
-        router.push({
-          pathname: "/razorpay",
-          params: { orderId: res.data._id },
-        });
-      } else {
-  const existing = await AsyncStorage.getItem("orders");
-
-let orders = [];
-
-if (existing) {
-  orders = JSON.parse(existing);
-}
-
-// add new order on top
-orders.unshift({
-  orderId: res.data._id,
-  orderNumber: res.data.orderNumber,
-  phone: address.phone,
-  email,
-  createdAt: new Date().toISOString(),
-});
-
-// optional: keep only last 5 orders
-orders = orders.slice(0, 5);
-
-await AsyncStorage.setItem("orders", JSON.stringify(orders));
-        await clearCart();
-        router.replace({
-          pathname: "/order-success",
-          params: {
-            orderNumber: res.data.orderNumber,
-            email,
-          },
-        });
-      }
-    } catch (err: any) {
-      console.log("Order error:", err);
-      Toast.show({
-        type: "error",
-        text1: err.response?.data?.message || "Failed to place order. Please try again."
+    // ✅ PAYMENT FLOW
+    if (paymentMethod === "razorpay") {
+      router.push({
+        pathname: "/razorpay",
+        params: { orderId: res.data._id },
       });
-    } finally {
-      setLoading(false);
+      return;
     }
-  };
+
+    // ✅ SUCCESS FLOW
+    router.replace({
+      pathname: "/order-success",
+      params: {
+        orderNumber: res.data.orderNumber,
+        email,
+      },
+    });
+
+  } catch (err: any) {
+    console.log("Order error:", err);
+
+    Toast.show({
+      type: "error",
+      text1:
+        err.response?.data?.message ||
+        "Failed to place order. Please try again.",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   /* ================= UI ================= */
 
@@ -335,7 +331,7 @@ await AsyncStorage.setItem("orders", JSON.stringify(orders));
               placeholder="City"
               value={address.city}
               onChange={(v) => { }}
-              editable={false}
+              editable={!address.city}
 
             />
             <Input
