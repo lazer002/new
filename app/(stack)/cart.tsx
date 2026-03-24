@@ -20,7 +20,7 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 
 const { width, height } = Dimensions.get("window");
-const SUMMARY_HEIGHT = height * 0.38;
+const SUMMARY_HEIGHT = height * 0.35;
 
 export default function CartScreen() {
   const { user } = useAuth();
@@ -36,10 +36,11 @@ export default function CartScreen() {
     return s + (it.product?.price || 0) * it.quantity;
   }, 0);
 
-  const tax = subtotal * 0.05;
-  const deliveryFee = subtotal > 500 ? 0 : 50;
+  // const tax = subtotal * 0.05;
+  const deliveryFee = subtotal > 1000 ? 0 : 100;
   const discount = 0;
-  const total = subtotal + tax + deliveryFee - discount;
+  const total = subtotal + deliveryFee - discount;
+  // const total = subtotal + tax + deliveryFee - discount;
 
   /* ---------- EMPTY CART ---------- */
   if (items.length === 0) {
@@ -189,7 +190,7 @@ const renderDelete = (item: any) => (
           <Text style={styles.summaryTitle}>Order Summary</Text>
 
           <SummaryRow label="Subtotal" value={`₹ ${subtotal.toFixed(2)}`} />
-          <SummaryRow label="Tax (5%)" value={`₹ ${tax.toFixed(2)}`} />
+          {/* <SummaryRow label="Tax (5%)" value={`₹ ${tax.toFixed(2)}`} /> */}
           <SummaryRow
             label="Delivery Fee"
             value={`₹ ${deliveryFee.toFixed(2)}`}

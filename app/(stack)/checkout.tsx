@@ -59,15 +59,8 @@ export default function CheckoutScreen() {
 
   const router = useRouter();
   const { items, clearCart } = useCart();
-  const { user } = useAuth();
-  const [guestId, setGuestId] = useState<string | null>(null);
+  const { user, guestId } = useAuth();
 
-  useEffect(() => {
-    (async () => {
-      const gid = await AsyncStorage.getItem("ds_guest");
-      setGuestId(gid);
-    })();
-  }, []);
 
   useEffect(() => {
     if (items.length === 0) {
@@ -101,7 +94,7 @@ export default function CheckoutScreen() {
     }, 0);
   }, [items]);
 
-  const shipping: number = subtotal > 500 ? 0 : 50;
+  const shipping: number = subtotal > 1000 ? 0 : 100;
   const total: number = subtotal + shipping;
   const savings = shipping === 0 ? 50 : 0;
 
@@ -188,7 +181,7 @@ const placeOrder = async (): Promise<void> => {
         items: orderItems,
         subtotal,
         shipping,
-        total,
+        total: Number(subtotal) + Number(shipping),
         shippingMethod: "standard",
         billingSame: true,
         shippingAddress: address,
@@ -327,13 +320,14 @@ const placeOrder = async (): Promise<void> => {
           />
 
           <Row>
-            <Input
-              placeholder="City"
-              value={address.city}
-              onChange={(v) => { }}
-              editable={!address.city}
-
-            />
+      <Input
+  placeholder="City"
+  value={address.city}
+  onChange={(v: string) =>
+    setAddress({ ...address, city: v })
+  }
+  editable={true}
+/>
             <Input
               placeholder="Pincode"
               keyboardType="numeric"
@@ -433,7 +427,7 @@ const placeOrder = async (): Promise<void> => {
             </Text>
           ) : (
             <Text style={{ fontSize: 12, color: "#666" }}>
-              Add ₹{Math.max(0, 500 - subtotal)} more for free delivery
+              Add ₹{Math.max(0, 1000 - subtotal)} more for free delivery
             </Text>
           )}
           <Divider />

@@ -15,13 +15,12 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { useCart } from "@/context/CartContext";
-
 import { useAuth } from "@/context/AuthContext";
 import api from "@/utils/config";
 
 export default function OrderSuccessScreen() {
   const router = useRouter();
-  const { orderNumber, email } = useLocalSearchParams();
+  const { orderNumber } = useLocalSearchParams();
   const { clearCart } = useCart();
   const { guestId } = useAuth();
 
@@ -30,23 +29,29 @@ export default function OrderSuccessScreen() {
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
+  const getStatus = (order: any) => {
+    if (order?.statusHistory?.length > 0) {
+      return order.statusHistory[order.statusHistory.length - 1].status;
+    }
+    return order?.orderStatus || "pending";
+  };
+
   useEffect(() => {
-    // ✅ Clear cart
     clearCart({ skipLocal: true }).catch(console.log);
 
-    // 🧹 CLEAN OLD LOCAL ORDERS (ONE LINE YOU ASKED)
+    // 🧹 remove old local orders
     AsyncStorage.removeItem("orders");
 
-    // ✅ FETCH ORDER FROM BACKEND
     const loadOrder = async () => {
       try {
-        const res = await api.get(`/api/orders/${orderNumber}`, {
-          headers: {
-            "x-guest-id": guestId || "",
-          },
-        });
+        const res = await api.get(
+          `/api/orders/track?orderNumber=${orderNumber}`,
+          {
+            headers: { "x-guest-id": guestId || "" },
+          }
+        );
 
-        setOrder(res.data);
+        setOrder(res.data.order);
       } catch (e) {
         console.log("Order fetch error:", e);
       }
@@ -54,7 +59,6 @@ export default function OrderSuccessScreen() {
 
     loadOrder();
 
-    // ✅ ANIMATION
     Animated.sequence([
       Animated.spring(scaleAnim, {
         toValue: 1,
@@ -73,12 +77,14 @@ export default function OrderSuccessScreen() {
   if (!order) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={{ textAlign: "center", marginTop: 50 }}>
+        <Text style={{ textAlign: "center", marginTop: 60 }}>
           Loading order...
         </Text>
       </SafeAreaView>
     );
   }
+
+  const status = getStatus(order);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -99,86 +105,95 @@ export default function OrderSuccessScreen() {
               Your order has been placed successfully
             </Text>
 
-            {/* BASIC INFO */}
+            {/* STATUS BADGE */}
+            <View style={styles.statusBadge}>
+              <Text style={styles.statusText}>{status}</Text>
+            </View>
+
+            {/* ORDER INFO */}
             <View style={styles.card}>
-              <View style={styles.row}>
-                <Text style={styles.label}>Order ID</Text>
-                <Text style={styles.value}>#{order.orderNumber}</Text>
-              </View>
+              <Row label="Order ID" value={`#${order.orderNumber}`} />
+              <Divider />
 
-              <View style={styles.divider} />
+              <Row label="Email" value={order.email} />
+              <Divider />
 
-              <View style={styles.row}>
-                <Text style={styles.label}>Email</Text>
-                <Text style={styles.value}>{email}</Text>
-              </View>
+              <Row
+                label="Date"
+                value={new Date(order.createdAt).toDateString()}
+              />
+              <Divider />
 
-              <View style={styles.divider} />
-
-              <View style={styles.row}>
-                <Text style={styles.label}>Date</Text>
-                <Text style={styles.value}>
-                  {new Date(order.createdAt).toLocaleDateString()}
-                </Text>
-              </View>
+              <Row label="Payment" value={`${order.paymentMethod} (${order.paymentStatus})`} />
             </View>
 
             {/* ITEMS */}
             <View style={styles.card}>
-              <Text style={styles.sectionTitle}>Items</Text>
+              <Text style={styles.section}>Items</Text>
 
-              {order.items?.map((item: any, index: number) => (
-                <View key={index} style={styles.itemRow}>
-                  <Image
-                    source={{ uri: item.mainImage }}
-                    style={styles.image}
-                  />
+              {order.items.map((item: any, i: number) => (
+                <View key={i} style={styles.itemRow}>
+                  <Image source={{ uri: item.mainImage }} style={styles.image} />
 
                   <View style={{ flex: 1 }}>
                     <Text style={styles.itemTitle}>{item.title}</Text>
-                    <Text style={styles.itemSub}>{item.variant}</Text>
+                    <Text style={styles.itemSub}>
+                      {item.variant} • Qty {item.quantity}
+                    </Text>
                   </View>
 
                   <Text style={styles.itemPrice}>₹{item.total}</Text>
                 </View>
               ))}
-
-              <View style={styles.divider} />
-
-              <View style={styles.row}>
-                <Text style={styles.label}>Total</Text>
-                <Text style={styles.value}>
-                  ₹{order.total ?? order.subtotal ?? 0}
-                </Text>
-              </View>
             </View>
 
             {/* DELIVERY */}
             <View style={styles.card}>
-              <Text style={styles.sectionTitle}>Delivery Details</Text>
+              <Text style={styles.section}>Delivery</Text>
 
               <Text style={styles.value}>
-                {order.shippingAddress?.firstName}{" "}
-                {order.shippingAddress?.lastName}
+                {order.shippingAddress.firstName}{" "}
+                {order.shippingAddress.lastName}
               </Text>
 
-              <Text style={styles.subText}>
-                {order.shippingAddress?.address}
+              <Text style={styles.sub}>
+                {order.shippingAddress.address}
               </Text>
 
-              <Text style={styles.subText}>
-                {order.shippingAddress?.city},{" "}
-                {order.shippingAddress?.state} -{" "}
-                {order.shippingAddress?.zip}
+              <Text style={styles.sub}>
+                {order.shippingAddress.city}, {order.shippingAddress.state}
               </Text>
 
-              <Text style={styles.subText}>
-                📞 {order.shippingAddress?.phone || "N/A"}
+              <Text style={styles.sub}>
+                📞 {order.shippingAddress.phone}
               </Text>
             </View>
 
-            <Text style={styles.infoText}>
-              A confirmation email has been sent. You can track your order anytime.
+            {/* BILLING */}
+            <View style={styles.card}>
+              <Text style={styles.section}>Summary</Text>
+
+              <Row label="Subtotal" value={`₹${order.subtotal}`} />
+              <Row
+                label="Shipping"
+                value={
+                  order.shippingFee > 0
+                    ? `₹${order.shippingFee}`
+                    : "Free"
+                }
+              />
+
+              <Divider />
+
+              <Row
+                label="Total"
+                value={`₹${order.total}`}
+                bold
+              />
+            </View>
+
+            <Text style={styles.info}>
+              You can track your order anytime from My Orders.
             </Text>
           </Animated.View>
         </View>
@@ -204,17 +219,25 @@ export default function OrderSuccessScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-  },
+/* ---------- SMALL COMPONENTS ---------- */
 
-  content: {
-    alignItems: "center",
-    paddingHorizontal: 20,
-    marginTop: 60,
-  },
+const Row = ({ label, value, bold }: any) => (
+  <View style={styles.row}>
+    <Text style={styles.label}>{label}</Text>
+    <Text style={[styles.value, bold && { fontWeight: "700" }]}>
+      {value}
+    </Text>
+  </View>
+);
+
+const Divider = () => <View style={styles.divider} />;
+
+/* ---------- STYLES ---------- */
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#fff" },
+
+  content: { alignItems: "center", paddingHorizontal: 20, marginTop: 60 },
 
   iconWrapper: {
     width: 110,
@@ -223,73 +246,70 @@ const styles = StyleSheet.create({
     backgroundColor: "#ecfdf5",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: 20,
   },
 
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#111",
-    textAlign: "center",
-  },
+  title: { fontSize: 22, fontWeight: "700", textAlign: "center" },
 
   subtitle: {
     fontSize: 14,
     color: "#666",
-    marginBottom: 20,
+    marginBottom: 10,
     textAlign: "center",
   },
 
-  sectionTitle: {
-    fontWeight: "700",
-    marginBottom: 10,
+  statusBadge: {
+    alignSelf: "center",
+    backgroundColor: "#fff7ed",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 20,
+    marginBottom: 12,
+  },
+
+  statusText: {
+    color: "#f59e0b",
+    fontSize: 12,
+    fontWeight: "600",
   },
 
   card: {
     width: "100%",
-    backgroundColor: "#ffffff",
-    borderRadius: 18,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#f0f0f0",
+    backgroundColor: "#fafafa",
+    borderRadius: 16,
+    padding: 14,
     marginBottom: 14,
-    shadowColor: "#000",
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-    elevation: 2,
+  },
+
+  section: {
+    fontSize: 12,
+    color: "#999",
+    marginBottom: 8,
+    fontWeight: "600",
   },
 
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
+    marginBottom: 6,
   },
 
-  label: {
-    fontSize: 12,
-    color: "#888",
-  },
+  label: { fontSize: 12, color: "#777" },
 
-  value: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
+  value: { fontSize: 13, fontWeight: "500" },
 
-  subText: {
-    fontSize: 12,
-    color: "#666",
-    marginTop: 2,
-  },
+  sub: { fontSize: 12, color: "#666", marginTop: 2 },
 
   divider: {
     height: 1,
     backgroundColor: "#eee",
-    marginVertical: 10,
+    marginVertical: 8,
   },
 
   itemRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 10,
   },
 
   image: {
@@ -297,31 +317,15 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 10,
     marginRight: 10,
-    backgroundColor: "#eee",
   },
 
-  itemTitle: {
-    fontWeight: "600",
-    fontSize: 13,
-  },
+  itemTitle: { fontSize: 13, fontWeight: "600" },
 
-  itemSub: {
-    fontSize: 11,
-    color: "#666",
-  },
+  itemSub: { fontSize: 11, color: "#666" },
 
-  itemPrice: {
-    fontWeight: "600",
-  },
+  itemPrice: { fontWeight: "600" },
 
-  emptyText: {
-    textAlign: "center",
-    color: "#999",
-    fontSize: 13,
-    marginTop: 10,
-  },
-
-  infoText: {
+  info: {
     fontSize: 12,
     color: "#777",
     textAlign: "center",
@@ -331,36 +335,29 @@ const styles = StyleSheet.create({
   bottomBar: {
     position: "absolute",
     bottom: 0,
-    left: 0,
-    right: 0,
+    width: "100%",
     padding: 16,
     backgroundColor: "#fff",
     borderTopWidth: 1,
-    borderTopColor: "#eee",
+    borderColor: "#eee",
     gap: 10,
   },
 
   primaryBtn: {
     backgroundColor: "#111",
-    paddingVertical: 14,
+    padding: 14,
     borderRadius: 30,
     alignItems: "center",
   },
 
-  primaryText: {
-    color: "#fff",
-    fontWeight: "700",
-  },
+  primaryText: { color: "#fff", fontWeight: "700" },
 
   secondaryBtn: {
     backgroundColor: "#f5f5f5",
-    paddingVertical: 14,
+    padding: 14,
     borderRadius: 30,
     alignItems: "center",
   },
 
-  secondaryText: {
-    color: "#111",
-    fontWeight: "600",
-  },
+  secondaryText: { fontWeight: "600" },
 });

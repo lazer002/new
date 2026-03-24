@@ -49,14 +49,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const rawUser = await AsyncStorage.getItem("ds_user");
         const at = await AsyncStorage.getItem("ds_access");
         const rt = await AsyncStorage.getItem("ds_refresh");
-        const gid = await AsyncStorage.getItem("ds_guest_id");
+        const gid = await AsyncStorage.getItem("ds_guest");
 
         
         if (gid) {
           setGuestId(gid);
         } else {
           const newGuestId = Math.random().toString(36).substring(2) + Date.now();
-          await AsyncStorage.setItem("ds_guest_id", newGuestId);
+          await AsyncStorage.setItem("ds_guest", newGuestId);
           setGuestId(newGuestId);
         }
 
@@ -191,7 +191,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   /* ---------- PROVIDE ---------- */
-
   return (
     <AuthContext.Provider
       value={{

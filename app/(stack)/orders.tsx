@@ -10,22 +10,35 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import { useAuth } from "@/context/AuthContext";
+import { api } from "@/utils/config";
 
 export default function OrdersScreen() {
   const router = useRouter();
-
+  const { user, guestId } = useAuth();
   const [orders, setOrders] = useState<any[]>([]);
   const [tab, setTab] = useState<"completed" | "pending" | "cancelled">("pending");
+console.log(guestId)
 
   useEffect(() => {
     loadOrders();
   }, []);
+const loadOrders = async () => {
+  try {
+    const res = await api.get("/api/orders/mine", {
+      headers: {
+        "x-guest-id": guestId || "",
+      },
+      params: {
+        userId: user?._id || null,
+      },
+    });
 
-  const loadOrders = async () => {
-    const local = await AsyncStorage.getItem("orders");
-    const data = local ? JSON.parse(local) : [];
-    setOrders(data);
-  };
+    setOrders(res.data.orders || res.data);
+  } catch (e) {
+    console.log("Order fetch error:", e);
+  }
+};
 console.log("Loaded orders:", JSON.stringify(orders));
 const renderItem = ({ item }: any) => {
   const status = getCurrentStatus(item);
