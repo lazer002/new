@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState ,useCallback} from "react";
 import {
   View,
   Text,
@@ -8,21 +8,23 @@ import {
   Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/utils/config";
+import { useFocusEffect } from "expo-router";
 
 export default function OrdersScreen() {
   const router = useRouter();
   const { user, guestId } = useAuth();
   const [orders, setOrders] = useState<any[]>([]);
   const [tab, setTab] = useState<"completed" | "pending" | "cancelled">("pending");
-console.log(guestId)
 
-  useEffect(() => {
+
+useFocusEffect(
+  useCallback(() => {
     loadOrders();
-  }, []);
+  }, [guestId])
+);
 const loadOrders = async () => {
   try {
     const res = await api.get("/api/orders/mine", {
@@ -105,7 +107,12 @@ const renderItem = ({ item }: any) => {
 
       {/* ACTION BUTTONS */}
       <View style={styles.actions}>
-        <TouchableOpacity style={styles.trackBtn}>
+        <TouchableOpacity style={styles.trackBtn} onPress={() => {
+          router.push({
+            pathname: "/track",
+            params: { orderNumber: item.orderNumber },
+          });
+        }}>
           <Text style={styles.trackText}>Track Order</Text>
         </TouchableOpacity>
 
@@ -123,10 +130,9 @@ const renderItem = ({ item }: any) => {
     </TouchableOpacity>
   );
 };
-  const getCurrentStatus = (order: any) => {
-    if (!order?.statusHistory?.length) return "pending";
-    return order.statusHistory[order.statusHistory.length - 1].status;
-  };
+const getCurrentStatus = (order: any) => {
+  return order.orderStatus || "pending";
+};
 
   const getStatusColor = (status: string) => {
     switch (status) {

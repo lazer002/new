@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,20 +6,26 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
+  Alert
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-
+import Toast from "react-native-toast-message";
 import api from "@/utils/config";
 import { useAuth } from "@/context/AuthContext";
-
+import * as Clipboard from "expo-clipboard";
 export default function OrderDetails() {
   const { orderNumber } = useLocalSearchParams();
-  const { guestId } = useAuth();
+  const { guestId,user } = useAuth();
   const [order, setOrder] = useState<any>(null);
 
-  useEffect(() => {
+useFocusEffect(
+  useCallback(() => {
+    loadOrder();
+  }, [guestId])
+);
+
     const loadOrder = async () => {
       const res = await api.get(
         `/api/orders/track?orderNumber=${orderNumber}`,
@@ -27,8 +33,6 @@ export default function OrderDetails() {
       );
       setOrder(res.data.order);
     };
-    loadOrder();
-  }, []);
 
   if (!order) return null;
 
@@ -48,6 +52,70 @@ export default function OrderDetails() {
 
   const currentIndex = steps.findIndex((s) => s === currentStatus);
 
+const getAction = () => {
+  if (["pending", "confirmed"].includes(currentStatus)) return "cancel";
+  if (["shipped", "out for delivery", "delivered"].includes(currentStatus))
+    return "return";
+  return null;
+};
+
+const handleCancel = () => {
+  Alert.alert(
+    "Cancel Order",
+    "Are you sure you want to cancel this order?",
+    [
+      { text: "No", style: "cancel" },
+      {
+        text: "Yes, Cancel",
+        style: "destructive",
+        onPress: confirmCancel,
+      },
+    ]
+  );
+};
+const confirmCancel = async () => {
+  try {
+    await api.put(
+      "/api/orders/cancel",
+      { orderId: order._id }, // ✅ correct
+      { headers: { "x-guest-id": guestId || "" } }
+    );
+
+    setOrder((prev: any) => ({
+      ...prev,
+      orderStatus: "cancelled",
+      statusHistory: [
+        ...(prev.statusHistory || []),
+        { status: "cancelled", updatedAt: new Date() },
+      ],
+    }));
+
+ await loadOrder();
+
+    Toast.show({
+      type: "success",
+      text1: "Order Cancelled",
+    });
+  } catch (e) {
+    Toast.show({
+      type: "error",
+      text1: "Cancel Failed",
+    });
+  }
+};
+
+const handleReturn = () => {
+  Toast.show({
+    type: "info",
+    text1: "Return Available",
+    text2: "You can reject delivery or request return",
+  });
+};
+const actionType = getAction();
+
+const handleCopyOrderId = async () => {
+  await Clipboard.setStringAsync(order.orderNumber);
+};
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={{ paddingBottom: 140 }}>
@@ -64,16 +132,28 @@ export default function OrderDetails() {
         </View>
 
         {/* ORDER CARD */}
-        <View style={styles.card}>
-          <Text style={styles.orderId}>#{order.orderNumber}</Text>
-          <Text style={styles.date}>
-            {new Date(order.createdAt).toDateString()}
-          </Text>
+ <View style={styles.card}>
+  
+  {/* TOP ROW */}
+  <View style={styles.topRow}>
+    <Text style={styles.orderId}>#{order.orderNumber}</Text>
 
-          <View style={styles.statusBadge}>
-            <Text style={styles.statusText}>{currentStatus}</Text>
-          </View>
-        </View>
+    <TouchableOpacity onPress={handleCopyOrderId}>
+    <Ionicons name="copy-outline" size={18} color="#000" />
+    </TouchableOpacity>
+  </View>
+
+  {/* DATE */}
+  <Text style={styles.date}>
+    {new Date(order.createdAt).toDateString()}
+  </Text>
+
+  {/* STATUS */}
+  <View style={styles.statusBadge}>
+    <Text style={styles.statusText}>{currentStatus}</Text>
+  </View>
+
+</View>
 
         {/* TRACKING */}
         <View style={styles.card}>
@@ -177,6 +257,18 @@ export default function OrderDetails() {
             </View>
           ))}
         </View>
+        {/* ACTION BUTTON */}
+{actionType === "cancel" && (
+  <TouchableOpacity style={styles.cancelBtn} onPress={handleCancel}>
+    <Text style={styles.cancelText}>Cancel Order</Text>
+  </TouchableOpacity>
+)}
+
+{actionType === "return" && (
+  <TouchableOpacity style={styles.returnBtn} onPress={handleReturn}>
+    <Text style={styles.returnText}>Return / Reject</Text>
+  </TouchableOpacity>
+)}
       </ScrollView>
 
       {/* TOTAL */}
@@ -193,6 +285,7 @@ export default function OrderDetails() {
 
         <Row label="Total" value={`₹${order.total}`} bold />
       </View>
+      
     </SafeAreaView>
   );
 }
@@ -334,4 +427,41 @@ const styles = StyleSheet.create({
     backgroundColor: "#eee",
     marginVertical: 8,
   },
+  cancelBtn: {
+  marginHorizontal: 16,
+  marginBottom: 12,
+  padding: 14,
+  borderRadius: 30,
+  backgroundColor: "#fee2e2",
+  alignItems: "center",
+},
+topRow: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+},
+
+copyText: {
+  fontSize: 12,
+  fontWeight: "600",
+  color: "#000",
+},
+cancelText: {
+  color: "#dc2626",
+  fontWeight: "700",
+},
+
+returnBtn: {
+  marginHorizontal: 16,
+  marginBottom: 12,
+  padding: 14,
+  borderRadius: 30,
+  backgroundColor: "#111",
+  alignItems: "center",
+},
+
+returnText: {
+  color: "#fff",
+  fontWeight: "700",
+},
 });
