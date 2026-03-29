@@ -41,7 +41,6 @@ const loadOrders = async () => {
     console.log("Order fetch error:", e);
   }
 };
-console.log("Loaded orders:", JSON.stringify(orders));
 const renderItem = ({ item }: any) => {
   const status = getCurrentStatus(item);
 
@@ -91,7 +90,7 @@ const renderItem = ({ item }: any) => {
   <View style={styles.rowBetween}>
     <Text style={styles.lightText}>Quantity: </Text>
     <Text style={styles.darkText}>
-      {item.items?.length || 0}
+      {item.items?.reduce((sum: number, it: any) => sum + (it.quantity || 0), 0)}
     </Text>
   </View>
       <View style={styles.rowBetween}>

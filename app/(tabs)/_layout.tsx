@@ -5,22 +5,39 @@ import {
   StyleSheet,
   Animated,
   useWindowDimensions,
+  Text,
 } from "react-native";
-import { useEffect, useRef } from "react";
-
+import { useEffect, useRef, useState } from "react";
+import api from "@/utils/config";
 import Octicons from "@expo/vector-icons/Octicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useWishlist } from "@/context/WishlistContext";
+import { useCart } from "@/context/CartContext";
 
 /* ---------------- CONSTANTS ---------------- */
 
 const CIRCLE_SIZE = 56;
+const Badge = ({ count }: { count: number }) => {
+  if (!count) return null;
 
+  return (
+    <View style={styles.badge}>
+      <Text style={styles.badgeText}>
+        {count > 9 ? "9+" : count}
+      </Text>
+    </View>
+  );
+};
 /* ---------------- CUSTOM TAB BAR ---------------- */
 
 function CustomTabBar({ state, navigation }: any) {
   const { width } = useWindowDimensions();
   const tabCount = state.routes.length;
+const [notifCount, setNotifCount] = useState(0);
+  const { wishlist } = useWishlist();
+  const { items } = useCart();
 
+const [orderCount, setOrderCount] = useState(0);
   const navWidth = width * 0.85;
   const tabWidth = navWidth / tabCount;
 
@@ -38,6 +55,20 @@ function CustomTabBar({ state, navigation }: any) {
     }).start();
   }, [state.index, tabWidth]);
 
+  useEffect(() => {
+  const loadCounts = async () => {
+    try {
+      const notifRes = await api.get("/api/notifications/unread-count");
+      setNotifCount(notifRes.data.count);
+
+    } catch (err) {
+      console.log("COUNT ERROR", err);
+    }
+  };
+
+  loadCounts();
+}, []);
+console.log(items);
   return (
     <View style={[styles.wrapper, { width: navWidth }]}>
       {/* 🔘 Sliding Circle */}
@@ -58,36 +89,44 @@ function CustomTabBar({ state, navigation }: any) {
             style={[styles.tab, { width: tabWidth }]}
           >
             {/* Notifications (MaterialIcons) */}
-            {route.name === "notifications" ? (
-              <MaterialIcons
-                name={
-                  isFocused
-                    ? "notifications"
-                    : "notifications-none"
-                }
-                size={26}
-                color={isFocused ? "#000" : "#999"}
-              />
-            ) : (
-              /* Other tabs (Octicons) */
-              <Octicons
-          name={
-    route.name === "index"
-      ? isFocused
-        ? "home-fill"
-        : "home"
-      : route.name === "wishlist"
-      ? isFocused
-        ? "heart-fill"
-        : "heart"
-      : isFocused
-      ? "person-fill"
-      : "person"
-  }
-                size={22}
-                color={isFocused ? "#000" : "#999"}
-              />
-            )}
+     {route.name === "notifications" ? (
+  <View>
+    <MaterialIcons
+      name={
+        isFocused
+          ? "notifications"
+          : "notifications-none"
+      }
+      size={26}
+      color={isFocused ? "#000" : "#999"}
+    />
+    <Badge count={notifCount} />
+  </View>
+) : route.name === "wishlist" ? (
+  <View>
+    <Octicons
+      name={isFocused ? "heart-fill" : "heart"}
+      size={22}
+      color={isFocused ? "#000" : "#999"}
+    />
+    <Badge count={wishlist.length} />
+  </View>
+) : route.name === "profile" ? (
+  <View>
+    <Octicons
+      name={isFocused ? "person-fill" : "person"}
+      size={22}
+      color={isFocused ? "#000" : "#999"}
+    />
+    <Badge count={items.length} />
+  </View>
+) : (
+  <Octicons
+    name={isFocused ? "home-fill" : "home"}
+    size={22}
+    color={isFocused ? "#000" : "#999"}
+  />
+)}
           </Pressable>
         );
       })}
@@ -151,4 +190,23 @@ const styles = StyleSheet.create({
     left: 0,
     zIndex: 1,
   },
+  badge: {
+  position: "absolute",
+  top: -6,
+  right: -10,
+  backgroundColor: "#22c55e",
+  borderRadius: 10,
+  minWidth: 18,
+  height: 18,
+  justifyContent: "center",
+  alignItems: "center",
+  paddingHorizontal: 4,
+  elevation: 3,
+},
+
+badgeText: {
+  color: "#fff",
+  fontSize: 10,
+  fontWeight: "700",
+},
 });

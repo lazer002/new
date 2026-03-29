@@ -5,7 +5,6 @@ import React, {
   useState,
   ReactNode,
 } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { api } from "../utils/config";
 import { useAuth } from "./AuthContext";
 
@@ -30,75 +29,28 @@ const WishlistContext = createContext<WishlistContextType | undefined>(
   undefined
 );
 
-/* ================= CONSTANTS ================= */
-
-const GUEST_KEY = "guestWishlist_v1";
-
 /* ================= PROVIDER ================= */
 
 export const WishlistProvider = ({ children }: WishlistProviderProps) => {
-  const { user } = useAuth();
+  const { user, guestId } = useAuth();
   const userId = user?._id ?? null;
 
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
-  /* ---------- GUEST HELPERS ---------- */
-
-  const loadGuestWishlist = async () => {
-    try {
-      const raw = await AsyncStorage.getItem(GUEST_KEY);
-      const list: string[] = raw ? JSON.parse(raw) : [];
-      setWishlist(list);
-    } catch (e) {
-      console.log("Guest wishlist load error:", e);
-      setWishlist([]);
-    }
-  };
-
-  const saveGuestWishlist = async (list: string[]) => {
-    try {
-      await AsyncStorage.setItem(GUEST_KEY, JSON.stringify(list));
-    } catch (e) {
-      console.log("Guest wishlist save error:", e);
-    }
-  };
-
-  const clearGuestWishlist = async () => {
-    try {
-      await AsyncStorage.removeItem(GUEST_KEY);
-    } catch (e) {
-      console.log("Guest wishlist clear error:", e);
-    }
-  };
-
-  /* ---------- FETCH / REFRESH ---------- */
+  /* ---------- FETCH ---------- */
 
   const refreshWishlist = async () => {
-    // ---------- GUEST ----------
-    if (!userId) {
-      await loadGuestWishlist();
-      return;
-    }
-
-    // ---------- LOGGED IN ----------
     try {
       setLoading(true);
 
-      // 1️⃣ Merge guest wishlist ON LOGIN
-      const raw = await AsyncStorage.getItem(GUEST_KEY);
-      const guestItems: string[] = raw ? JSON.parse(raw) : [];
+      const { data } = await api.get("/api/wishlist", {
+        headers: {
+          "x-guest-id": guestId || "",
+        },
+      });
 
-      if (guestItems.length > 0) {
-        await api.post("/api/wishlist/sync", {
-          items: guestItems,
-        });
-        await clearGuestWishlist();
-      }
-
-      // 2️⃣ Fetch canonical wishlist from DB
-      const { data } = await api.get("/api/wishlist");
-      setWishlist(data?.items ?? []);
+      setWishlist(Array.from(new Set(data?.items ?? [])));
     } catch (e) {
       console.log("Wishlist refresh error:", e);
       setWishlist([]);
@@ -112,17 +64,17 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
   const addToWishlist = async (productId: string) => {
     if (!productId) return;
 
-    // Guest
-    if (!userId) {
-      const updated = Array.from(new Set([...wishlist, productId]));
-      setWishlist(updated);
-      await saveGuestWishlist(updated);
-      return;
-    }
-
-    // Logged in
     try {
-      await api.post("/api/wishlist/wishadd", { productId });
+      await api.post(
+        "/api/wishlist/wishadd",
+        { productId },
+        {
+          headers: {
+            "x-guest-id": guestId || "",
+          },
+        }
+      );
+
       setWishlist((prev) =>
         prev.includes(productId) ? prev : [...prev, productId]
       );
@@ -136,17 +88,17 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
   const removeFromWishlist = async (productId: string) => {
     if (!productId) return;
 
-    // Guest
-    if (!userId) {
-      const updated = wishlist.filter((id) => id !== productId);
-      setWishlist(updated);
-      await saveGuestWishlist(updated);
-      return;
-    }
-
-    // Logged in
     try {
-      await api.post("/api/wishlist/wishremove", { productId });
+      await api.post(
+        "/api/wishlist/wishremove",
+        { productId },
+        {
+          headers: {
+            "x-guest-id": guestId || "",
+          },
+        }
+      );
+
       setWishlist((prev) => prev.filter((id) => id !== productId));
     } catch (e) {
       console.log("Remove wishlist error:", e);
@@ -162,10 +114,13 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
   /* ---------- EFFECT ---------- */
 
   useEffect(() => {
-    refreshWishlist();
-  }, [userId]);
+    if (guestId) {
+      refreshWishlist();
+    }
+  }, [userId, guestId]);
 
   /* ---------- PROVIDE ---------- */
+console.log("WishlistContext rendered with wishlist:", wishlist.length);
 
   return (
     <WishlistContext.Provider
@@ -182,7 +137,6 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
     </WishlistContext.Provider>
   );
 };
-
 /* ================= HOOK ================= */
 
 export const useWishlist = () => {

@@ -18,38 +18,55 @@ import api from "@/utils/config";
 
 type Item = {
   _id: string;
+  productId?: string;
   title: string;
   mainImage: string;
   quantity: number;
   variant?: string;
+  price?: number;
 };
 
 type Order = {
   _id: string;
   orderNumber: string;
-  orderStatus: string;
+  orderStatus: string; // ✅ important
   items: Item[];
 };
 
-/* ---------- CONSTANT ---------- */
+/* ---------- ACTIONS ---------- */
 
-const ACTIONS = ["return", "exchange"] as const;
+const ACTIONS = [
+  { label: "Return", value: "refund" },
+  { label: "Exchange", value: "exchange" },
+  { label: "Repair", value: "repair" },
+];
+
+/* ---------- REASONS ---------- */
 
 const RETURN_REASONS = [
-  "Wrong item delivered",
-  "Damaged product",
-  "Quality not good",
-  "Changed mind",
+  "Item damaged or defective",
+  "Wrong item received",
+  "Quality not as expected",
+  "Changed my mind",
 ];
 
 const EXCHANGE_REASONS = [
-  "Size issue",
-  "Wrong item",
-  "Damaged product",
+  "Size doesn't fit",
+  "Wrong item received",
+  "Damaged item",
 ];
 
-const getReasons = (action: string) =>
-  action === "exchange" ? EXCHANGE_REASONS : RETURN_REASONS;
+const REPAIR_REASONS = [
+  "Stitch issue",
+  "Print damage",
+  "Fabric defect",
+];
+
+const getReasons = (action: string) => {
+  if (action === "exchange") return EXCHANGE_REASONS;
+  if (action === "repair") return REPAIR_REASONS;
+  return RETURN_REASONS;
+};
 
 /* ---------- COMPONENT ---------- */
 
@@ -61,6 +78,9 @@ export default function ReturnExchangeScreen() {
   const [selected, setSelected] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
   const [openReason, setOpenReason] = useState<string | null>(null);
+
+  /* ---------- RULE ---------- */
+  const isReturnAllowed = order?.orderStatus === "delivered";
 
   /* ---------- FETCH ORDER ---------- */
 
@@ -82,6 +102,8 @@ export default function ReturnExchangeScreen() {
   /* ---------- TOGGLE ITEM ---------- */
 
   const toggleItem = (item: Item) => {
+    if (!isReturnAllowed) return;
+
     setSelected((prev) => {
       if (prev[item._id]) {
         const copy = { ...prev };
@@ -91,7 +113,7 @@ export default function ReturnExchangeScreen() {
       return {
         ...prev,
         [item._id]: {
-          action: "return",
+          action: "refund",
           reason: "",
           note: "",
           images: [],
@@ -103,11 +125,10 @@ export default function ReturnExchangeScreen() {
   /* ---------- IMAGE PICK ---------- */
 
   const pickImage = async (itemId: string) => {
+    if (!isReturnAllowed) return;
+
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      alert("Permission required");
-      return;
-    }
+    if (!permission.granted) return;
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -129,99 +150,68 @@ export default function ReturnExchangeScreen() {
 
   /* ---------- SUBMIT ---------- */
 
-const submit = async () => {
-  if (!order) return;
+  const submit = async () => {
+    if (!order || !isReturnAllowed) return;
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const perItemUploaded: Record<string, string[]> = {};
-    const itemIds = Object.keys(selected || {});
+      const perItemUploaded: Record<string, string[]> = {};
+      const itemIds = Object.keys(selected);
 
-    /* ---------- UPLOAD IMAGES ---------- */
-    for (const itemId of itemIds) {
-      perItemUploaded[itemId] = [];
+      for (const itemId of itemIds) {
+        perItemUploaded[itemId] = [];
 
-      const images = selected[itemId]?.images || [];
+        for (const uri of selected[itemId].images || []) {
+          const fd = new FormData();
 
-      for (const uri of images) {
-        const formData = new FormData();
+          fd.append("file", {
+            uri,
+            name: "image.jpg",
+            type: "image/jpeg",
+          } as any);
 
-        formData.append("file", {
-          uri,
-          name: "image.jpg",
-          type: "image/jpeg",
-        } as any);
+          const res = await api.post("/api/upload/image", fd, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
 
-        const res = await api.post("api/upload/image", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-
-        if (res?.data?.url) perItemUploaded[itemId].push(res.data.url);
-        else if (res?.data?.path) perItemUploaded[itemId].push(res.data.path);
-        else if (res?.data?.publicUrl) perItemUploaded[itemId].push(res.data.publicUrl);
+          if (res?.data?.url) perItemUploaded[itemId].push(res.data.url);
+        }
       }
-    }
 
-    /* ---------- BUILD ITEMS ---------- */
-    const payloadItems = itemIds.map((itemId) => {
-      const it =
-        (order?.items || []).find((o) => o._id === itemId) || {};
+      const items = itemIds.map((itemId) => {
+        const it = order.items.find((i) => i._id === itemId)!;
 
-      return {
-        orderItemId: itemId,
-        productId: (it as any)?.productId || itemId, // ⚠️ adjust if needed
-        qty: 1,
-
-        action: selected[itemId]?.action || "return",
-        reason: selected[itemId]?.reason || "",
-        exchangeSize: selected[itemId]?.exchangeSize || null,
-        details: selected[itemId]?.note || "",
-
-        photos: perItemUploaded[itemId] || [],
-
-        title: (it as any)?.title || "",
-        variant: (it as any)?.variant || "",
-        price: Number((it as any)?.price || 0),
-      };
-    });
-
-    /* ---------- FINAL PAYLOAD ---------- */
-    const payload = {
-      orderId: order?._id,
-      orderNumber: order?.orderNumber,
-      guestEmail: email || null,
-      items: payloadItems,
-    };
-
-    console.log("FINAL PAYLOAD:", payload);
-
-    const { data } = await api.post("/api/returns", payload);
-
-    if (data?.success) {
-      Toast.show({
-        type: "success",
-        text1: "Return request created",
+        return {
+          orderItemId: itemId,
+          productId: it.productId || itemId,
+          qty: 1,
+          action: selected[itemId].action,
+          reason: selected[itemId].reason,
+          details: selected[itemId].note,
+          exchangeSize: selected[itemId].exchangeSize || null,
+          photos: perItemUploaded[itemId],
+          title: it.title,
+          variant: it.variant,
+          price: it.price || 0,
+        };
       });
 
+      await api.post("/api/returns", {
+        orderId: order._id,
+        orderNumber: order.orderNumber,
+        guestEmail: email || null,
+        items,
+      });
+
+      Toast.show({ type: "success", text1: "Request Submitted" });
       setStep(3);
-    } else {
-      Toast.show({
-        type: "error",
-        text1: data?.message || "Failed",
-      });
+    } catch {
+      Toast.show({ type: "error", text1: "Failed" });
+    } finally {
+      setLoading(false);
     }
-  } catch (err: any) {
-    console.log("ERROR:", err?.response?.data || err.message);
-
-    Toast.show({
-      type: "error",
-      text1: err?.response?.data?.message || "Error creating return",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   /* ---------- UI ---------- */
 
@@ -260,20 +250,27 @@ const submit = async () => {
         {/* STEP 2 */}
         {step === 2 && order && (
           <>
+            {!isReturnAllowed && (
+              <View style={styles.infoBox}>
+                <Text style={styles.infoText}>
+                  Returns & exchanges available only after delivery
+                </Text>
+              </View>
+            )}
+
             {order.items.map((item) => {
               const active = !!selected[item._id];
 
               return (
                 <View key={item._id} style={styles.card}>
-                  {/* PRODUCT */}
                   <TouchableOpacity
                     onPress={() => toggleItem(item)}
-                    style={styles.row}
+                    style={[
+                      styles.row,
+                      !isReturnAllowed && { opacity: 0.4 },
+                    ]}
                   >
-                    <Image
-                      source={{ uri: item.mainImage }}
-                      style={styles.img}
-                    />
+                    <Image source={{ uri: item.mainImage }} style={styles.img} />
 
                     <View style={{ flex: 1 }}>
                       <Text style={styles.title}>{item.title}</Text>
@@ -287,46 +284,37 @@ const submit = async () => {
                     </View>
                   </TouchableOpacity>
 
-                  {/* DETAILS */}
-                  {active && (
+                  {active && isReturnAllowed && (
                     <View style={{ marginTop: 12 }}>
                       {/* ACTION */}
                       <Text style={styles.label}>Action</Text>
                       <View style={styles.rowWrap}>
-                        {ACTIONS.map((a) => (
-                          <TouchableOpacity
-                            key={a}
-                            style={[
-                              styles.chip,
-                              selected[item._id].action === a &&
-                                styles.chipActive,
-                            ]}
-                            onPress={() =>
-                              setSelected((p) => ({
-                                ...p,
-                                [item._id]: {
-                                  ...p[item._id],
-                                  action: a,
-                                  reason: "",
-                                },
-                              }))
-                            }
-                          >
-                            <Text
-                              style={{
-                                color:
-                                  selected[item._id].action === a
-                                    ? "#fff"
-                                    : "#333",
-                              }}
+                        {ACTIONS.map((a) => {
+                          const act = selected[item._id].action === a.value;
+                          return (
+                            <TouchableOpacity
+                              key={a.value}
+                              style={[styles.chip, act && styles.chipActive]}
+                              onPress={() =>
+                                setSelected((p) => ({
+                                  ...p,
+                                  [item._id]: {
+                                    ...p[item._id],
+                                    action: a.value,
+                                    reason: "",
+                                  },
+                                }))
+                              }
                             >
-                              {a}
-                            </Text>
-                          </TouchableOpacity>
-                        ))}
+                              <Text style={{ color: act ? "#fff" : "#333" }}>
+                                {a.label}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        })}
                       </View>
 
-                      {/* DROPDOWN */}
+                      {/* REASON */}
                       <Text style={styles.label}>Reason</Text>
                       <TouchableOpacity
                         style={styles.dropdown}
@@ -366,7 +354,7 @@ const submit = async () => {
 
                       {/* NOTE */}
                       <TextInput
-                        placeholder="Additional details (optional)"
+                        placeholder="Additional details"
                         style={styles.textArea}
                         multiline
                         onChangeText={(t) =>
@@ -388,28 +376,24 @@ const submit = async () => {
                         <Text>Add Photos</Text>
                       </TouchableOpacity>
 
-                      {/* IMAGE PREVIEW */}
-                      {selected[item._id]?.images?.length > 0 && (
-                        <ScrollView horizontal>
-                          {selected[item._id].images.map(
-                            (img: string, i: number) => (
-                              <Image
-                                key={i}
-                                source={{ uri: img }}
-                                style={styles.previewImg}
-                              />
-                            )
-                          )}
-                        </ScrollView>
-                      )}
+                      {/* PREVIEW */}
+                      <ScrollView horizontal>
+                        {(selected[item._id]?.images || []).map((img: string, i: number) => (
+                          <Image key={i} source={{ uri: img }} style={styles.previewImg} />
+                        ))}
+                      </ScrollView>
                     </View>
                   )}
                 </View>
               );
             })}
 
-            <TouchableOpacity style={styles.btn} onPress={submit}>
-              <Text style={styles.btnText}>Submit Request</Text>
+            <TouchableOpacity
+              style={[styles.btn, !isReturnAllowed && { opacity: 0.5 }]}
+              disabled={!isReturnAllowed}
+              onPress={submit}
+            >
+              <Text style={styles.btnText}>Submit</Text>
             </TouchableOpacity>
           </>
         )}
@@ -417,7 +401,7 @@ const submit = async () => {
         {/* STEP 3 */}
         {step === 3 && (
           <View style={styles.center}>
-            <Text style={styles.success}>Request Submitted 🎉</Text>
+            <Text style={styles.success}>Submitted 🎉</Text>
           </View>
         )}
       </ScrollView>
@@ -431,8 +415,8 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "#f6f6f7" },
   container: { padding: 16 },
 
-  header: { fontSize: 28, fontWeight: "700", color: "#111" },
-  subHeader: { fontSize: 13, color: "#777", marginBottom: 20 },
+  header: { fontSize: 28, fontWeight: "700" },
+  subHeader: { color: "#777", marginBottom: 20 },
 
   card: {
     backgroundColor: "#fff",
@@ -448,7 +432,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 14,
     marginBottom: 12,
-    backgroundColor: "#fff",
   },
 
   btn: {
@@ -458,22 +441,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  btnText: { color: "#fff", fontWeight: "600" },
+  btnText: { color: "#fff" },
 
   row: { flexDirection: "row", alignItems: "center", gap: 12 },
   rowWrap: { flexDirection: "row", flexWrap: "wrap" },
 
   img: { width: 64, height: 64, borderRadius: 14 },
 
-  title: { fontSize: 15, fontWeight: "600", color: "#111" },
+  title: { fontWeight: "600" },
   meta: { fontSize: 12, color: "#888" },
 
   checkbox: {
     width: 22,
     height: 22,
-    borderRadius: 6,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderRadius: 6,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -484,7 +466,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#111",
   },
 
-  label: { marginTop: 10, fontSize: 12, color: "#555" },
+  label: { marginTop: 10, fontSize: 12 },
 
   chip: {
     paddingHorizontal: 12,
@@ -524,7 +506,6 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 12,
     marginTop: 10,
-    backgroundColor: "#fafafa",
   },
 
   upload: {
@@ -544,6 +525,18 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 
+  infoBox: {
+    backgroundColor: "#fff3f3",
+    padding: 12,
+    borderRadius: 14,
+    marginBottom: 12,
+  },
+
+  infoText: {
+    color: "#d32f2f",
+    fontSize: 13,
+  },
+
   center: { alignItems: "center", marginTop: 40 },
-  success: { fontSize: 18, fontWeight: "600" },
+  success: { fontSize: 18 },
 });
