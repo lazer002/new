@@ -120,7 +120,6 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
   }, [userId, guestId]);
 
   /* ---------- PROVIDE ---------- */
-console.log("WishlistContext rendered with wishlist:", wishlist.length);
 
   return (
     <WishlistContext.Provider

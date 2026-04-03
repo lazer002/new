@@ -28,6 +28,8 @@ type FilterContextType = {
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   resetFilters: () => void;
   activeCount: number; // 👈 NEW
+ isFilterOpen: boolean;
+setIsFilterOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 /* ───────────── DEFAULTS ───────────── */
@@ -51,6 +53,7 @@ const FilterContext = createContext<FilterContextType | undefined>(
 /* ───────────── PROVIDER ───────────── */
 
 export function FilterProvider({ children }: { children: ReactNode }) {
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] =
     useState<FilterState>(defaultFilters);
 
@@ -61,6 +64,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
   // ✅ Count how many FILTER GROUPS are active
   const activeCount = getActiveFilterCount(filters);
 
+
   return (
     <FilterContext.Provider
       value={{
@@ -68,6 +72,8 @@ export function FilterProvider({ children }: { children: ReactNode }) {
         setFilters,
         resetFilters,
         activeCount,
+       isFilterOpen,        // ✅
+    setIsFilterOpen
       }}
     >
       {children}

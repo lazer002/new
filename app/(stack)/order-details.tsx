@@ -20,6 +20,9 @@ export default function OrderDetails() {
   const { guestId,user } = useAuth();
   const [order, setOrder] = useState<any>(null);
 
+
+
+
 useFocusEffect(
   useCallback(() => {
     loadOrder();
@@ -116,6 +119,7 @@ const actionType = getAction();
 const handleCopyOrderId = async () => {
   await Clipboard.setStringAsync(order.orderNumber);
 };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={{ paddingBottom: 140 }}>

@@ -314,6 +314,8 @@ const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0,0,0,0.4)",
+    elevation: 16,
+
   },
 
   sheet: {
@@ -325,6 +327,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 22,
     borderTopRightRadius: 22,
     padding: 16,
+    
   },
 
   header: {

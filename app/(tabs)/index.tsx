@@ -114,8 +114,8 @@ export default function Home() {
   const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterVisible, setFilterVisible] = useState(false); // ✅ single source
-  const { filters, setFilters } = useFilter();
+
+  const { filters, setFilters,isFilterOpen, setIsFilterOpen } = useFilter();
   useEffect(() => {
     api.get("/api/categories").then((res) =>
       setCategories(res.data.categories || [])
@@ -188,7 +188,7 @@ export default function Home() {
             }
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            openFilter={() => setFilterVisible(true)} // ✅ FIXED
+            openFilter={() => setIsFilterOpen(true)} // ✅ FIXED
           />
           <SectionHeader onSeeAll={() => console.log("See all pressed")} />
             </>
@@ -204,9 +204,9 @@ export default function Home() {
 
       {/* ✅ BOTTOM FILTER SHEET */}
       <BottomFilterSheet
-        visible={filterVisible}
+        visible={isFilterOpen}
         categories={categories}
-        onClose={() => setFilterVisible(false)}
+        onClose={() => setIsFilterOpen(false)}
       />
     </Screen>
   );

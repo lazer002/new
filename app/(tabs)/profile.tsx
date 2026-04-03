@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext ,useEffect, useState} from "react";
 import {
   View,
   Text,
@@ -11,15 +11,61 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 import Screen from "@/components/Screen";
+import { api } from "@/utils/config";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 
 export default function Profile() {
   const router = useRouter();
-  const { user, logout } = useAuth()
+  const { user, logout,guestId } = useAuth()
+const [activeOrderCount, setActiveOrderCount] = useState(0);
+
+useEffect(() => {
+  const loadOrders = async () => {
+    try {
+      const res = await api.get("/api/orders/mine", {
+        headers: {
+          "x-guest-id": guestId || "",
+        },
+      });
+
+      const orders = res.data.orders || [];
+
+      const activeStatuses = [
+        "pending",
+        "confirmed",
+        "dispatched",
+        "shipped",
+        "out for delivery",
+      ];
+
+      const activeCount = orders.filter((o: any) =>
+        activeStatuses.includes(
+          (o.orderStatus || "").toLowerCase()
+        )
+      ).length;
+
+      setActiveOrderCount(activeCount);
+    } catch (err) {
+      console.log("Order count error", err);
+    }
+  };
+
+  loadOrders();
+}, []);
 
   const go = (path: string) => router.push(path);
+const Badge = ({ count }: { count: number }) => {
+  if (!count) return null;
 
+  return (
+    <View style={styles.badge}>
+      <Text style={styles.badgeText}>
+        {count > 9 ? "9+" : count}
+      </Text>
+    </View>
+  );
+};
   return (
     <Screen>
     
@@ -53,18 +99,21 @@ export default function Profile() {
           <Item
             icon="log-in-outline"
             label="Sign in / Create Account"
-            onPress={() => go("/auth")}
+            onPress={() => go("/login")}
           />
         )}
       </Section>
 
       {/* --- ORDER SECTION --- */}
       <Section title="Orders">
-        <Item
-          icon="cube-outline"
-          label="My Orders"
-          onPress={() => go("/orders")}
-        />
+  <View>
+  <Item
+    icon="cube-outline"
+    label="My Orders"
+    onPress={() => go("/orders")}
+  />
+  <Badge count={activeOrderCount} />
+</View>
         <Item
           icon="location-outline"
           label="Track Order"
@@ -235,4 +284,22 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     fontSize: 15,
   },
+  badge: {
+  position: "absolute",
+  right: width * 0.09,
+  top: height * 0.0156,
+  backgroundColor: "#22c55e",
+  borderRadius: 10,
+  minWidth: 18,
+  height: 18,
+  justifyContent: "center",
+  alignItems: "center",
+  paddingHorizontal: 5,
+},
+
+badgeText: {
+  color: "#fff",
+  fontSize: 10,
+  fontWeight: "700",
+},
 });

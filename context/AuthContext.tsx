@@ -8,7 +8,11 @@ import React, {
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { api as baseApi } from "../utils/config";
+import * as WebBrowser from "expo-web-browser";
+import * as Google from "expo-auth-session/providers/google";
+import { useRouter } from "expo-router";
 
+WebBrowser.maybeCompleteAuthSession();
 /* ================= TYPES ================= */
 
 type User = any; // keep flexible – backend controls shape
@@ -21,6 +25,7 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<any>;
   register: (name: string, email: string, password: string) => Promise<any>;
   loginWithGoogle: (googleToken: string) => Promise<any>;
+  promptGoogleLogin: () => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -40,6 +45,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+const router = useRouter();
 
   /* ---------- LOAD STORED AUTH ---------- */
 
@@ -158,6 +164,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
     ]);
   };
 
+const [request, response, promptAsync] = Google.useAuthRequest({
+  clientId: process.env.GOOGLE_CLIENT_ID,
+  androidClientId: "YOUR_ANDROID_CLIENT_ID",
+  iosClientId: "YOUR_IOS_CLIENT_ID",
+});
+
+useEffect(() => {
+  const handleGoogleResponse = async () => {
+    if (response?.type === "success") {
+      try {
+        const token = response.authentication?.accessToken;
+
+        if (!token) throw new Error("No Google token");
+
+        const data = await loginWithGoogle(token);
+
+        // ✅ redirect after login
+        if (data?.user) {
+          router.replace("/");
+        }
+      } catch (err) {
+        console.log("Google login error", err);
+      }
+    }
+  };
+
+  handleGoogleResponse();
+}, [response]);
+
+
   /* ---------- AUTH ACTIONS ---------- */
 
   const login = async (email: string, password: string) => {
@@ -180,15 +216,37 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return data;
   };
 
-  const loginWithGoogle = async (googleToken: string) => {
+const loginWithGoogle = async (googleToken: string) => {
+  try {
     const { data } = await baseApi.post("/auth/google", {
       token: googleToken,
     });
+
     setUser(data.user);
     setAccessToken(data.accessToken);
     setRefreshToken(data.refreshToken);
+
     return data;
-  };
+  } catch (err: any) {
+    console.log("Google API login error", err);
+    throw err;
+  }
+};
+
+
+
+const promptGoogleLogin = async () => {
+  try {
+    if (!request) {
+      throw new Error("Google request not ready");
+    }
+
+    await promptAsync();
+  } catch (err) {
+    console.log("Google prompt error", err);
+    throw err;
+  }
+};
 
   /* ---------- PROVIDE ---------- */
   return (
@@ -202,6 +260,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         register,
         loginWithGoogle,
         logout: handleLogout,
+        promptGoogleLogin
+
       }}
     >
       {children}
