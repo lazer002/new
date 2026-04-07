@@ -1,12 +1,11 @@
 {
   "expo": {
-    "name": "new",
+    "name": "monkey",
     "newArchEnabled": true,
-    "slug": "new",
+    "slug": "monkey",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "new",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/images/splash-icon.png",
@@ -23,7 +22,7 @@
         "foregroundImage": "./assets/images/android-icon-foreground.png"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.xnew"
+      "package": "com.anonymous.monkey"
     },
     "plugins": [
       "expo-router",
