@@ -10,7 +10,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { api as baseApi } from "../utils/config";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
+  import * as AuthSession from "expo-auth-session";
 
 WebBrowser.maybeCompleteAuthSession();
 /* ================= TYPES ================= */
@@ -164,10 +165,11 @@ const router = useRouter();
     ]);
   };
 
+
+
 const [request, response, promptAsync] = Google.useAuthRequest({
-  clientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-  androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
-  // iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+ androidClientId:process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+//  useProxy: true,
 });
 
 useEffect(() => {
@@ -240,8 +242,8 @@ const promptGoogleLogin = async () => {
     if (!request) {
       throw new Error("Google request not ready");
     }
-
-    await promptAsync();
+console.log("Prompting Google login...",request);
+ await promptAsync();
   } catch (err) {
     console.log("Google prompt error", err);
     throw err;
