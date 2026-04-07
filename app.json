@@ -5,6 +5,7 @@
     "slug": "monkey",
     "version": "1.0.0",
     "orientation": "portrait",
+    "scheme": "com.anonymous.monkey",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
     "splash": {

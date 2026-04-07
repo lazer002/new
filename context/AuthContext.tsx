@@ -25,7 +25,7 @@ type AuthContextType = {
    guestId: string | null;
   login: (email: string, password: string) => Promise<any>;
   register: (name: string, email: string, password: string) => Promise<any>;
-  loginWithGoogle: (googleToken: string) => Promise<any>;
+  loginWithGoogle: (code: string, codeVerifier: string) => Promise<any>;
   promptGoogleLogin: () => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -172,28 +172,6 @@ const [request, response, promptAsync] = Google.useAuthRequest({
 //  useProxy: true,
 });
 
-useEffect(() => {
-  const handleGoogleResponse = async () => {
-    if (response?.type === "success") {
-      try {
-        const token = response.authentication?.accessToken;
-
-        if (!token) throw new Error("No Google token");
-
-        const data = await loginWithGoogle(token);
-
-        // ✅ redirect after login
-        if (data?.user) {
-          router.replace("/");
-        }
-      } catch (err) {
-        console.log("Google login error", err);
-      }
-    }
-  };
-
-  handleGoogleResponse();
-}, [response]);
 
 
   /* ---------- AUTH ACTIONS ---------- */
@@ -218,10 +196,12 @@ useEffect(() => {
     return data;
   };
 
-const loginWithGoogle = async (googleToken: string) => {
+const loginWithGoogle = async (code: string, codeVerifier: string) => {
   try {
-    const { data } = await baseApi.post("/auth/google", {
-      token: googleToken,
+    const { data } = await baseApi.post("api/auth/google/mobile", {
+      code,
+      codeVerifier
+      // ✅ send code instead of token
     });
 
     setUser(data.user);
@@ -236,14 +216,39 @@ const loginWithGoogle = async (googleToken: string) => {
 };
 
 
-
 const promptGoogleLogin = async () => {
   try {
     if (!request) {
       throw new Error("Google request not ready");
     }
-console.log("Prompting Google login...",request);
- await promptAsync();
+
+    console.log("request", request);
+
+    const result = await promptAsync();
+
+    console.log("promptAsync result:", result);
+
+    if (result?.type === "success") {
+      const code = result.params?.code;
+      const codeVerifier = request?.codeVerifier;
+
+      if (!code || !codeVerifier) {
+        console.log("NO CODE OR CODE VERIFIER FOUND");
+        return;
+      }
+
+      console.log("CODE:", code);
+
+      // 🔥 CALL YOUR BACKEND
+      const data = await loginWithGoogle(code, codeVerifier);
+
+      if (data?.user) {
+        console.log("LOGIN SUCCESS");
+        router.replace("/");
+      }
+    } else {
+      console.log("LOGIN CANCELLED OR FAILED:", result?.type);
+    }
   } catch (err) {
     console.log("Google prompt error", err);
     throw err;
