@@ -20,6 +20,7 @@ export default function Profile() {
   const { user, logout,guestId } = useAuth()
 const [activeOrderCount, setActiveOrderCount] = useState(0);
 
+if (!user && !guestId) return;
 useEffect(() => {
   const loadOrders = async () => {
     try {
@@ -52,7 +53,7 @@ useEffect(() => {
   };
 
   loadOrders();
-}, []);
+}, [guestId]);
 
   const go = (path: string) => router.push(path);
 const Badge = ({ count }: { count: number }) => {
@@ -68,12 +69,13 @@ const Badge = ({ count }: { count: number }) => {
 };
   return (
     <Screen>
-    
-      
-      {/* --- HEADER SECTION --- */}
+      <ScrollView
+    showsVerticalScrollIndicator={false}
+    contentContainerStyle={{ paddingBottom: 40 }}
+  >
       <View style={styles.headerBox}>
         <Text style={styles.title}>
-          {user ? `Hey, ${user.firstName || "User"}` : "Welcome"}
+         {user ? `Hey, ${user.name?.split(" ")[0] || "User"}` : "Welcome"}
         </Text>
         <Text style={styles.subTitle}>
           {user
@@ -86,7 +88,7 @@ const Badge = ({ count }: { count: number }) => {
       <Section title="Account">
         {user ? (
           <>
-            <Item icon="person-outline" label="Profile Details" />
+            <Item icon="person-outline" label="Profile Details" onPress={() => go("/profile/details")} />
             <Item
               icon="heart-outline"
               label="Wishlist"
@@ -106,7 +108,7 @@ const Badge = ({ count }: { count: number }) => {
 
       {/* --- ORDER SECTION --- */}
       <Section title="Orders">
-  <View>
+  <View style={{ position: "relative" }}>
   <Item
     icon="cube-outline"
     label="My Orders"
@@ -157,11 +159,12 @@ const Badge = ({ count }: { count: number }) => {
         <FooterButton
           label="Login / Signup"
           icon="log-in-outline"
-          onPress={() => go("/auth")}
+          onPress={() => go("/login")}
         />
       )}
 
-      <View style={{ height: 30 }} />
+      <View style={{ height: 130 }} />
+      </ScrollView>
     </Screen>
   );
 }
@@ -286,8 +289,8 @@ const styles = StyleSheet.create({
   },
   badge: {
   position: "absolute",
-  right: width * 0.09,
-  top: height * 0.0156,
+  right: 16,
+  top: 10,
   backgroundColor: "#22c55e",
   borderRadius: 10,
   minWidth: 18,

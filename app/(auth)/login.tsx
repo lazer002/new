@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -16,7 +16,7 @@ import api from "@/utils/config";
 import { useRouter, useLocalSearchParams } from "expo-router";
 
 export default function Login() {
-  const { promptGoogleLogin } = useAuth();
+  const { promptGoogleLogin, user } = useAuth();
   const router = useRouter();
   const { redirect } = useLocalSearchParams();
 
@@ -63,15 +63,17 @@ export default function Login() {
       setLoading(true);
       await promptGoogleLogin();
 
-      // ✅ redirect after login
-      router.replace((redirect as string) || "/");
     } catch (err) {
       Alert.alert("Google Login Failed");
     } finally {
       setLoading(false);
     }
   };
-
+useEffect(() => {
+  if (user) {
+    router.replace("/");
+  }
+}, [user]);
   /* ───────── UI ───────── */
 
   return (
