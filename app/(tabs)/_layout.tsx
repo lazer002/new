@@ -8,7 +8,7 @@ import {
   Text,
 } from "react-native";
 import { useEffect, useRef, useState } from "react";
-import api from "@/utils/config";
+import {api} from "@/utils/config";
 import Octicons from "@expo/vector-icons/Octicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useWishlist } from "@/context/WishlistContext";
@@ -40,7 +40,7 @@ function CustomTabBar({ state, navigation }: any) {
 const [notifCount, setNotifCount] = useState(0);
   const { wishlist } = useWishlist();
 
-  const { user, logout,guestId } = useAuth()
+  const { user, logout,guestId, loading } = useAuth()
 const [hasProfileAlert, setHasProfileAlert] = useState(false);
   const navWidth = width * 0.85;
   const tabWidth = navWidth / tabCount;
@@ -63,7 +63,7 @@ const Dot = ({ show }: { show: boolean }) => {
   }, [state.index, tabWidth]);
 
   useEffect(() => {
-     if (!guestId) return;
+  if (loading) return
   const loadCounts = async () => {
     try {
       const notifRes = await api.get("/api/notifications/unread-count");
@@ -75,17 +75,14 @@ const Dot = ({ show }: { show: boolean }) => {
   };
 
   loadCounts();
-}, [guestId]);
+}, [loading]);
 
 useEffect(() => {
-   if (!guestId) return;
+  if (loading) return;
+
   const checkProfileAlert = async () => {
     try {
-      const res = await api.get("/api/orders/mine", {
-        headers: {
-          "x-guest-id": guestId || "",
-        },
-      });
+      const res = await api.get("/api/orders/mine");
 
       const orders = res.data.orders || [];
 
@@ -110,8 +107,7 @@ useEffect(() => {
   };
 
   checkProfileAlert();
-}, [guestId]);
-
+}, [loading, user]);
  
   if (isFilterOpen) return null;
   return (

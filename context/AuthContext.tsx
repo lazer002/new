@@ -105,13 +105,21 @@ const router = useRouter();
     const instance = baseApi;
 
     // Request interceptor
-    const reqId = instance.interceptors.request.use((config) => {
-      if (accessToken) {
-        config.headers.Authorization = `Bearer ${accessToken}`;
-      }
-      return config;
-    });
+const reqId = instance.interceptors.request.use((config) => {
+  // ✅ AUTH PRIORITY
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
+  } else if (guestId) {
+    config.headers["x-guest-id"] = guestId;
+  }
 
+  // ✅ HANDLE FORM DATA (VERY IMPORTANT FOR UPLOAD)
+  if (config.data instanceof FormData) {
+    config.headers["Content-Type"] = "multipart/form-data";
+  }
+
+  return config;
+});
     // Response interceptor (refresh)
     const resId = instance.interceptors.response.use(
       (res) => res,
@@ -150,7 +158,7 @@ const router = useRouter();
         instance.interceptors.response.eject(resId);
       },
     });
-  }, [accessToken, refreshToken]);
+  }, [accessToken, refreshToken, guestId]);
 
   /* ---------- LOGOUT ---------- */
 
@@ -253,7 +261,6 @@ const promptGoogleLogin = async () => {
     console.log("Google prompt error:", err);
   }
 };
-
   /* ---------- PROVIDE ---------- */
   return (
     <AuthContext.Provider
