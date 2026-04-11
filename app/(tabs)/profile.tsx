@@ -17,18 +17,15 @@ const { width, height } = Dimensions.get("window");
 
 export default function Profile() {
   const router = useRouter();
-  const { user, logout,guestId } = useAuth()
+  const { user, logout,guestId, loading } = useAuth()
 const [activeOrderCount, setActiveOrderCount] = useState(0);
 
 if (!user && !guestId) return;
+
 useEffect(() => {
   const loadOrders = async () => {
     try {
-      const res = await api.get("/api/orders/mine", {
-        headers: {
-          "x-guest-id": guestId || "",
-        },
-      });
+      const res = await api.get("/api/orders/mine");
 
       const orders = res.data.orders || [];
 
@@ -53,7 +50,7 @@ useEffect(() => {
   };
 
   loadOrders();
-}, [guestId]);
+}, [loading,user]);
 
   const go = (path: string) => router.push(path);
 const Badge = ({ count }: { count: number }) => {

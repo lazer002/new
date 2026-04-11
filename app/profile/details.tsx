@@ -64,21 +64,23 @@ export default function ProfileDetails() {
       let avatarUrl = avatar;
 
       // 🔥 upload to supabase if new image
-      if (avatar && !avatar.startsWith("http")) {
-        setUploading(true);
+if (avatar && !avatar.startsWith("http")) {
+  setUploading(true);
 
-        const formData = new FormData();
-        formData.append("file", {
-          uri: avatar,
-          name: "profile.jpg",
-          type: "image/jpeg",
-        } as any);
+  const formData = new FormData();
 
-        const uploadRes = await api.post("/upload/image", formData);
-        avatarUrl = uploadRes.data.url;
+  formData.append("file", {
+    uri: avatar,
+    name: "profile.jpg",
+    type: "image/jpeg",
+  } as any);
 
-        setUploading(false);
-      }
+  const uploadRes = await api.post("/api/upload/image", formData);
+
+  avatarUrl = uploadRes.data.url;
+
+  setUploading(false);
+}
 
       // 🔥 only changed fields
       const payload: any = {};
@@ -91,7 +93,7 @@ export default function ProfileDetails() {
         return;
       }
 
-      const res = await api.put("/update", payload);
+      const res = await api.put("/api/user/update", payload);
 
       setUser(res.data.user);
 
