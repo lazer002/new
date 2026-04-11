@@ -20,6 +20,7 @@ type User = any; // keep flexible – backend controls shape
 
 type AuthContextType = {
   user: User | null;
+    setUser: (user: User | null) => void ;
   api: typeof baseApi;
   loading: boolean;
    guestId: string | null;
@@ -168,8 +169,14 @@ const router = useRouter();
 
 
 const [request, response, promptAsync] = Google.useAuthRequest({
+  clientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
  androidClientId:process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
-//  useProxy: true,
+  responseType: "code",
+  usePKCE: true,
+  extraParams: {
+    access_type: "offline",
+  },
+    shouldAutoExchangeCode: false
 });
 
 
@@ -218,40 +225,32 @@ const loginWithGoogle = async (code: string, codeVerifier: string) => {
 
 const promptGoogleLogin = async () => {
   try {
-    if (!request) {
+    if (!request || !promptAsync) {
       throw new Error("Google request not ready");
     }
 
-    console.log("request", request);
-
     const result = await promptAsync();
 
-    console.log("promptAsync result:", result);
+    if (result?.type !== "success") return;
 
-    if (result?.type === "success") {
-      const code = result.params?.code;
-      const codeVerifier = request?.codeVerifier;
+    const code = result.params?.code;
+    const codeVerifier = request?.codeVerifier;
 
-      if (!code || !codeVerifier) {
-        console.log("NO CODE OR CODE VERIFIER FOUND");
-        return;
-      }
+    if (!code || !codeVerifier) return;
 
-      console.log("CODE:", code);
+    await loginWithGoogle(code, codeVerifier);
 
-      // 🔥 CALL YOUR BACKEND
-      const data = await loginWithGoogle(code, codeVerifier);
-
-      if (data?.user) {
-        console.log("LOGIN SUCCESS");
-        router.replace("/");
-      }
-    } else {
-      console.log("LOGIN CANCELLED OR FAILED:", result?.type);
+  } catch (err: any) {
+    // 🔥 THIS IS THE FIX
+    if (
+      err?.message?.includes("authorization grant") ||
+      err?.message?.includes("invalid_grant")
+    ) {
+      console.log("Ignoring Expo token exchange error");
+      return;
     }
-  } catch (err) {
-    console.log("Google prompt error", err);
-    throw err;
+
+    console.log("Google prompt error:", err);
   }
 };
 
@@ -261,6 +260,7 @@ const promptGoogleLogin = async () => {
       value={{
         guestId,
         user,
+        setUser,
         api,
         loading,
         login,
