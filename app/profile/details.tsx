@@ -17,6 +17,7 @@ import { useRouter } from "expo-router";
 import Screen from "@/components/Screen";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/utils/config";
+import Toast from "react-native-toast-message";
 
 export default function ProfileDetails() {
   const router = useRouter();
@@ -53,9 +54,14 @@ export default function ProfileDetails() {
 
   // 💾 SAVE PROFILE
   const handleSave = async () => {
+    console.log("Saving profile with", { name, phone, avatar });
     try {
       if (!name.trim()) {
-        Alert.alert("Error", "Name is required");
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "Name is required"
+        });
         return;
       }
 
@@ -75,8 +81,12 @@ if (avatar && !avatar.startsWith("http")) {
     type: "image/jpeg",
   } as any);
 
-  const uploadRes = await api.post("/api/upload/image", formData);
-
+    const uploadRes = await api.post("/api/upload/image", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+console.log("Upload response", uploadRes.data);
   avatarUrl = uploadRes.data.url;
 
   setUploading(false);
@@ -89,7 +99,11 @@ if (avatar && !avatar.startsWith("http")) {
       if (avatarUrl !== user?.avatar) payload.avatar = avatarUrl;
 
       if (Object.keys(payload).length === 0) {
-        Alert.alert("No changes", "Nothing to update");
+        Toast.show({
+          type: "error",
+          text1: "No changes",
+          text2: "Nothing to update"
+        });
         return;
       }
 
@@ -97,11 +111,19 @@ if (avatar && !avatar.startsWith("http")) {
 
       setUser(res.data.user);
 
-      Alert.alert("Success", "Profile updated");
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Profile updated"
+      });
       router.back();
     } catch (err) {
       console.log("Update error", err);
-      Alert.alert("Error", "Something went wrong");
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Something went wrong"
+      });
     } finally {
       setLoading(false);
       setUploading(false);
