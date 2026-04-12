@@ -6,12 +6,14 @@ import {
   StyleSheet,
   ScrollView,
   Dimensions,
+  Linking,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 import Screen from "@/components/Screen";
 import { api } from "@/utils/config";
+import Toast from "react-native-toast-message";
 
 const { width, height } = Dimensions.get("window");
 
@@ -19,8 +21,27 @@ export default function Profile() {
   const router = useRouter();
   const { user, logout,guestId, loading } = useAuth()
 const [activeOrderCount, setActiveOrderCount] = useState(0);
+const openWhatsApp = async () => {
+  console.log("Opening WhatsApp with support number");
 
-if (!user && !guestId) return;
+  const phone = "919315076712";
+
+  const message = `Hi, I need help with my order.`;
+
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+  try {
+    await Linking.openURL(url); // 🔥 directly open
+  } catch (err) {
+    console.log(err);
+
+    Toast.show({
+      type: "error",
+      text1: "Error",
+      text2: "Unable to open WhatsApp",
+    });
+  }
+};
 
 useEffect(() => {
   if (!user) {
@@ -29,41 +50,46 @@ useEffect(() => {
 }, [user]);
 
 useEffect(() => {
-const loadOrders = async () => {
-  try {
-    if (!user && !guestId) {
-      setActiveOrderCount(0);
-      return;
+  const loadOrders = async () => {
+    try {
+      // ✅ Only block when NOTHING exists
+      if (!user && !guestId) {
+        setActiveOrderCount(0);
+        return;
+      }
+
+      const res = await api.get("/api/orders/mine");
+
+      const orders = res.data.orders || [];
+
+      const activeStatuses = [
+        "pending",
+        "confirmed",
+        "dispatched",
+        "shipped",
+        "out for delivery",
+      ];
+
+      const activeCount = orders.filter((o: any) =>
+        activeStatuses.includes(
+          (o.orderStatus || "").toLowerCase()
+        )
+      ).length;
+
+      setActiveOrderCount(activeCount);
+    } catch (err) {
+      console.log("Order count error", err);
     }
-
-    const res = await api.get("/api/orders/mine");
-
-    const orders = res.data.orders || [];
-
-    const activeStatuses = [
-      "pending",
-      "confirmed",
-      "dispatched",
-      "shipped",
-      "out for delivery",
-    ];
-
-    const activeCount = orders.filter((o: any) =>
-      activeStatuses.includes((o.orderStatus || "").toLowerCase())
-    ).length;
-
-    setActiveOrderCount(activeCount);
-  } catch (err) {
-    console.log("Order count error", err);
-  }
-};
+  };
 
   loadOrders();
-}, [loading,user,guestId]);
+}, [user, guestId]); // ✅ important
 
   const go = (path: string) => router.push(path);
 const Badge = ({ count }: { count: number }) => {
   if (!count) return null;
+
+
 
   return (
     <View style={styles.badge}>
@@ -144,11 +170,12 @@ const Badge = ({ count }: { count: number }) => {
 
       {/* --- SUPPORT SECTION --- */}
       <Section title="Support">
-        <Item icon="help-circle-outline" label="Help Center" />
-        <Item icon="chatbubble-ellipses-outline" label="Contact Support" />
+        <Item icon="help-circle-outline" label="Help Center" onPress={() => go("profile/help")} />
+        <Item icon="chatbubble-ellipses-outline" label="Contact Support" onPress={() => openWhatsApp()} />
         <Item
           icon="information-circle-outline"
           label="Terms & Policies"
+          onPress={() => go("profile/terms")}
         />
       </Section>
 
@@ -159,7 +186,10 @@ const Badge = ({ count }: { count: number }) => {
         <FooterButton
           label="Logout"
           icon="log-out-outline"
-          onPress={logout}
+          onPress={async () => {
+            await logout();
+            setActiveOrderCount(0);
+          }}
         />
       ) : (
         <FooterButton

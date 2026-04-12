@@ -148,7 +148,7 @@ console.log("✅ STEP 1 DONE");
 
 console.log("➡️ STEP 2: orders merge start");
 
-await api.post("/api/orders/merge-all", {}, {
+await api.post("/api/orders/merge-orders", {}, {
   headers: {
     "x-guest-id": gid,
     Authorization: `Bearer ${token}`,

@@ -82,6 +82,12 @@ useEffect(() => {
 
   const checkProfileAlert = async () => {
     try {
+
+        if (!user) {
+        setHasProfileAlert(false);
+        return;
+      }
+      
       const res = await api.get("/api/orders/mine");
 
       const orders = res.data.orders || [];

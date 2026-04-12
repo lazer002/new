@@ -99,67 +99,66 @@ const router = useRouter();
       : AsyncStorage.removeItem("ds_refresh");
   }, [refreshToken]);
 
+
+
+  
+
   /* ---------- AXIOS WITH INTERCEPTORS ---------- */
 
-  const api = useMemo(() => {
-    const instance = baseApi;
+const api = useMemo(() => {
+  const instance = baseApi;
 
-    // Request interceptor
-const reqId = instance.interceptors.request.use((config) => {
-  // ✅ AUTH PRIORITY
-  if (accessToken) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
-  } else if (guestId) {
-    config.headers["x-guest-id"] = guestId;
-  }
+  // 🔥 CLEAR OLD INTERCEPTORS (MOST IMPORTANT FIX)
+  instance.interceptors.request.handlers = [];
+  instance.interceptors.response.handlers = [];
 
-  // ✅ HANDLE FORM DATA (VERY IMPORTANT FOR UPLOAD)
-  if (config.data instanceof FormData) {
-    config.headers["Content-Type"] = "multipart/form-data";
-  }
+  // ✅ REQUEST
+  instance.interceptors.request.use((config) => {
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    } else if (guestId) {
+      config.headers["x-guest-id"] = guestId;
+      delete config.headers.Authorization;
+    } else {
+      delete config.headers.Authorization;
+    }
 
-  return config;
-});
-    // Response interceptor (refresh)
-    const resId = instance.interceptors.response.use(
-      (res) => res,
-      async (error) => {
-        const originalReq = error.config;
+    return config;
+  });
 
-        if (
-          error.response?.status === 401 &&
-          refreshToken &&
-          !originalReq._retry
-        ) {
-          try {
-            originalReq._retry = true;
+  // ✅ RESPONSE
+  instance.interceptors.response.use(
+    (res) => res,
+    async (error) => {
+      const originalReq = error.config;
 
-            const { data } = await baseApi.post("/auth/refresh", {
-              refreshToken,
-            });
+      if (
+        error.response?.status === 401 &&
+        refreshToken &&
+        !originalReq._retry
+      ) {
+        try {
+          originalReq._retry = true;
 
-            setAccessToken(data.accessToken);
-            originalReq.headers.Authorization = `Bearer ${data.accessToken}`;
+          const { data } = await baseApi.post("/auth/refresh", {
+            refreshToken,
+          });
 
-            return instance(originalReq);
-          } catch {
-            await handleLogout();
-          }
+          setAccessToken(data.accessToken);
+          originalReq.headers.Authorization = `Bearer ${data.accessToken}`;
+
+          return instance(originalReq);
+        } catch {
+          await handleLogout();
         }
-
-        return Promise.reject(error);
       }
-    );
 
-    // Cleanup interceptors on change
-    return Object.assign(instance, {
-      eject: () => {
-        instance.interceptors.request.eject(reqId);
-        instance.interceptors.response.eject(resId);
-      },
-    });
-  }, [accessToken, refreshToken, guestId]);
+      return Promise.reject(error);
+    }
+  );
 
+  return instance;
+}, [accessToken, refreshToken, guestId]);
   /* ---------- LOGOUT ---------- */
 
 const handleLogout = async () => {
@@ -167,20 +166,20 @@ const handleLogout = async () => {
   setAccessToken(null);
   setRefreshToken(null);
 
+  // 🔥 REMOVE HEADER IMMEDIATELY
+  delete baseApi.defaults.headers.common["Authorization"];
+
   await AsyncStorage.multiRemove([
     "ds_user",
     "ds_access",
     "ds_refresh",
   ]);
 
-  // ✅ RESET guestId (VERY IMPORTANT)
   const newGuestId =
     Math.random().toString(36).substring(2) + Date.now();
 
   await AsyncStorage.setItem("ds_guest", newGuestId);
   setGuestId(newGuestId);
-
-  console.log("🔄 New guest session created:", newGuestId);
 };
 
 
