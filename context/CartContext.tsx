@@ -30,7 +30,7 @@ type CartContextType = {
   ) => Promise<void>;
   remove: (id: string, size?: string, isBundle?: boolean) => Promise<void>;
   refresh: () => Promise<void>;
-  mergeGuestCart: () => Promise<void>;
+  mergeGuestCart: (gid: string) => Promise<void>;
   addBundleToCart: (bundle: any, selectedSizes: Record<string, string>) => Promise<void>;
   clearCart: (opts?: { server?: boolean,skipLocal?: boolean }) => Promise<void>;
 };
@@ -63,7 +63,7 @@ async function ensureGuestId(): Promise<string | null> {
 
 export function CartProvider({ children }: CartProviderProps) {
   const { user } = useAuth();
-
+const [isMerging, setIsMerging] = useState(false);
   const [items, setItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [guestId, setGuestId] = useState<string | null>(null);
@@ -96,53 +96,90 @@ export function CartProvider({ children }: CartProviderProps) {
 
   /* ---------- REFRESH ---------- */
 
-  const refresh = async () => {
-    if (!guestId) return;
+const refresh = async () => {
+  setLoading(true);
+  try {
+    const token = await AsyncStorage.getItem("ds_access");
 
-    setLoading(true);
-    try {
-      const c = client();
-      if (!c) return;
+    let headers: any = {};
 
-      const { data } = await c.get("/");
-      setItems(data.items || []);
-    } catch (err) {
-      console.error(err);
-      Toast.show({type: "error", text1: "Failed to refresh cart"});
-    } finally {
-      setLoading(false);
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    } else if (guestId) {
+      headers["x-guest-id"] = guestId;
+    } else {
+      return;
     }
-  };
 
-  useEffect(() => {
-    if (guestId) refresh();
-  }, [guestId]);
+    const { data } = await api.get("/api/cart", { headers });
+
+    setItems(data.items || []);
+  } catch (err) {
+    console.error(err);
+    Toast.show({ type: "error", text1: "Failed to refresh cart" });
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  refresh();
+}, [guestId, user]);
 
   /* ---------- MERGE GUEST CART ---------- */
 
-  const mergeGuestCart = async () => {
-    if (!user || !guestId) return;
+const mergeGuestCart = async (gid: string) => {
+  console.log("Attempting cart merge for guestId:", gid);
+  if (!user || !gid || isMerging) return;
 
-    try {
-      const token = await AsyncStorage.getItem("ds_access");
-      if (!token) return;
+  setIsMerging(true);
 
-      const c = client(token);
-      if (!c) return;
+  try {
+    const token = await AsyncStorage.getItem("ds_access");
+    if (!token) return;
 
-      await c.post("/merge", { guestId });
-      await refresh();
-      Toast.show({type: "success", text1: "Guest cart merged successfully"});
-    } catch (err) {
-      console.error(err);
-      Toast.show({type: "error", text1: "Failed to merge guest cart"});
-    }
-  };
+    const c = client(token);
 
-  useEffect(() => {
-    if (user && guestId) mergeGuestCart();
-  }, [user, guestId]);
+console.log("➡️ STEP 1: cart merge start");
 
+await c?.post("/merge", { guestId: gid });
+
+console.log("✅ STEP 1 DONE");
+
+console.log("➡️ STEP 2: orders merge start");
+
+await api.post("/api/orders/merge-all", {}, {
+  headers: {
+    "x-guest-id": gid,
+    Authorization: `Bearer ${token}`,
+  },
+});
+
+console.log("✅ STEP 2 DONE");
+
+    // 3. refresh
+    await refresh();
+
+    // 4. cleanup
+    await AsyncStorage.removeItem("ds_guest");
+    setGuestId(null);
+
+    console.log("✅ MERGE DONE");
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setIsMerging(false);
+  }
+};
+
+useEffect(() => {
+  console.log("EFFECT RUN:", { user, guestId });
+
+  if (user && guestId) {
+    mergeGuestCart(guestId); // ✅ FIXED
+  }
+}, [user, guestId]);
   /* ---------- ADD ---------- */
 
   const add = async (productId: string, size: string, quantity = 1) => {

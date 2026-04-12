@@ -23,34 +23,43 @@ const [activeOrderCount, setActiveOrderCount] = useState(0);
 if (!user && !guestId) return;
 
 useEffect(() => {
-  const loadOrders = async () => {
-    try {
-      const res = await api.get("/api/orders/mine");
+  if (!user) {
+    setActiveOrderCount(0); // ✅ reset badge
+  }
+}, [user]);
 
-      const orders = res.data.orders || [];
-
-      const activeStatuses = [
-        "pending",
-        "confirmed",
-        "dispatched",
-        "shipped",
-        "out for delivery",
-      ];
-
-      const activeCount = orders.filter((o: any) =>
-        activeStatuses.includes(
-          (o.orderStatus || "").toLowerCase()
-        )
-      ).length;
-
-      setActiveOrderCount(activeCount);
-    } catch (err) {
-      console.log("Order count error", err);
+useEffect(() => {
+const loadOrders = async () => {
+  try {
+    if (!user && !guestId) {
+      setActiveOrderCount(0);
+      return;
     }
-  };
+
+    const res = await api.get("/api/orders/mine");
+
+    const orders = res.data.orders || [];
+
+    const activeStatuses = [
+      "pending",
+      "confirmed",
+      "dispatched",
+      "shipped",
+      "out for delivery",
+    ];
+
+    const activeCount = orders.filter((o: any) =>
+      activeStatuses.includes((o.orderStatus || "").toLowerCase())
+    ).length;
+
+    setActiveOrderCount(activeCount);
+  } catch (err) {
+    console.log("Order count error", err);
+  }
+};
 
   loadOrders();
-}, [loading,user]);
+}, [loading,user,guestId]);
 
   const go = (path: string) => router.push(path);
 const Badge = ({ count }: { count: number }) => {
@@ -286,8 +295,8 @@ const styles = StyleSheet.create({
   },
   badge: {
   position: "absolute",
-  right: 16,
-  top: 10,
+  right: 36,
+  top: 15,
   backgroundColor: "#22c55e",
   borderRadius: 10,
   minWidth: 18,

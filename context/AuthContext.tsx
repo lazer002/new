@@ -162,18 +162,26 @@ const reqId = instance.interceptors.request.use((config) => {
 
   /* ---------- LOGOUT ---------- */
 
-  const handleLogout = async () => {
-    setUser(null);
-    setAccessToken(null);
-    setRefreshToken(null);
+const handleLogout = async () => {
+  setUser(null);
+  setAccessToken(null);
+  setRefreshToken(null);
 
-    await AsyncStorage.multiRemove([
-      "ds_user",
-      "ds_access",
-      "ds_refresh",
-    ]);
-  };
+  await AsyncStorage.multiRemove([
+    "ds_user",
+    "ds_access",
+    "ds_refresh",
+  ]);
 
+  // ✅ RESET guestId (VERY IMPORTANT)
+  const newGuestId =
+    Math.random().toString(36).substring(2) + Date.now();
+
+  await AsyncStorage.setItem("ds_guest", newGuestId);
+  setGuestId(newGuestId);
+
+  console.log("🔄 New guest session created:", newGuestId);
+};
 
 
 const [request, response, promptAsync] = Google.useAuthRequest({
@@ -196,6 +204,21 @@ const [request, response, promptAsync] = Google.useAuthRequest({
     setUser(data.user);
     setAccessToken(data.accessToken);
     setRefreshToken(data.refreshToken);
+
+      try {
+    const token = data.accessToken;
+
+    await baseApi.post("/api/orders/merge-orders", {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("✅ Orders merged after login");
+  } catch (err) {
+    console.log("❌ Merge failed", err);
+  }
+
     return data;
   };
 
@@ -223,6 +246,21 @@ const loginWithGoogle = async (code: string, codeVerifier: string) => {
     setAccessToken(data.accessToken);
     setRefreshToken(data.refreshToken);
 
+try {
+  const token = data.accessToken;
+
+  console.log("➡️ Calling merge-orders API (Google)");
+
+  const res = await baseApi.post("/api/orders/merge-orders", {}, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  console.log("✅ Merge response:", res.data);
+} catch (err) {
+  console.log("❌ Merge failed:", err);
+}
     return data;
   } catch (err: any) {
     console.log("Google API login error", err);
