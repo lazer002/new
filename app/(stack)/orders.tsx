@@ -23,18 +23,11 @@ export default function OrdersScreen() {
 useFocusEffect(
   useCallback(() => {
     loadOrders();
-  }, [guestId])
+  }, [guestId, user])
 );
 const loadOrders = async () => {
   try {
-    const res = await api.get("/api/orders/mine", {
-      headers: {
-        "x-guest-id": guestId || "",
-      },
-      params: {
-        userId: user?._id || null,
-      },
-    });
+    const res = await api.get("/api/orders/mine");
 
     setOrders(res.data.orders || res.data);
   } catch (e) {
