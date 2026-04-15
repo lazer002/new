@@ -52,7 +52,7 @@ useEffect(() => {
 useEffect(() => {
   const loadOrders = async () => {
     try {
-      // ✅ Only block when NOTHING exists
+
       if (!user && !guestId) {
         setActiveOrderCount(0);
         return;

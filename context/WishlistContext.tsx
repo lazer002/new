@@ -41,38 +41,47 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
 
   /* ---------- HELPER: HEADERS ---------- */
 
-  const getHeaders = async () => {
-    const token = await AsyncStorage.getItem("ds_access");
+const getHeaders = async () => {
+  const token = await AsyncStorage.getItem("ds_access");
 
-    const headers: any = {};
+  const headers: any = {};
 
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    } else if (guestId) {
-      headers["x-guest-id"] = guestId;
-    }
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
 
-    return headers;
-  };
+  if (guestId) {
+    headers["x-guest-id"] = guestId;
+  }
 
+  console.log("Using headers:", headers);
+
+  return headers;
+};
   /* ---------- FETCH ---------- */
 
-  const refreshWishlist = async () => {
-    try {
-      setLoading(true);
+const refreshWishlist = async () => {
+  try {
+    setLoading(true);
 
-      const headers = await getHeaders();
+    const headers = await getHeaders();
 
-      const { data } = await api.get("/api/wishlist", { headers });
-
-      setWishlist(Array.from(new Set(data?.items ?? [])));
-    } catch (e) {
-      console.log("Wishlist refresh error:", e);
-      setWishlist([]);
-    } finally {
-      setLoading(false);
+    // 🔥 STOP if empty
+    if (!headers.Authorization && !headers["x-guest-id"]) {
+      console.log("Skipping wishlist (no identity)");
+      return;
     }
-  };
+
+    const { data } = await api.get("/api/wishlist", { headers });
+
+    setWishlist(Array.from(new Set(data?.items ?? [])));
+  } catch (e) {
+    console.log("Wishlist refresh error:", e);
+    setWishlist([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   /* ---------- ADD ---------- */
 
@@ -169,13 +178,14 @@ export const WishlistProvider = ({ children }: WishlistProviderProps) => {
   }, [user]);
 
   /* ---------- EFFECT ---------- */
+useEffect(() => {
+  if (!guestId && !user) return; // 🔥 must
 
-  useEffect(() => {
-    refreshWishlist();
-  }, [userId, guestId]);
+  refreshWishlist();
+}, [guestId, user]);
 
   /* ---------- PROVIDE ---------- */
-
+console.log("WishlistContext render",  wishlist.length );
   return (
     <WishlistContext.Provider
       value={{

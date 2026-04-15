@@ -142,7 +142,12 @@ const mergeGuestCart = async (gid: string) => {
 
 console.log("➡️ STEP 1: cart merge start");
 
-await c?.post("/merge", { guestId: gid });
+await api.post("/api/cart/merge", { guestId: gid }, {
+  headers: {
+    Authorization: `Bearer ${token}`, // 🔥 MUST
+    "x-guest-id": gid,                // 🔥 use gid, not state
+  },
+})
 
 console.log("✅ STEP 1 DONE");
 
@@ -173,13 +178,16 @@ console.log("✅ STEP 2 DONE");
   }
 };
 
-useEffect(() => {
-  console.log("EFFECT RUN:", { user, guestId });
+  useEffect(() => {
+    if (!user && !guestId) return;
+    console.log("EFFECT RUN:", { user, guestId });
 
-  if (user && guestId) {
-    mergeGuestCart(guestId); // ✅ FIXED
-  }
-}, [user, guestId]);
+    if (!user || !guestId) return;
+
+    console.log("Merge effect triggered");
+    mergeGuestCart(guestId);
+
+  }, [user, guestId]);
   /* ---------- ADD ---------- */
 
   const add = async (productId: string, size: string, quantity = 1) => {

@@ -12,6 +12,7 @@ import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import { Redirect, useRouter } from "expo-router";
   import * as AuthSession from "expo-auth-session";
+import Toast from "react-native-toast-message";
 
 WebBrowser.maybeCompleteAuthSession();
 /* ================= TYPES ================= */
@@ -104,30 +105,21 @@ const router = useRouter();
   
 
   /* ---------- AXIOS WITH INTERCEPTORS ---------- */
-
-const api = useMemo(() => {
-  const instance = baseApi;
-
-  // 🔥 CLEAR OLD INTERCEPTORS (MOST IMPORTANT FIX)
-  instance.interceptors.request.handlers = [];
-  instance.interceptors.response.handlers = [];
-
-  // ✅ REQUEST
-  instance.interceptors.request.use((config) => {
+const api = baseApi; 
+useEffect(() => {
+  const reqId = baseApi.interceptors.request.use((config) => {
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
-    } else if (guestId) {
+    }
+
+    if (guestId) {
       config.headers["x-guest-id"] = guestId;
-      delete config.headers.Authorization;
-    } else {
-      delete config.headers.Authorization;
     }
 
     return config;
   });
 
-  // ✅ RESPONSE
-  instance.interceptors.response.use(
+  const resId = baseApi.interceptors.response.use(
     (res) => res,
     async (error) => {
       const originalReq = error.config;
@@ -145,9 +137,10 @@ const api = useMemo(() => {
           });
 
           setAccessToken(data.accessToken);
+
           originalReq.headers.Authorization = `Bearer ${data.accessToken}`;
 
-          return instance(originalReq);
+          return baseApi(originalReq);
         } catch {
           await handleLogout();
         }
@@ -157,7 +150,11 @@ const api = useMemo(() => {
     }
   );
 
-  return instance;
+  return () => {
+    baseApi.interceptors.request.eject(reqId);
+    baseApi.interceptors.response.eject(resId);
+  };
+
 }, [accessToken, refreshToken, guestId]);
   /* ---------- LOGOUT ---------- */
 
@@ -180,6 +177,11 @@ const handleLogout = async () => {
 
   await AsyncStorage.setItem("ds_guest", newGuestId);
   setGuestId(newGuestId);
+
+  Toast.show({
+    type: "success",
+    text1: "Logged out",
+  });
 };
 
 
@@ -200,9 +202,9 @@ const [request, response, promptAsync] = Google.useAuthRequest({
 
   const login = async (email: string, password: string) => {
     const { data } = await baseApi.post("/auth/login", { email, password });
-    setUser(data.user);
     setAccessToken(data.accessToken);
     setRefreshToken(data.refreshToken);
+    setUser(data.user);
 
       try {
     const token = data.accessToken;
@@ -241,9 +243,9 @@ const loginWithGoogle = async (code: string, codeVerifier: string) => {
       // ✅ send code instead of token
     });
 
-    setUser(data.user);
     setAccessToken(data.accessToken);
     setRefreshToken(data.refreshToken);
+    setUser(data.user);
 
 try {
   const token = data.accessToken;
@@ -253,8 +255,17 @@ try {
   const res = await baseApi.post("/api/orders/merge-orders", {}, {
     headers: {
       Authorization: `Bearer ${token}`,
+      
     },
   });
+
+if (!guestId) return;
+await baseApi.post("/api/wishlist/sync", {}, {
+  headers: {
+    Authorization: `Bearer ${data.accessToken}`,
+    "x-guest-id": guestId, // 🔥 USE STATE
+  },
+});
 
   console.log("✅ Merge response:", res.data);
 } catch (err) {
