@@ -78,16 +78,14 @@ const Dot = ({ show }: { show: boolean }) => {
 }, [loading]);
 
 useEffect(() => {
-  if (loading) return;
+  // 🔥 STOP only if NO identity at all
+  if (!user && !guestId) {
+    setHasProfileAlert(false);
+    return;
+  }
 
   const checkProfileAlert = async () => {
     try {
-
-        if (!user) {
-        setHasProfileAlert(false);
-        return;
-      }
-      
       const res = await api.get("/api/orders/mine");
 
       const orders = res.data.orders || [];
@@ -109,11 +107,12 @@ useEffect(() => {
       setHasProfileAlert(hasActive);
     } catch (err) {
       console.log("Profile dot error", err);
+      setHasProfileAlert(false);
     }
   };
 
   checkProfileAlert();
-}, [loading, user]);
+}, [user, guestId]); // 🔥 include guestId
  
   if (isFilterOpen) return null;
   return (
