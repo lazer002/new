@@ -1,47 +1,49 @@
+import { useAuth } from "@/context/AuthContext";
+import api from "@/utils/config";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
+  View,
 } from "react-native";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useAuth } from "@/context/AuthContext";
-import api from "@/utils/config";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { Image } from "react-native";
+const { height } = Dimensions.get("window");
 
 export default function Login() {
   const { promptGoogleLogin, user } = useAuth();
   const router = useRouter();
   const { redirect } = useLocalSearchParams();
 
+  const isSmall = height < 700;
+
   const [email, setEmail] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
+  const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  /* ───────── VALIDATION ───────── */
+  /* ---------- VALIDATION ---------- */
   const isValidEmail = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  /* ───────── HANDLERS ───────── */
+  /* ---------- HANDLERS ---------- */
 
   const handleContinue = async () => {
-    if (!email) {
-      return Alert.alert("Required", "Please enter your email");
-    }
-
-    if (!isValidEmail(email)) {
-      return Alert.alert("Invalid Email", "Enter a valid email address");
-    }
+    if (!email) return Alert.alert("Required", "Enter email");
+    if (!isValidEmail(email))
+      return Alert.alert("Invalid", "Enter valid email");
 
     try {
       setLoading(true);
-
       await api.post("/api/auth/otp/send", { email });
 
       router.push({
@@ -49,10 +51,7 @@ export default function Login() {
         params: { email, redirect },
       });
     } catch (err: any) {
-      Alert.alert(
-        "Error",
-        err?.response?.data?.error || "Failed to send OTP"
-      );
+      Alert.alert("Error", err?.response?.data?.error || "Failed");
     } finally {
       setLoading(false);
     }
@@ -62,170 +61,315 @@ export default function Login() {
     try {
       setLoading(true);
       await promptGoogleLogin();
-
-    } catch (err) {
+    } catch {
       Alert.alert("Google Login Failed");
     } finally {
       setLoading(false);
     }
   };
-useEffect(() => {
-  if (user) {
-    router.replace("/");
-  }
-}, [user]);
-  /* ───────── UI ───────── */
+
+  useEffect(() => {
+    if (user) router.replace("/");
+  }, [user]);
+
+  /* ---------- UI ---------- */
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      {/* HEADER */}
-      <View style={styles.header}>
-        <Text style={styles.heading}>Welcome Back</Text>
-        <Text style={styles.subHeading}>
-          Login to access your orders, wishlist & more
-        </Text>
+      <View style={styles.container}>
+        
+        {/* 🔵 HEADER */}
+        <LinearGradient
+          colors={["#3f5efb", "#6f86ff"]}
+          style={styles.top}
+        >
+          <View style={styles.topBar}>
+            <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name="chevron-back" size={22} color="#fff" />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.switchBtn}>
+              <Text style={styles.switchText}>Get Started</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.logo}>YourApp</Text>
+        </LinearGradient>
+
+        {/* ⚪ SHEET */}
+        <View
+          style={[
+            styles.sheet,
+            {
+              top: isSmall ? height * 0.28 : height * 0.32,
+              padding: isSmall ? 18 : 24,
+            },
+          ]}
+        >
+          <Text style={styles.smallTop}>
+            Don’t have an account?
+            <Text style={styles.link}> Get Started</Text>
+          </Text>
+
+          <Text style={styles.heading}>Welcome Back</Text>
+          <Text style={styles.sub}>Enter your details below</Text>
+
+          {/* EMAIL */}
+          <View style={styles.inputBox}>
+            <TextInput
+              value={email}
+              onChangeText={setEmail}
+              placeholder="Email Address"
+              style={styles.input}
+              placeholderTextColor="#aaa"
+            />
+          </View>
+
+          {/* PASSWORD */}
+          <View style={styles.inputBox}>
+            <TextInput
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Password"
+              secureTextEntry={!showPass}
+              style={styles.input}
+              placeholderTextColor="#aaa"
+            />
+            <TouchableOpacity onPress={() => setShowPass(!showPass)}>
+              <Ionicons
+                name={showPass ? "eye-off-outline" : "eye-outline"}
+                size={18}
+                color="#999"
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* FORGOT */}
+     
+
+          {/* BUTTON */}
+          <LinearGradient
+            colors={["#3f5efb", "#c471ed"]}
+            style={styles.btn}
+          >
+            <TouchableOpacity
+              style={styles.btnInner}
+              onPress={handleContinue}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.btnText}>Sign in</Text>
+              )}
+            </TouchableOpacity>
+          </LinearGradient>
+     <TouchableOpacity>
+            <Text style={styles.forgot}>Forgot your password?</Text>
+          </TouchableOpacity>
+          {/* DIVIDER */}
+          <View style={styles.dividerRow}>
+            <View style={styles.line} />
+            <Text style={styles.or}>Or sign in with</Text>
+            <View style={styles.line} />
+          </View>
+
+          {/* SOCIAL */}
+   <View style={styles.socialRow}>
+  {/* GOOGLE */}
+  <TouchableOpacity style={styles.socialBtn} onPress={handleGoogle}>
+    <Image
+    source={require("@/assets/public/google.png")}
+      style={styles.socialIcon}
+    />
+    <Text style={styles.socialDark}>Google</Text>
+  </TouchableOpacity>
+
+  {/* FACEBOOK */}
+  <TouchableOpacity style={styles.socialBtn}>
+    <Image
+      source={require("@/assets/public/fb.png")}
+      style={styles.socialIcon}
+    />
+    <Text style={styles.socialDark}>Facebook</Text>
+  </TouchableOpacity>
+</View>
+        </View>
       </View>
-
-      {/* INPUT */}
-      <View
-        style={[
-          styles.inputWrapper,
-          { borderColor: isFocused ? "#000" : "#ddd" },
-        ]}
-      >
-        <Ionicons name="mail-outline" size={20} color="#666" />
-        <TextInput
-          value={email}
-          onChangeText={setEmail}
-          placeholder="Enter your email"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          style={styles.input}
-          placeholderTextColor="#999"
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-        />
-      </View>
-
-      {/* CONTINUE */}
-      <TouchableOpacity
-        style={[
-          styles.primaryBtn,
-          !email && { opacity: 0.6 },
-        ]}
-        onPress={handleContinue}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.primaryText}>Continue</Text>
-        )}
-      </TouchableOpacity>
-
-      {/* DIVIDER */}
-      <Text style={styles.orText}>OR</Text>
-
-      {/* GOOGLE */}
-      <TouchableOpacity
-        style={styles.googleBtn}
-        onPress={handleGoogle}
-        disabled={loading}
-      >
-        <MaterialCommunityIcons name="google" size={20} color="#fff" />
-        <Text style={styles.googleText}>Continue with Google</Text>
-      </TouchableOpacity>
-
-      {/* FOOTER */}
-      <Text style={styles.footer}>
-        By continuing, you agree to our Terms & Privacy Policy
-      </Text>
     </KeyboardAvoidingView>
   );
 }
 
+/* ================= STYLES ================= */
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    paddingHorizontal: 24,
+    backgroundColor: "#eef1f7",
+  },
+socialIcon: {
+  width: 20,
+  height: 20,
+  resizeMode: "contain",
+},
+
+socialDark: {
+  fontWeight: "600",
+  color: "#333",
+},
+  top: {
+    height: 300,
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
     justifyContent: "center",
+    alignItems: "center",
   },
 
-  header: {
-    marginBottom: 40,
+  topBar: {
+    position: "absolute",
+    top: Platform.OS === "ios" ? 60 : 40,
+    left: 20,
+    right: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+
+  switchBtn: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+
+  switchText: {
+    color: "#fff",
+    fontSize: 12,
+  },
+
+  logo: {
+    color: "#fff",
+    fontSize: 28,
+    fontWeight: "700",
+  },
+
+  sheet: {
+    position: "absolute",
+    left: 1,
+    right: 1,
+    bottom: 0,
+    backgroundColor: "#fff",
+    borderRadius: 26,
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+
+  smallTop: {
+    textAlign: "right",
+    fontSize: 12,
+    color: "#aaa",
+    marginBottom: 10,
+  },
+
+  link: {
+    color: "#5a6cff",
+    fontWeight: "600",
   },
 
   heading: {
-    fontSize: 30,
+    fontSize: 22,
     fontWeight: "700",
-    color: "#000",
+    color: "#111",
   },
 
-  subHeading: {
-    fontSize: 15,
-    color: "#666",
-    marginTop: 6,
+  sub: {
+    fontSize: 13,
+    color: "#888",
+    marginBottom: 20,
   },
 
-  inputWrapper: {
+  inputBox: {
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1.5,
+    backgroundColor: "#f7f8fc",
     borderRadius: 12,
     paddingHorizontal: 14,
     height: 52,
-    marginBottom: 20,
+    marginBottom: 14,
+    justifyContent: "space-between",
+    borderWidth: 1,
+    borderColor: "#eee",
   },
 
   input: {
     flex: 1,
-    marginLeft: 10,
-    fontSize: 16,
+    fontSize: 15,
   },
 
-  primaryBtn: {
-    backgroundColor: "#000",
-    paddingVertical: 14,
+  forgot: {
+    textAlign: "center",
+    color: "#888",
+    marginVertical: 20,
+    fontSize: 12,
+  },
+
+  btn: {
     borderRadius: 12,
+    marginTop: 6,
+  },
+
+  btnInner: {
+    height: 50,
+    justifyContent: "center",
     alignItems: "center",
   },
 
-  primaryText: {
+  btnText: {
     color: "#fff",
     fontWeight: "600",
-    fontSize: 16,
+    fontSize: 15,
   },
 
-  orText: {
-    textAlign: "center",
+  dividerRow: {
+    flexDirection: "row",
+    alignItems: "center",
     marginVertical: 16,
-    color: "#999",
   },
 
-  googleBtn: {
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#eee",
+  },
+
+  or: {
+    marginVertical: 10,
+    marginHorizontal: 10,
+    color: "#aaa",
+    fontSize: 12,
+  },
+
+  socialRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+
+  socialBtn: {
+    width: "48%",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#444",
-    paddingVertical: 14,
-    borderRadius: 12,
-    gap: 10,
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#eee",
+    gap: 6,
   },
 
-  googleText: {
-    color: "#fff",
+  socialText: {
     fontWeight: "600",
-    fontSize: 16,
-  },
-
-  footer: {
-    marginTop: 30,
-    fontSize: 12,
-    color: "#999",
-    textAlign: "center",
   },
 });

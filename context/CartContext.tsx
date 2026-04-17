@@ -8,14 +8,14 @@ import React, {
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Crypto from "expo-crypto";
-import  Toast  from "react-native-toast-message";
+import Toast from "react-native-toast-message";
 
 import { useAuth } from "./AuthContext";
 import api from "../utils/config";
 
 /* ================= TYPES ================= */
 
-type CartItem = any; // keep flexible (your backend controls shape)
+type CartItem = any;
 
 type CartContextType = {
   items: CartItem[];
@@ -30,9 +30,11 @@ type CartContextType = {
   ) => Promise<void>;
   remove: (id: string, size?: string, isBundle?: boolean) => Promise<void>;
   refresh: () => Promise<void>;
-  mergeGuestCart: (gid: string) => Promise<void>;
-  addBundleToCart: (bundle: any, selectedSizes: Record<string, string>) => Promise<void>;
-  clearCart: (opts?: { server?: boolean,skipLocal?: boolean }) => Promise<void>;
+  addBundleToCart: (
+    bundle: any,
+    selectedSizes: Record<string, string>
+  ) => Promise<void>;
+  clearCart: (opts?: { server?: boolean; skipLocal?: boolean }) => Promise<void>;
 };
 
 type CartProviderProps = {
@@ -63,12 +65,12 @@ async function ensureGuestId(): Promise<string | null> {
 
 export function CartProvider({ children }: CartProviderProps) {
   const { user } = useAuth();
-const [isMerging, setIsMerging] = useState(false);
+
   const [items, setItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [guestId, setGuestId] = useState<string | null>(null);
 
-  /* ---------- INIT GUEST ID ---------- */
+  /* ---------- INIT GUEST ---------- */
 
   useEffect(() => {
     (async () => {
@@ -77,140 +79,72 @@ const [isMerging, setIsMerging] = useState(false);
     })();
   }, []);
 
-  /* ---------- API CLIENT ---------- */
-
-  const client = (token?: string) => {
-    if (!guestId) return null;
-
-    const headers = {
-      "x-guest-id": guestId,
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    };
-
-    return {
-      get: (url: string) => api.get(`/api/cart${url}`, { headers }),
-      post: (url: string, data?: any) =>
-        api.post(`/api/cart${url}`, data, { headers }),
-    };
-  };
-
   /* ---------- REFRESH ---------- */
 
-const refresh = async () => {
-  setLoading(true);
-  try {
-    const token = await AsyncStorage.getItem("ds_access");
+  const refresh = async () => {
+    setLoading(true);
+    try {
+      const token = await AsyncStorage.getItem("ds_access");
 
-    let headers: any = {};
+      let headers: any = {};
 
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    } else if (guestId) {
-      headers["x-guest-id"] = guestId;
-    } else {
-      return;
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      if (guestId) {
+        headers["x-guest-id"] = guestId;
+      }
+
+      const { data } = await api.get("/api/cart", { headers });
+
+      setItems(data.items || []);
+    } catch (err) {
+      console.error(err);
+      Toast.show({ type: "error", text1: "Failed to refresh cart" });
+    } finally {
+      setLoading(false);
     }
-
-    const { data } = await api.get("/api/cart", { headers });
-
-    setItems(data.items || []);
-  } catch (err) {
-    console.error(err);
-    Toast.show({ type: "error", text1: "Failed to refresh cart" });
-  } finally {
-    setLoading(false);
-  }
-};
-
-useEffect(() => {
-  refresh();
-}, [guestId, user]);
-
-  /* ---------- MERGE GUEST CART ---------- */
-
-const mergeGuestCart = async (gid: string) => {
-  console.log("Attempting cart merge for guestId:", gid);
-  if (!user || !gid || isMerging) return;
-
-  setIsMerging(true);
-
-  try {
-    const token = await AsyncStorage.getItem("ds_access");
-    if (!token) return;
-
-    const c = client(token);
-
-console.log("➡️ STEP 1: cart merge start");
-
-await api.post("/api/cart/merge", { guestId: gid }, {
-  headers: {
-    Authorization: `Bearer ${token}`, // 🔥 MUST
-    "x-guest-id": gid,                // 🔥 use gid, not state
-  },
-})
-
-console.log("✅ STEP 1 DONE");
-
-console.log("➡️ STEP 2: orders merge start");
-
-await api.post("/api/orders/merge-orders", {}, {
-  headers: {
-    "x-guest-id": gid,
-    Authorization: `Bearer ${token}`,
-  },
-});
-
-console.log("✅ STEP 2 DONE");
-
-    // 3. refresh
-    await refresh();
-
-    // 4. cleanup
-    await AsyncStorage.removeItem("ds_guest");
-    setGuestId(null);
-
-    console.log("✅ MERGE DONE");
-
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setIsMerging(false);
-  }
-};
+  };
 
   useEffect(() => {
-    if (!user && !guestId) return;
-    console.log("EFFECT RUN:", { user, guestId });
+    if (guestId) {
+      refresh();
+    }
+  }, [guestId, user]);
 
-    if (!user || !guestId) return;
-
-    console.log("Merge effect triggered");
-    mergeGuestCart(guestId);
-
-  }, [user, guestId]);
   /* ---------- ADD ---------- */
 
   const add = async (productId: string, size: string, quantity = 1) => {
     if (!guestId) return;
 
     if (!size) {
-      Toast.show({type: "error", text1: "Please select a size"});
+      Toast.show({ type: "error", text1: "Please select a size" });
       return;
     }
 
     try {
-      const c = client();
-      if (!c) return;
+      await api.post(
+        "/api/cart/add",
+        { productId, size, quantity },
+        {
+          headers: {
+            "x-guest-id": guestId,
+          },
+        }
+      );
 
-      await c.post("/add", { productId, size, quantity });
       await refresh();
-      Toast.show({type: "success", text1: "Added to cart"});
+
+      Toast.show({ type: "success", text1: "Added to cart" });
     } catch (err: any) {
       console.error(err);
-      Toast.show({type: "error", text1: 
-        err?.response?.data?.code === 11000
-          ? "Already in cart"
-          : "Failed to add item"
+      Toast.show({
+        type: "error",
+        text1:
+          err?.response?.data?.code === 11000
+            ? "Already in cart"
+            : "Failed to add item",
       });
     }
   };
@@ -230,21 +164,27 @@ console.log("✅ STEP 2 DONE");
     }
 
     try {
-      const c = client();
-      if (!c) return;
-
-      await c.post("/update", {
-        quantity,
-        size: isBundle ? undefined : size,
-        productId: isBundle ? undefined : id,
-        bundleId: isBundle ? id : undefined,
-      });
+      await api.post(
+        "/api/cart/update",
+        {
+          quantity,
+          size: isBundle ? undefined : size,
+          productId: isBundle ? undefined : id,
+          bundleId: isBundle ? id : undefined,
+        },
+        {
+          headers: {
+            "x-guest-id": guestId,
+          },
+        }
+      );
 
       await refresh();
-      Toast.show({type: "success", text1: "Cart updated"});
+
+      Toast.show({ type: "success", text1: "Cart updated" });
     } catch (err) {
       console.error(err);
-      Toast.show({type: "error", text1: "Failed to update cart"});
+      Toast.show({ type: "error", text1: "Failed to update cart" });
       await refresh();
     }
   };
@@ -259,70 +199,96 @@ console.log("✅ STEP 2 DONE");
     if (!guestId) return;
 
     try {
-      const c = client();
-      if (!c) return;
+      await api.post(
+        "/api/cart/remove",
+        isBundle ? { bundleId: id } : { productId: id, size },
+        {
+          headers: {
+            "x-guest-id": guestId,
+          },
+        }
+      );
 
-      await c.post("/remove", isBundle ? { bundleId: id } : { productId: id, size });
       await refresh();
     } catch (err) {
       console.error(err);
-      Toast.show({type: "error", text1: "Failed to remove item"});
+      Toast.show({ type: "error", text1: "Failed to remove item" });
       await refresh();
     }
   };
 
   /* ---------- CLEAR ---------- */
 
-const clearCart = async (opts?: { server?: boolean, skipLocal?: boolean }) => {
-  if (!guestId) return;
+  const clearCart = async (opts?: {
+    server?: boolean;
+    skipLocal?: boolean;
+  }) => {
+    if (!guestId) return;
 
-  const shouldClearServer = opts?.server ?? true;
+    const shouldClearServer = opts?.server ?? true;
 
-  setLoading(true);
-  try {
-    if (!opts?.skipLocal) {
-      setItems([]);
-}
+    setLoading(true);
 
-    if (shouldClearServer) {
-      const c = client();
-      if (c) await c.post("/clear");
+    try {
+      if (!opts?.skipLocal) {
+        setItems([]);
+      }
+
+      if (shouldClearServer) {
+        await api.post(
+          "/api/cart/clear",
+          {},
+          {
+            headers: {
+              "x-guest-id": guestId,
+            },
+          }
+        );
+      }
+
+      Toast.show({ type: "success", text1: "Cart cleared" });
+    } catch (err) {
+      console.error(err);
+      Toast.show({ type: "error", text1: "Failed to clear cart" });
+      await refresh();
+    } finally {
+      setLoading(false);
     }
-
-    Toast.show({type: "success", text1: "Cart cleared"});
-  } catch (err) {
-    console.error("Failed to clear cart:", err);
-    Toast.show({type: "error", text1: "Failed to clear cart"});
-    await refresh();
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   /* ---------- BUNDLE ---------- */
 
-  const addBundleToCart = async (bundle: any, selectedSizes: Record<string, string>) => {
+  const addBundleToCart = async (
+    bundle: any,
+    selectedSizes: Record<string, string>
+  ) => {
     if (!guestId) return;
 
     try {
-      const c = client();
-      if (!c) return;
-
-      await c.post("/addbundle", {
-        bundleId: bundle._id,
-        mainImage: bundle.mainImages?.[0] || "",
-        bundleProducts: bundle.products.map((p: any) => ({
-          productId: p._id,
-          size: selectedSizes[p._id],
-          quantity: 1,
-        })),
-      });
+      await api.post(
+        "/api/cart/addbundle",
+        {
+          bundleId: bundle._id,
+          mainImage: bundle.mainImages?.[0] || "",
+          bundleProducts: bundle.products.map((p: any) => ({
+            productId: p._id,
+            size: selectedSizes[p._id],
+            quantity: 1,
+          })),
+        },
+        {
+          headers: {
+            "x-guest-id": guestId,
+          },
+        }
+      );
 
       await refresh();
-      Toast.show({type: "success", text1: "Bundle added to cart"});
+
+      Toast.show({ type: "success", text1: "Bundle added" });
     } catch (err) {
       console.error(err);
-      Toast.show({type: "error", text1: "Failed to add bundle"});
+      Toast.show({ type: "error", text1: "Failed to add bundle" });
       await refresh();
     }
   };
@@ -333,7 +299,7 @@ const clearCart = async (opts?: { server?: boolean, skipLocal?: boolean }) => {
     return items.reduce((sum, it) => sum + (it.quantity || 1), 0);
   }, [items]);
 
-  /* ---------- PROVIDE ---------- */
+  /* ---------- PROVIDER ---------- */
 
   return (
     <CartContext.Provider
@@ -345,7 +311,6 @@ const clearCart = async (opts?: { server?: boolean, skipLocal?: boolean }) => {
         update,
         remove,
         refresh,
-        mergeGuestCart,
         addBundleToCart,
         clearCart,
       }}

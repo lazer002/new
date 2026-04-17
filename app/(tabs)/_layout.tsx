@@ -7,7 +7,7 @@ import {
   useWindowDimensions,
   Text,
 } from "react-native";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState,useCallback } from "react";
 import {api} from "@/utils/config";
 import Octicons from "@expo/vector-icons/Octicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -15,8 +15,9 @@ import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useFilter } from "@/context/FilterContext";
-
+import { useFocusEffect } from "@react-navigation/native";
 /* ---------------- CONSTANTS ---------------- */
+import { useNotification } from "@/context/NotificationContext";
 
 const CIRCLE_SIZE = 56;
 const Badge = ({ count }: { count: number }) => {
@@ -37,7 +38,8 @@ function CustomTabBar({ state, navigation }: any) {
   const { isFilterOpen } = useFilter();
 
   const tabCount = state.routes.length;
-const [notifCount, setNotifCount] = useState(0);
+
+const { notifCount } = useNotification();
   const { wishlist } = useWishlist();
 
   const { user, logout,guestId, loading } = useAuth()
@@ -62,20 +64,9 @@ const Dot = ({ show }: { show: boolean }) => {
     }).start();
   }, [state.index, tabWidth]);
 
-  useEffect(() => {
-  if (loading) return
-  const loadCounts = async () => {
-    try {
-      const notifRes = await api.get("/api/notifications/unread-count");
-      setNotifCount(notifRes.data.count);
 
-    } catch (err) {
-      console.log("COUNT ERROR", err);
-    }
-  };
 
-  loadCounts();
-}, [loading]);
+
 
 useEffect(() => {
   // 🔥 STOP only if NO identity at all
