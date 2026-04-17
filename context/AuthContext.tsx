@@ -2,7 +2,6 @@ import React, {
   createContext,
   useContext,
   useEffect,
-  useMemo,
   useState,
   ReactNode,
 } from "react";
@@ -10,77 +9,85 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { api as baseApi } from "../utils/config";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
-import { Redirect, useRouter } from "expo-router";
-  import * as AuthSession from "expo-auth-session";
+import { useRouter } from "expo-router";
 import Toast from "react-native-toast-message";
-
+import * as AuthSession from "expo-auth-session"
 WebBrowser.maybeCompleteAuthSession();
+
 /* ================= TYPES ================= */
 
-type User = any; // keep flexible – backend controls shape
+type User = any;
 
 type AuthContextType = {
   user: User | null;
-    setUser: (user: User | null) => void ;
+  setUser: (user: User | null) => void;
   api: typeof baseApi;
   loading: boolean;
-   guestId: string | null;
+  guestId: string | null;
   login: (email: string, password: string) => Promise<any>;
   register: (name: string, email: string, password: string) => Promise<any>;
   loginWithGoogle: (code: string, codeVerifier: string) => Promise<any>;
   promptGoogleLogin: () => Promise<void>;
+  promptFacebookLogin: () => Promise<void>;
   logout: () => Promise<void>;
 };
-
-type AuthProviderProps = {
-  children: ReactNode;
-};
-
-/* ================= CONTEXT ================= */
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /* ================= PROVIDER ================= */
 
-export function AuthProvider({ children }: AuthProviderProps) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [guestId, setGuestId] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-const router = useRouter();
+  const [isMerged, setIsMerged] = useState(false);
 
-  /* ---------- LOAD STORED AUTH ---------- */
+  const router = useRouter();
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const rawUser = await AsyncStorage.getItem("ds_user");
-        const at = await AsyncStorage.getItem("ds_access");
-        const rt = await AsyncStorage.getItem("ds_refresh");
-        const gid = await AsyncStorage.getItem("ds_guest");
+  /* ---------- INIT ---------- */
 
-        
-        if (gid) {
-          setGuestId(gid);
-        } else {
-          const newGuestId = Math.random().toString(36).substring(2) + Date.now();
-          await AsyncStorage.setItem("ds_guest", newGuestId);
-          setGuestId(newGuestId);
-        }
+/* ---------- LOAD STORED AUTH ---------- */
 
-        if (rawUser) setUser(JSON.parse(rawUser));
-        if (at) setAccessToken(at);
-        if (rt) setRefreshToken(rt);
-      } catch (err) {
-        console.error("Failed to load auth state:", err);
-      } finally {
-        setLoading(false);
+useEffect(() => {
+  (async () => {
+    try {
+      const rawUser = await AsyncStorage.getItem("ds_user");
+      const at = await AsyncStorage.getItem("ds_access");
+      const rt = await AsyncStorage.getItem("ds_refresh");
+      const gid = await AsyncStorage.getItem("ds_guest");
+
+      // ✅ Guest setup (keep as is)
+      if (gid) {
+        setGuestId(gid);
+      } else {
+        const newGuestId =
+          Math.random().toString(36).substring(2) + Date.now();
+        await AsyncStorage.setItem("ds_guest", newGuestId);
+        setGuestId(newGuestId);
       }
-    })();
-  }, []);
 
-  /* ---------- PERSIST STORAGE ---------- */
+      // 🔥 FIX STARTS HERE
+      if (at && rawUser) {
+        setAccessToken(at);
+        setRefreshToken(rt);
+        setUser(JSON.parse(rawUser));
+      } else {
+        setUser(null);          // 🔥 CRITICAL
+        setAccessToken(null);   // 🔥 CRITICAL
+        setRefreshToken(null);  // 🔥 CRITICAL
+      }
+
+    } catch (err) {
+      console.error("Failed to load auth state:", err);
+    } finally {
+      setLoading(false);
+    }
+  })();
+}, []);
+
+  /* ---------- PERSIST ---------- */
 
   useEffect(() => {
     user
@@ -100,125 +107,130 @@ const router = useRouter();
       : AsyncStorage.removeItem("ds_refresh");
   }, [refreshToken]);
 
+  /* ---------- AXIOS ---------- */
 
+  const api = baseApi;
 
-  
-
-  /* ---------- AXIOS WITH INTERCEPTORS ---------- */
-const api = baseApi; 
-useEffect(() => {
-  const reqId = baseApi.interceptors.request.use((config) => {
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
-
-    if (guestId) {
-      config.headers["x-guest-id"] = guestId;
-    }
-
-    return config;
-  });
-
-  const resId = baseApi.interceptors.response.use(
-    (res) => res,
-    async (error) => {
-      const originalReq = error.config;
-
-      if (
-        error.response?.status === 401 &&
-        refreshToken &&
-        !originalReq._retry
-      ) {
-        try {
-          originalReq._retry = true;
-
-          const { data } = await baseApi.post("/auth/refresh", {
-            refreshToken,
-          });
-
-          setAccessToken(data.accessToken);
-
-          originalReq.headers.Authorization = `Bearer ${data.accessToken}`;
-
-          return baseApi(originalReq);
-        } catch {
-          await handleLogout();
-        }
+  useEffect(() => {
+    const reqId = baseApi.interceptors.request.use((config) => {
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
       }
+      if (guestId) {
+        config.headers["x-guest-id"] = guestId;
+      }
+      return config;
+    });
 
-      return Promise.reject(error);
+    const resId = baseApi.interceptors.response.use(
+      (res) => res,
+      async (error) => {
+        const originalReq = error.config;
+
+        if (
+          error.response?.status === 401 &&
+          refreshToken &&
+          !originalReq._retry
+        ) {
+          try {
+            originalReq._retry = true;
+
+            const { data } = await baseApi.post("/auth/refresh", {
+              refreshToken,
+            });
+
+            setAccessToken(data.accessToken);
+
+            originalReq.headers.Authorization = `Bearer ${data.accessToken}`;
+            return baseApi(originalReq);
+
+          } catch {
+            await handleLogout();
+          }
+        }
+
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      baseApi.interceptors.request.eject(reqId);
+      baseApi.interceptors.response.eject(resId);
+    };
+  }, [accessToken, refreshToken, guestId]);
+
+  /* ---------- MERGE (🔥 CORE FIX) ---------- */
+
+  const mergeGuestData = async (gid: string) => {
+    if (!accessToken || !gid || isMerged) return;
+
+    try {
+      console.log("🔥 MERGING ALL DATA");
+
+      await baseApi.post("/api/orders/merge-orders", {}, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "x-guest-id": gid,
+        },
+      });
+
+      await baseApi.post("/api/wishlist/sync", {}, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "x-guest-id": gid,
+        },
+      });
+
+      console.log("✅ MERGE DONE");
+
+      await AsyncStorage.removeItem("ds_guest");
+      setGuestId(null);
+      setIsMerged(true);
+
+    } catch (err) {
+      console.log("❌ Merge error", err);
     }
-  );
-
-  return () => {
-    baseApi.interceptors.request.eject(reqId);
-    baseApi.interceptors.response.eject(resId);
   };
 
-}, [accessToken, refreshToken, guestId]);
+  useEffect(() => {
+    if (user && guestId) {
+      mergeGuestData(guestId);
+    }
+  }, [user, guestId]);
+
   /* ---------- LOGOUT ---------- */
 
-const handleLogout = async () => {
-  setUser(null);
-  setAccessToken(null);
-  setRefreshToken(null);
+  const handleLogout = async () => {
+    setUser(null);
+    setAccessToken(null);
+    setRefreshToken(null);
 
-  // 🔥 REMOVE HEADER IMMEDIATELY
-  delete baseApi.defaults.headers.common["Authorization"];
+    delete baseApi.defaults.headers.common["Authorization"];
 
-  await AsyncStorage.multiRemove([
-    "ds_user",
-    "ds_access",
-    "ds_refresh",
-  ]);
+    await AsyncStorage.multiRemove([
+      "ds_user",
+      "ds_access",
+      "ds_refresh",
+    ]);
 
-  const newGuestId =
-    Math.random().toString(36).substring(2) + Date.now();
+    const newGuestId =
+      Math.random().toString(36).substring(2) + Date.now();
 
-  await AsyncStorage.setItem("ds_guest", newGuestId);
-  setGuestId(newGuestId);
+    await AsyncStorage.setItem("ds_guest", newGuestId);
+    setGuestId(newGuestId);
+    setIsMerged(false);
 
-  Toast.show({
-    type: "success",
-    text1: "Logged out",
-  });
-};
+    Toast.show({ type: "success", text1: "Logged out" });
+  };
 
-
-const [request, response, promptAsync] = Google.useAuthRequest({
-  clientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
- androidClientId:process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
-  responseType: "code",
-  usePKCE: true,
-  extraParams: {
-    access_type: "offline",
-  },
-    shouldAutoExchangeCode: false
-});
-
-
-
-  /* ---------- AUTH ACTIONS ---------- */
+  /* ---------- AUTH ---------- */
 
   const login = async (email: string, password: string) => {
     const { data } = await baseApi.post("/auth/login", { email, password });
+
     setAccessToken(data.accessToken);
     setRefreshToken(data.refreshToken);
     setUser(data.user);
-
-      try {
-    const token = data.accessToken;
-
-    await baseApi.post("/api/orders/merge-orders", {}, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    console.log("✅ Orders merged after login");
-  } catch (err) {
-    console.log("❌ Merge failed", err);
-  }
 
     return data;
   };
@@ -229,87 +241,92 @@ const [request, response, promptAsync] = Google.useAuthRequest({
       email,
       password,
     });
+
     setUser(data.user);
     setAccessToken(data.accessToken);
     setRefreshToken(data.refreshToken);
+
     return data;
   };
 
-const loginWithGoogle = async (code: string, codeVerifier: string) => {
-  try {
+  const loginWithGoogle = async (code: string, codeVerifier: string) => {
     const { data } = await baseApi.post("api/auth/google/mobile", {
       code,
-      codeVerifier
-      // ✅ send code instead of token
+      codeVerifier,
     });
 
     setAccessToken(data.accessToken);
     setRefreshToken(data.refreshToken);
     setUser(data.user);
 
-try {
-  const token = data.accessToken;
+    return data;
+  };
 
-  console.log("➡️ Calling merge-orders API (Google)");
+  /* ---------- GOOGLE ---------- */
 
-  const res = await baseApi.post("/api/orders/merge-orders", {}, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      
-    },
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    clientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+    responseType: "code",
+    usePKCE: true,
+    extraParams: { access_type: "offline" },
+    shouldAutoExchangeCode: false,
   });
 
-if (!guestId) return;
-await baseApi.post("/api/wishlist/sync", {}, {
-  headers: {
-    Authorization: `Bearer ${data.accessToken}`,
-    "x-guest-id": guestId, // 🔥 USE STATE
-  },
-});
+  const promptGoogleLogin = async () => {
+    try {
+      const result = await promptAsync();
+      if (result?.type !== "success") return;
 
-  console.log("✅ Merge response:", res.data);
-} catch (err) {
-  console.log("❌ Merge failed:", err);
-}
-    return data;
-  } catch (err: any) {
-    console.log("Google API login error", err);
-    throw err;
-  }
-};
+      const code = result.params?.code;
+      const codeVerifier = request?.codeVerifier;
 
+      if (!code || !codeVerifier) return;
 
-const promptGoogleLogin = async () => {
-  try {
-    if (!request || !promptAsync) {
-      throw new Error("Google request not ready");
+      await loginWithGoogle(code, codeVerifier);
+
+    } catch (err: any) {
+      console.log("Google error:", err);
     }
+  };
 
-    const result = await promptAsync();
 
+const [fbRequest, fbResponse, fbPromptAsync] = AuthSession.useAuthRequest(
+  {
+    clientId: process.env.EXPO_PUBLIC_FACEBOOK_APP_ID!,
+    redirectUri: AuthSession.makeRedirectUri({ useProxy: true }),
+    scopes: ["public_profile", "email"],
+    responseType: AuthSession.ResponseType.Token,
+  },
+  {
+    authorizationEndpoint: "https://www.facebook.com/v18.0/dialog/oauth",
+  }
+);
+const promptFacebookLogin = async () => {
+  try {
+    const result = await fbPromptAsync();
     if (result?.type !== "success") return;
 
-    const code = result.params?.code;
-    const codeVerifier = request?.codeVerifier;
+    const accessToken = result.params?.access_token;
+    if (!accessToken) return;
 
-    if (!code || !codeVerifier) return;
+    // 🔥 SAME PATTERN AS GOOGLE
+    const { data } = await baseApi.post("/api/auth/facebook", {
+      access_token: accessToken,
+    });
 
-    await loginWithGoogle(code, codeVerifier);
+    setAccessToken(data.accessToken);
+    setRefreshToken(data.refreshToken);
+    setUser(data.user);
 
-  } catch (err: any) {
-    // 🔥 THIS IS THE FIX
-    if (
-      err?.message?.includes("authorization grant") ||
-      err?.message?.includes("invalid_grant")
-    ) {
-      console.log("Ignoring Expo token exchange error");
-      return;
-    }
-
-    console.log("Google prompt error:", err);
+  } catch (err) {
+    console.log("Facebook error:", err);
   }
 };
-  /* ---------- PROVIDE ---------- */
+
+console.log("AuthContext rendered", { user, guestId, loading });
+  /* ---------- PROVIDER ---------- */
+
   return (
     <AuthContext.Provider
       value={{
@@ -322,8 +339,8 @@ const promptGoogleLogin = async () => {
         register,
         loginWithGoogle,
         logout: handleLogout,
-        promptGoogleLogin
-
+        promptGoogleLogin,
+         promptFacebookLogin,
       }}
     >
       {children}
@@ -331,7 +348,7 @@ const promptGoogleLogin = async () => {
   );
 }
 
-/* ================= HOOK ================= */
+/* ---------- HOOK ---------- */
 
 export function useAuth() {
   const ctx = useContext(AuthContext);

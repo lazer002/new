@@ -12,6 +12,7 @@ import { WishlistProvider } from "@/context/WishlistContext";
 import { FilterProvider } from "@/context/FilterContext";
 import Toast from "react-native-toast-message";
 import { pillToastConfig } from "@/components/PillToast";
+import { NotificationProvider } from "@/context/NotificationContext";
 export default function RootLayout() {
 const [fontsLoaded] = useFonts({
   "RobotoCondensed-Thin": require("../assets/font/RobotoCondensed-Thin.ttf"),
@@ -49,6 +50,7 @@ const [fontsLoaded] = useFonts({
     <GestureHandlerRootView style={{ flex: 1 }}>
   <SafeAreaProvider>
     <AuthProvider>
+ <NotificationProvider>
       <CartProvider>
         <WishlistProvider>
           <FilterProvider>
@@ -61,6 +63,7 @@ const [fontsLoaded] = useFonts({
           </FilterProvider>
         </WishlistProvider>
       </CartProvider>
+      </NotificationProvider>
     </AuthProvider>
   </SafeAreaProvider>
 </GestureHandlerRootView>
