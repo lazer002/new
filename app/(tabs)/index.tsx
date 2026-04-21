@@ -13,7 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import Screen from "@/components/Screen";
 import api from "@/utils/config";
-import { useRouter } from "expo-router";
+import { router, useRouter } from "expo-router";
 import { useFilter } from "@/context/FilterContext";
 import BottomFilterSheet from "@/components/BottomFilterSheet";
 import { useWishlist } from "@/context/WishlistContext";
@@ -190,7 +190,7 @@ export default function Home() {
             setSearchQuery={setSearchQuery}
             openFilter={() => setIsFilterOpen(true)} // ✅ FIXED
           />
-          <SectionHeader onSeeAll={() => console.log("See all pressed")} />
+          <SectionHeader onSeeAll={() => router.push("/category")} />
             </>
         }
         contentContainerStyle={{ paddingBottom: 24 }}

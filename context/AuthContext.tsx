@@ -236,7 +236,7 @@ useEffect(() => {
   };
 
   const register = async (name: string, email: string, password: string) => {
-    const { data } = await baseApi.post("/auth/register", {
+    const { data } = await baseApi.post("api/auth/register", {
       name,
       email,
       password,
@@ -293,8 +293,8 @@ useEffect(() => {
 
 const [fbRequest, fbResponse, fbPromptAsync] = AuthSession.useAuthRequest(
   {
-    clientId: process.env.EXPO_PUBLIC_FACEBOOK_APP_ID!,
-    redirectUri: AuthSession.makeRedirectUri({ useProxy: true }),
+    clientId: process.env.EXPO_PUBLIC_FACEBOOK_APP_ID,
+    redirectUri: AuthSession.makeRedirectUri(),
     scopes: ["public_profile", "email"],
     responseType: AuthSession.ResponseType.Token,
   },

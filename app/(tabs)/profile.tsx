@@ -126,7 +126,7 @@ const Badge = ({ count }: { count: number }) => {
               label="Wishlist"
               onPress={() => go("/wishlist")}
             />
-            <Item icon="map-outline" label="Saved Addresses" />
+            <Item icon="map-outline" label="Saved Addresses" onPress={() => go("/savedAddresses")} />
             <Item icon="card-outline" label="Payments" />
           </>
         ) : (
