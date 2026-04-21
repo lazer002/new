@@ -3,7 +3,7 @@ import api from "@/utils/config";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState ,useRef} from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -15,10 +15,16 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Animated
 } from "react-native";
 import { Image } from "react-native";
-const { height } = Dimensions.get("window");
-
+import Toast from "react-native-toast-message";
+const { height, width } = Dimensions.get("window");
+const slides = [
+  { title: "Monkey", subtitle: "Fast & Smart" },
+  { title: "Secure", subtitle: "Your data is safe" },
+  { title: "Easy", subtitle: "One tap login" },
+];
 export default function Login() {
   const { promptGoogleLogin, user } = useAuth();
   const router = useRouter();
@@ -38,20 +44,20 @@ export default function Login() {
   /* ---------- HANDLERS ---------- */
 
   const handleContinue = async () => {
-    if (!email) return Alert.alert("Required", "Enter email");
+    if (!email) return Toast.show({ type: "error", text1: "Required", text2: "Enter email" });
     if (!isValidEmail(email))
-      return Alert.alert("Invalid", "Enter valid email");
+      return Toast.show({ type: "error", text1: "Invalid", text2: "Enter valid email" });
 
     try {
       setLoading(true);
       await api.post("/api/auth/otp/send", { email });
 
       router.push({
-        pathname: "/OTP",
+        pathname: "/otp",
         params: { email, redirect },
       });
     } catch (err: any) {
-      Alert.alert("Error", err?.response?.data?.error || "Failed");
+      Toast.show({ type: "error", text1: "Error", text2: err?.response?.data?.error || "Failed" });
     } finally {
       setLoading(false);
     }
@@ -61,8 +67,9 @@ export default function Login() {
     try {
       setLoading(true);
       await promptGoogleLogin();
+      Toast.show({ type: "success", text1: "Logged in with Google", text2: "Successfully logged in with Google" });
     } catch {
-      Alert.alert("Google Login Failed");
+      Toast.show({ type: "error", text1: "Error", text2: "Google Login Failed" });
     } finally {
       setLoading(false);
     }
@@ -74,6 +81,47 @@ export default function Login() {
 
   /* ---------- UI ---------- */
 
+
+const opacity = useRef(new Animated.Value(1)).current;
+const [index, setIndex] = useState(0);
+
+useEffect(() => {
+  let isMounted = true;
+
+  const animate = () => {
+    if (!isMounted) return;
+
+    // fade out
+    Animated.timing(opacity, {
+      toValue: 0,
+      duration: 400,
+      useNativeDriver: true,
+    }).start(() => {
+      // change slide
+      const next = (index + 1) % slides.length;
+      setIndex(next);
+
+      // fade in
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }).start(() => {
+        setTimeout(animate, 5000);
+      });
+    });
+  };
+
+  const timeout = setTimeout(animate, 2000);
+
+  return () => {
+    isMounted = false;
+    clearTimeout(timeout);
+  };
+}, [index]);
+
+
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -82,22 +130,34 @@ export default function Login() {
       <View style={styles.container}>
         
         {/* 🔵 HEADER */}
-        <LinearGradient
-          colors={["#3f5efb", "#6f86ff"]}
-          style={styles.top}
-        >
-          <View style={styles.topBar}>
-            <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="chevron-back" size={22} color="#fff" />
-            </TouchableOpacity>
+<LinearGradient
+  colors={["#757575", "#0a0a0a"]}
+  style={styles.top}
+>
+  {/* TOP BAR */}
+  <View style={styles.topBar}>
+    <TouchableOpacity onPress={() => router.back()}>
+      <Ionicons name="chevron-back" size={22} color="#fff" />
+    </TouchableOpacity>
 
-            <TouchableOpacity style={styles.switchBtn}>
-              <Text style={styles.switchText}>Get Started</Text>
-            </TouchableOpacity>
-          </View>
+    <TouchableOpacity style={styles.switchBtn} >
+      <Text style={styles.switchText}>Get Started</Text>
+    </TouchableOpacity>
+  </View>
 
-          <Text style={styles.logo}>YourApp</Text>
-        </LinearGradient>
+  {/* 🔥 SWIPER */}
+  <Animated.View
+    style={[
+      styles.sliderContainer,
+    
+    ]}
+  >
+<Animated.View style={[styles.slide, { opacity }]}>
+  <Text style={styles.logo}>{slides[index].title}</Text>
+  <Text style={styles.tag}>{slides[index].subtitle}</Text>
+</Animated.View>
+  </Animated.View>
+</LinearGradient>
 
         {/* ⚪ SHEET */}
         <View
@@ -111,7 +171,9 @@ export default function Login() {
         >
           <Text style={styles.smallTop}>
             Don’t have an account?
-            <Text style={styles.link}> Get Started</Text>
+            <Text style={styles.link} onPress={() => router.push("/register")}>
+              Get Started
+            </Text>
           </Text>
 
           <Text style={styles.heading}>Welcome Back</Text>
@@ -152,7 +214,7 @@ export default function Login() {
 
           {/* BUTTON */}
           <LinearGradient
-            colors={["#3f5efb", "#c471ed"]}
+            colors={["#757575", "#0a0a0a"]}
             style={styles.btn}
           >
             <TouchableOpacity
@@ -188,13 +250,13 @@ export default function Login() {
   </TouchableOpacity>
 
   {/* FACEBOOK */}
-  <TouchableOpacity style={styles.socialBtn}>
+  {/* <TouchableOpacity style={styles.socialBtn}>
     <Image
       source={require("@/assets/public/fb.png")}
       style={styles.socialIcon}
     />
-    <Text style={styles.socialDark}>Facebook</Text>
-  </TouchableOpacity>
+    <Text style={styles.socialDark}>Facebook</Text> 
+  </TouchableOpacity> */}
 </View>
         </View>
       </View>
@@ -219,13 +281,13 @@ socialDark: {
   fontWeight: "600",
   color: "#333",
 },
-  top: {
-    height: 300,
-    borderBottomLeftRadius: 40,
-    borderBottomRightRadius: 40,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+top: {
+  height: height * 0.4,
+  borderBottomLeftRadius: 40,
+  borderBottomRightRadius: 40,
+  justifyContent: "center",
+  overflow: "hidden", // 🔥 MUST ADD
+},
 
   topBar: {
     position: "absolute",
@@ -259,12 +321,13 @@ socialDark: {
     left: 1,
     right: 1,
     bottom: 0,
+    
     backgroundColor: "#fff",
     borderRadius: 26,
     shadowColor: "#000",
     shadowOpacity: 0.12,
     shadowRadius: 20,
-    elevation: 8,
+    elevation: 10,
   },
 
   smallTop: {
@@ -358,7 +421,7 @@ socialDark: {
   },
 
   socialBtn: {
-    width: "48%",
+    width: width * 0.9,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
@@ -368,7 +431,22 @@ socialDark: {
     borderColor: "#eee",
     gap: 6,
   },
+sliderContainer: {
+  flexDirection: "row",
+  width: width * slides.length, // 🔥 dynamic
+},
 
+slide: {
+  width: width, // 🔥 must match screen
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+tag: {
+  color: "#ddd",
+  fontSize: 13,
+  marginTop: 6,
+},
   socialText: {
     fontWeight: "600",
   },

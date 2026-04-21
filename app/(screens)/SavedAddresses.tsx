@@ -32,7 +32,7 @@ export default function SavedAddresses() {
 
   const fetchAddresses = async () => {
     try {
-      const res = await api.get("/api/user/addresses");
+      const res = await api.get("/api/address");
       setAddresses(res.data.addresses || []);
     } catch (err) {
       console.log("Address fetch error", err);
@@ -53,7 +53,7 @@ export default function SavedAddresses() {
 
   const handleDelete = async (id: string) => {
     try {
-      await api.delete(`/api/user/address/${id}`);
+      await api.delete(`/api/address/${id}`);
       fetchAddresses();
     } catch (err) {
       console.log("Delete error", err);
@@ -156,7 +156,7 @@ export default function SavedAddresses() {
       {/* ADD BUTTON */}
       <TouchableOpacity
         style={styles.addBtn}
-        onPress={() => router.push("/add-address")}
+        onPress={() => router.push("/addaddress")}
       >
         <Ionicons name="add" size={20} color="#fff" />
         <Text style={styles.addText}>Add New Address</Text>
