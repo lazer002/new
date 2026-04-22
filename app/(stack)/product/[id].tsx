@@ -37,7 +37,7 @@ export default function ProductScreen() {
   const { add } = useCart();
   const { isInWishlist, addToWishlist, removeFromWishlist } =
     useWishlist();
-
+const [related, setRelated] = useState<any[]>([]);
   const [product, setProduct] = useState<any>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -70,7 +70,54 @@ const viewerRef = useRef<FlatList>(null);
 
 
 
+useEffect(() => {
+  console.log("Product changed, fetching related...", product?._id);
 
+  if (!product) return;
+
+  // 🔥 FIX CURRENT CATEGORY
+  const currentCat =
+    typeof product.category === "string"
+      ? product.category
+      : product.category?._id;
+
+  console.log("Current category:", currentCat);
+
+  if (!currentCat) return;
+
+  (async () => {
+    try {
+      const res = await api.get("/api/products");
+
+      const items = res.data.items || [];
+
+      const relatedProducts = items.filter((p: any) => {
+        const itemCat =
+          typeof p.category === "string"
+            ? p.category
+            : p.category?._id;
+
+        console.log("Checking:", {
+          current: currentCat,
+          item: itemCat,
+          match: currentCat === itemCat,
+        });
+
+        return (
+          p._id !== product._id &&
+          currentCat === itemCat
+        );
+      });
+
+      console.log("Related products:", relatedProducts);
+
+      setRelated(relatedProducts.slice(0, 8));
+
+    } catch (err) {
+      console.log("Related error", err);
+    }
+  })();
+}, [product]);
 
   const uiStyle = useAnimatedStyle(() => ({
     opacity: uiOpacity.value,
@@ -215,7 +262,7 @@ const viewerRef = useRef<FlatList>(null);
       {/* ================= CONTENT ================= */}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: 20 }}
       >
         {/* Spacer for hero */}
         <View style={{ height: IMAGE_HEIGHT + 60 }} />
@@ -295,7 +342,45 @@ const viewerRef = useRef<FlatList>(null);
             contentWidth={width}
             source={{ html: product.description }}
           />
+          <View style={{ marginTop: 20 }}>
+  <Text style={styles.sectionTitle}>You may also like</Text>
+
+  <FlatList
+    data={related}
+    horizontal
+    showsHorizontalScrollIndicator={false}
+    keyExtractor={(item) => item._id}
+    contentContainerStyle={{ paddingVertical: 10 }}
+    renderItem={({ item }) => (
+      <Pressable
+        onPress={() => {
+          router.push({
+            pathname: "/product/[id]",
+            params: {
+              id: item._id,
+              image: item.images?.[0],
+            },
+          });
+        }}
+        style={styles.relatedCard}
+      >
+        <Image
+          source={{ uri: item.images?.[0] }}
+          style={styles.relatedImage}
+        />
+
+        <Text numberOfLines={1} style={styles.relatedTitle}>
+          {item.title}
+        </Text>
+
+        <Text style={styles.relatedPrice}>₹{item.price}</Text>
+      </Pressable>
+    )}
+  />
+</View>
         </Animated.View>
+        {/* 🔥 RELATED PRODUCTS */}
+
       </ScrollView>
 
       {/* ================= BOTTOM BAR ================= */}
@@ -328,7 +413,35 @@ const viewerRef = useRef<FlatList>(null);
 
 const styles = StyleSheet.create({
 
+sectionTitle: {
+  fontSize: 18,
+  fontWeight: "700",
+  marginBottom: 10,
+},
 
+relatedCard: {
+  width: 140,
+  marginRight: 12,
+},
+
+relatedImage: {
+  width: "100%",
+  height: 180,
+  borderRadius: 16,
+  backgroundColor: "#eee",
+},
+
+relatedTitle: {
+  fontSize: 13,
+  marginTop: 6,
+  fontWeight: "500",
+},
+
+relatedPrice: {
+  fontSize: 14,
+  fontWeight: "700",
+  marginTop: 2,
+},
 
 
 fullscreenImage: {

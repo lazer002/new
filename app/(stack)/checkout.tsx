@@ -60,7 +60,56 @@ export default function CheckoutScreen() {
   const router = useRouter();
   const { items, clearCart } = useCart();
   const { user, guestId } = useAuth();
+const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
+const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+const [useSaved, setUseSaved] = useState(true);
+useEffect(() => {
+  const fetchSaved = async () => {
+    try {
+      const res = await api.get("/api/address");
+      const list = res.data.addresses || [];
 
+      setSavedAddresses(list);
+
+      const def = list.find((a: any) => a.isDefault);
+      if (def) {
+        setSelectedAddressId(def._id);
+        fillAddress(def);
+          setUseSaved(true); // 🔥 auto fill
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  fetchSaved();
+}, []);
+
+const fillAddress = (a: any) => {
+  setAddress({
+    firstName: a.name,
+    lastName: "",
+    phone: a.phone,
+    address: a.address,
+    apartment: "",
+    city: a.city,
+    state: a.state,
+    zip: a.zip,
+    country: "India",
+  });
+};
+
+const emptyAddress: Address = {
+  firstName: "",
+  lastName: "",
+  phone: "",
+  address: "",
+  apartment: "",
+  city: "",
+  state: "",
+  zip: "",
+  country: "",
+};
 
   useEffect(() => {
     if (items.length === 0) {
@@ -266,98 +315,164 @@ const placeOrder = async (): Promise<void> => {
         showsVerticalScrollIndicator={false}
       >
         {/* ADDRESS */}
-        <Card title="Delivery Address">
-          <Row>
-            <Input
-              placeholder="First Name*"
-              value={address.firstName}
-              onChange={(v: string) =>
-                setAddress({ ...address, firstName: v })
-              }
-            />
-            <Input
-              placeholder="Last Name"
-              value={address.lastName}
-              onChange={(v: string) =>
-                setAddress({ ...address, lastName: v })
-              }
-            />
-          </Row>
+    {/* 🔥 SAVED ADDRESS SECTION */}
+<Card title="Saved Address">
 
-          <Input
-            placeholder="Phone*"
-            keyboardType="phone-pad"
-            value={address.phone}
-            maxLength={10}
-            onChange={(v: string) => {
-              // allow only numbers + max 10 digits
-              const cleaned = v.replace(/[^0-9]/g, "").slice(0, 10);
+  {savedAddresses.length > 0 ? (
+    savedAddresses.map((a) => {
+      const active = selectedAddressId === a._id;
 
-              setAddress({ ...address, phone: cleaned });
-            }}
-          />
+      return (
+        <TouchableOpacity
+          key={a._id}
+          style={[
+            styles.savedCard,
+            active && styles.savedCardActive,
+          ]}
+          onPress={() => {
+            setUseSaved(true);
+            setSelectedAddressId(a._id);
+            fillAddress(a);
+          }}
+        >
+          <Text style={styles.savedName}>
+            {a.name} • {a.phone}
+          </Text>
 
-          <Input
-            placeholder="Email"
-            value={email}
-            onChange={(v: string) => setEmail(v)}
-          />
+          <Text style={styles.savedAddr}>
+            {a.address}, {a.city}
+          </Text>
 
-          <Input
-            placeholder="Address*"
-            value={address.address}
-            onChange={(v: string) =>
-              setAddress({ ...address, address: v })
-            }
-          />
+          {a.isDefault && (
+            <Text style={styles.defaultBadge}>Default</Text>
+          )}
+        </TouchableOpacity>
+      );
+    })
+  ) : (
+    <Text style={{ color: "#888" }}>No saved addresses</Text>
+  )}
 
-          <Input
-            placeholder="Apartment (optional)"
-            value={address.apartment}
-            onChange={(v: string) =>
-              setAddress({ ...address, apartment: v })
-            }
-          />
+  {/* 🔥 SWITCH TO FORM */}
+  <TouchableOpacity
+   onPress={() => {
+  setUseSaved(false);
+  setSelectedAddressId(null);
+  setAddress(emptyAddress); // 🔥 THIS FIXES YOUR BUG
+}}
+    style={{ marginTop: 10 }}
+  >
+    <Text style={{ color: "#007aff", fontWeight: "600" }}>
+      + Add New Address
+    </Text>
+  </TouchableOpacity>
 
-          <Row>
+</Card>
+
+
+{!useSaved && (
+  <Card title="Delivery Address">
+
+    {/* NAME */}
+    <Row>
       <Input
-  placeholder="City"
-  value={address.city}
-  onChange={(v: string) =>
-    setAddress({ ...address, city: v })
-  }
-  editable={true}
-/>
-            <Input
-              placeholder="Pincode"
-              keyboardType="numeric"
-              value={address.zip}
-              onChange={async (v: string) => {
-                const cleaned = v.replace(/[^0-9]/g, "").slice(0, 6);
+        placeholder="First Name*"
+        value={address.firstName}
+        onChange={(v: string) =>
+          setAddress({ ...address, firstName: v })
+        }
+      />
 
-                setAddress((prev) => ({ ...prev, zip: cleaned }));
+      <Input
+        placeholder="Last Name"
+        value={address.lastName}
+        onChange={(v: string) =>
+          setAddress({ ...address, lastName: v })
+        }
+      />
+    </Row>
 
-                if (cleaned.length === 6) {
-                  const result = await getAddressFromPincode(cleaned);
+    {/* PHONE */}
+    <Input
+      placeholder="Phone*"
+      keyboardType="phone-pad"
+      value={address.phone}
+      maxLength={10}
+      onChange={(v: string) => {
+        const cleaned = v.replace(/[^0-9]/g, "").slice(0, 10);
+        setAddress({ ...address, phone: cleaned });
+      }}
+    />
 
-                  if (result) {
-                    setAddress((prev) => ({
-                      ...prev,
-                      city: result.city,
-                      state: result.state,
-                      country: result.country,
-                    }));
-                  } else {
-                    Toast.show({
-                      type: "error",
-                      text1: "Invalid pincode",
-                    });
-                  }
-                }
-              }}
-            />
-          </Row>
-        </Card>
+    {/* EMAIL */}
+    <Input
+      placeholder="Email"
+      value={email}
+      onChange={(v: string) => setEmail(v)}
+    />
+
+    {/* ADDRESS */}
+    <Input
+      placeholder="Address*"
+      value={address.address}
+      onChange={(v: string) =>
+        setAddress({ ...address, address: v })
+      }
+    />
+
+    {/* APARTMENT */}
+    <Input
+      placeholder="Apartment (optional)"
+      value={address.apartment}
+      onChange={(v: string) =>
+        setAddress({ ...address, apartment: v })
+      }
+    />
+
+    {/* CITY + PINCODE */}
+    <Row>
+      <Input
+        placeholder="City"
+        value={address.city}
+        onChange={(v: string) =>
+          setAddress({ ...address, city: v })
+        }
+      />
+
+      <Input
+        placeholder="Pincode"
+        keyboardType="numeric"
+        value={address.zip}
+        onChange={async (v: string) => {
+          const cleaned = v.replace(/[^0-9]/g, "").slice(0, 6);
+
+          setAddress((prev) => ({ ...prev, zip: cleaned }));
+
+          if (cleaned.length === 6) {
+            const result = await getAddressFromPincode(cleaned);
+
+            if (result) {
+              setAddress((prev) => ({
+                ...prev,
+                city: result.city,
+                state: result.state,
+                country: result.country,
+              }));
+            } else {
+              Toast.show({
+                type: "error",
+                text1: "Invalid pincode",
+              });
+            }
+          }
+        }}
+      />
+    </Row>
+
+  </Card>
+)}
+
+
 
         {/* ITEMS */}
         <Card title="Order Items">
@@ -630,7 +745,38 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
   },
+savedCard: {
+  padding: 12,
+  borderRadius: 12,
+  borderWidth: 1,
+  borderColor: "#eee",
+  marginBottom: 10,
+},
 
+savedCardActive: {
+  borderColor: "#111",
+  backgroundColor: "#fafafa",
+},
+
+savedName: {
+  fontWeight: "600",
+},
+
+savedAddr: {
+  fontSize: 12,
+  color: "#666",
+},
+
+defaultBadge: {
+  marginTop: 4,
+  fontSize: 10,
+  color: "#fff",
+  backgroundColor: "#111",
+  paddingHorizontal: 6,
+  paddingVertical: 2,
+  alignSelf: "flex-start",
+  borderRadius: 4,
+},
   headerTitle: {
     fontSize: 16,
     fontWeight: "700",
