@@ -77,8 +77,8 @@ export default function CategoriesScreen() {
   /* 🔁 NAV */
   const goToCategory = (item: Category) => {
     router.push({
-      pathname: "/CategoryProducts",
-      params: { category: JSON.stringify(item) },
+      pathname: "/plpcategory",
+         params: { category: item._id },
     });
   };
 
@@ -132,7 +132,7 @@ export default function CategoriesScreen() {
         ListHeaderComponent={
           <>
             {/* HEADER */}
-            <Text style={styles.brand}>DRIPZONE</Text>
+            <Text style={styles.brand}>MONKEY</Text>
             <Text style={styles.subtitle}>Shop your style</Text>
 
             {/* HERO */}

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -10,6 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import api from "@/utils/config";
+import Toast from "react-native-toast-message";
 
 type Address = {
   _id: string;
@@ -33,7 +35,14 @@ export default function SavedAddresses() {
   const fetchAddresses = async () => {
     try {
       const res = await api.get("/api/address");
-      setAddresses(res.data.addresses || []);
+
+      const list = res.data.addresses || [];
+      setAddresses(list);
+
+      // 🔥 auto select default
+      const defaultAddr = list.find((a: Address) => a.isDefault);
+      if (defaultAddr) setSelectedId(defaultAddr._id);
+
     } catch (err) {
       console.log("Address fetch error", err);
     }
@@ -54,9 +63,41 @@ export default function SavedAddresses() {
   const handleDelete = async (id: string) => {
     try {
       await api.delete(`/api/address/${id}`);
-      fetchAddresses();
+
+      // 🔥 instant UI update
+      setAddresses((prev) => prev.filter((a) => a._id !== id));
+
+      // reset selection if deleted
+      if (selectedId === id) setSelectedId(null);
+
     } catch (err) {
       console.log("Delete error", err);
+    }
+  };
+
+  /* ---------- DELIVER HERE ---------- */
+
+  const handleDeliver = async () => {
+    try {
+      await api.put(`/api/address/${selectedId}`, {
+        isDefault: true,
+      });
+
+      // 🔥 update UI
+      setAddresses((prev) =>
+        prev.map((a) => ({
+          ...a,
+          isDefault: a._id === selectedId,
+        }))
+      );
+
+Toast.show({
+        type: "success",
+        text1: "Delivery address updated!",
+      });
+
+    } catch (err) {
+      console.log("Deliver error", err);
     }
   };
 
@@ -69,10 +110,7 @@ export default function SavedAddresses() {
       <TouchableOpacity
         activeOpacity={0.9}
         onPress={() => handleSelect(item._id)}
-        style={[
-          styles.card,
-          selected && styles.selectedCard,
-        ]}
+        style={[styles.card, selected && styles.selectedCard]}
       >
         {/* TOP ROW */}
         <View style={styles.row}>
@@ -90,7 +128,6 @@ export default function SavedAddresses() {
             </Text>
           </View>
 
-          {/* SELECT ICON */}
           <Ionicons
             name={selected ? "radio-button-on" : "radio-button-off"}
             size={22}
@@ -98,7 +135,7 @@ export default function SavedAddresses() {
           />
         </View>
 
-        {/* BADGES */}
+        {/* BADGE */}
         {item.isDefault && (
           <View style={styles.badge}>
             <Text style={styles.badgeText}>Default</Text>
@@ -108,7 +145,12 @@ export default function SavedAddresses() {
         {/* ACTIONS */}
         <View style={styles.actions}>
           <TouchableOpacity
-            onPress={() => router.push(`/edit-address/${item._id}`)}
+            onPress={() =>
+              router.push({
+                pathname: "/addaddress",
+                params: { id: item._id }, // 🔥 FIXED
+              })
+            }
           >
             <Text style={styles.actionText}>Edit</Text>
           </TouchableOpacity>
@@ -145,12 +187,6 @@ export default function SavedAddresses() {
         renderItem={renderItem}
         contentContainerStyle={{ padding: 16 }}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={() => (
-          <View style={styles.empty}>
-            <Ionicons name="location-outline" size={50} color="#ccc" />
-            <Text style={styles.emptyText}>No addresses found</Text>
-          </View>
-        )}
       />
 
       {/* ADD BUTTON */}
@@ -162,17 +198,9 @@ export default function SavedAddresses() {
         <Text style={styles.addText}>Add New Address</Text>
       </TouchableOpacity>
 
-      {/* CONTINUE BUTTON */}
+      {/* CONTINUE */}
       {selectedId && (
-        <TouchableOpacity
-          style={styles.continueBtn}
-          onPress={() => {
-            router.push({
-              pathname: "/checkout",
-              params: { addressId: selectedId },
-            });
-          }}
-        >
+        <TouchableOpacity style={styles.continueBtn} onPress={handleDeliver}>
           <Text style={styles.continueText}>Deliver Here</Text>
         </TouchableOpacity>
       )}
@@ -180,7 +208,7 @@ export default function SavedAddresses() {
   );
 }
 
-/* ================= STYLES ================= */
+/* 🎨 STYLES SAME AS YOURS */
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "#fff" },
@@ -203,6 +231,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     borderColor: "#eee",
+    marginBottom: 12,
   },
 
   selectedCard: {
@@ -256,16 +285,6 @@ const styles = StyleSheet.create({
     color: "#111",
   },
 
-  empty: {
-    alignItems: "center",
-    marginTop: 80,
-  },
-
-  emptyText: {
-    marginTop: 10,
-    color: "#aaa",
-  },
-
   addBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -297,3 +316,4 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
 });
+
