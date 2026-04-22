@@ -10,7 +10,7 @@ import {
   StyleSheet,
   Text,
   View,
-  Modal 
+  Modal
 } from "react-native";
 import Animated, {
   Easing,
@@ -29,7 +29,7 @@ const { width, height } = Dimensions.get("window");
 import Toast from "react-native-toast-message";
 const IMAGE_WIDTH = width * 0.92;
 const IMAGE_HEIGHT = Math.min(height * 0.45, 420); // ✅ responsive cap
-
+import { runOnJS } from "react-native-reanimated";
 export default function ProductScreen() {
   const router = useRouter();
   const { id, image, x, y, w, h } = useLocalSearchParams<any>();
@@ -37,116 +37,107 @@ export default function ProductScreen() {
   const { add } = useCart();
   const { isInWishlist, addToWishlist, removeFromWishlist } =
     useWishlist();
-const [related, setRelated] = useState<any[]>([]);
+  const [related, setRelated] = useState<any[]>([]);
   const [product, setProduct] = useState<any>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const relatedRefs = useRef<{ [key: string]: View | null }>({});
 
-const viewerRef = useRef<FlatList>(null);
 
   const imageRef = useRef<FlatList>(null);
 
-  /* ================= HERO TRANSITION ================= */
-  const animX = useSharedValue(Number(x));
-  const animY = useSharedValue(Number(y));
-  const animW = useSharedValue(Number(w));
-  const animH = useSharedValue(Number(h));
+
+  const startX = x !== undefined ? Number(x) : width / 2; const startY = y !== undefined ? Number(y) : height / 2; const startW = w !== undefined ? Number(w) : 120; const startH = h !== undefined ? Number(h) : 120; const animX = useSharedValue(startX); const animY = useSharedValue(startY); const animW = useSharedValue(startW); const animH = useSharedValue(startH);
   const animRadius = useSharedValue(12);
-
-  const uiOpacity = useSharedValue(0);
-  const uiTranslate = useSharedValue(16);
-
   const heroStyle = useAnimatedStyle(() => ({
-    position: "absolute",
-    left: animX.value,
-    top: animY.value,
-    width: animW.value,
-    height: animH.value,
-    borderRadius: animRadius.value,
-    overflow: "hidden",
-    zIndex:0,
-    elevation: 1
-  }));
+    position: "absolute", left: animX.value, top: animY.value, width: animW.value, height: animH.value, borderRadius: animRadius.value, overflow: "hidden", zIndex: 10,
+  }))
+
+  useEffect(() => {
+    if (image) Image.prefetch(image);
+  }, [image]);
+  useEffect(() => {
+
+    if (!product) return;
+
+    // 🔥 FIX CURRENT CATEGORY
+    const currentCat =
+      typeof product.category === "string"
+        ? product.category
+        : product.category?._id;
+
+
+    if (!currentCat) return;
+
+    (async () => {
+      try {
+        const res = await api.get("/api/products");
+
+        const items = res.data.items || [];
+
+        const relatedProducts = items.filter((p: any) => {
+          const itemCat =
+            typeof p.category === "string"
+              ? p.category
+              : p.category?._id;
 
 
 
-useEffect(() => {
-  console.log("Product changed, fetching related...", product?._id);
-
-  if (!product) return;
-
-  // 🔥 FIX CURRENT CATEGORY
-  const currentCat =
-    typeof product.category === "string"
-      ? product.category
-      : product.category?._id;
-
-  console.log("Current category:", currentCat);
-
-  if (!currentCat) return;
-
-  (async () => {
-    try {
-      const res = await api.get("/api/products");
-
-      const items = res.data.items || [];
-
-      const relatedProducts = items.filter((p: any) => {
-        const itemCat =
-          typeof p.category === "string"
-            ? p.category
-            : p.category?._id;
-
-        console.log("Checking:", {
-          current: currentCat,
-          item: itemCat,
-          match: currentCat === itemCat,
+          return (
+            p._id !== product._id &&
+            currentCat === itemCat
+          );
         });
 
-        return (
-          p._id !== product._id &&
-          currentCat === itemCat
-        );
-      });
 
-      console.log("Related products:", relatedProducts);
+        setRelated(relatedProducts.slice(0, 8));
 
-      setRelated(relatedProducts.slice(0, 8));
-
-    } catch (err) {
-      console.log("Related error", err);
-    }
-  })();
-}, [product]);
-
+      } catch (err) {
+        console.log("Related error", err);
+      }
+    })();
+  }, [product]);
+  const uiOpacity = useSharedValue(0);
+  const uiTranslate = useSharedValue(30);
   const uiStyle = useAnimatedStyle(() => ({
     opacity: uiOpacity.value,
     transform: [{ translateY: uiTranslate.value }],
   }));
 
   useEffect(() => {
-    const D = 1200;
+    const D = 600;
 
-    animX.value = withTiming((width - IMAGE_WIDTH) / 2, {
-      duration: D,
-      easing: Easing.out(Easing.cubic),
-    });
-    animY.value = withTiming(90, {
-      duration: D,
-      easing: Easing.out(Easing.cubic),
-    });
-    animW.value = withTiming(IMAGE_WIDTH, {
-      duration: D,
-      easing: Easing.out(Easing.cubic),
-    });
-    animH.value = withTiming(IMAGE_HEIGHT, {
-      duration: D,
-      easing: Easing.out(Easing.cubic),
-    });
-    animRadius.value = withTiming(22, { duration: D });
+    requestAnimationFrame(() => {
+      animX.value = withTiming((width - IMAGE_WIDTH) / 2, {
+        duration: D,
+        easing: Easing.bezier(0.22, 1, 0.36, 1),
+      });
 
-    uiOpacity.value = withDelay(250, withTiming(1, { duration: 400 }));
-    uiTranslate.value = withDelay(250, withTiming(0, { duration: 400 }));
+      animY.value = withTiming(90, {
+        duration: D,
+        easing: Easing.bezier(0.22, 1, 0.36, 1),
+      });
+
+      animW.value = withTiming(IMAGE_WIDTH, {
+        duration: D,
+        easing: Easing.bezier(0.22, 1, 0.36, 1),
+      });
+
+      animH.value = withTiming(
+        IMAGE_HEIGHT,
+        { duration: D },
+        () => {
+          animX.value = (width - IMAGE_WIDTH) / 2;
+          animY.value = 90;
+
+
+        }
+      );
+      animRadius.value = withTiming(22, { duration: D });
+
+      uiOpacity.value = withDelay(300, withTiming(1, { duration: 300 }));
+      uiTranslate.value = withDelay(300, withTiming(0, { duration: 300 }));
+    });
   }, []);
 
   /* ================= LOAD PRODUCT ================= */
@@ -159,113 +150,121 @@ useEffect(() => {
 
 
 
-  if (!product) return null;
+  if (!product) {
+    return (
+      <Screen style={{ backgroundColor: "#f4f4f4" }}>
+
+        <Animated.View style={[styles.imageWrapper, heroStyle]}>
+          <Image
+            source={{ uri: image }}
+            style={{ width: "100%", height: "100%" }}
+            resizeMode="cover"
+          />
+        </Animated.View>
+      </Screen>
+    );
+  }
+
+  const images = product?.images?.length ? product.images : [image];
+  const sizes = product?.inventory ? Object.keys(product.inventory) : [];
 
 
-    const images = product.images?.length ? product.images : [image];
-  const sizes = product.inventory ? Object.keys(product.inventory) : [];
 
-
-
-
+  if (x === undefined || y === undefined || w === undefined || h === undefined) {
+    return (
+      <Screen style={{ backgroundColor: "#f4f4f4" }}>
+        <View />
+      </Screen>
+    );
+  }
   return (
     <Screen style={{ backgroundColor: "#f4f4f4" }}>
 
+      <Animated.View
+        style={[styles.imageWrapper, heroStyle]}
+      >
 
-
-      {/* ================= HERO IMAGE ================= */}
-  {/* ================= HERO IMAGE ================= */}
-<Animated.View style={[styles.imageWrapper, heroStyle]}>
-
-    <FlatList
-      ref={imageRef}
-      data={images}
-      horizontal
-      pagingEnabled
-      bounces={false}
-      overScrollMode="never"
-      showsHorizontalScrollIndicator={false}
-      keyExtractor={(_, i) => i.toString()}
-      onMomentumScrollEnd={(e) => {
-        const index = Math.round(
-          e.nativeEvent.contentOffset.x / IMAGE_WIDTH
-        );
-        setActiveIndex(index);
-      }}
-  renderItem={({ item, index }) => (
-  <Pressable
-   style={({ pressed }) => ({
-    opacity: pressed ? 0.96 : 1,
-  })}
-    onPress={() => {
-      console.log("OPEN VIEWER", images, index);
-      router.push({
-        pathname: "/product/viewer",
-        params: {
-          images: JSON.stringify(images),
-          index,
-        },
-      });
-    }}
-  >
-    <Image source={{ uri: item }} style={styles.bigImage} />
-  </Pressable>
-)}
-    />
-
-
-  {/* DOTS */}
-  <View style={styles.dots}>
-    {images.map((_: any, i: number) => (
-      <View
-        key={i}
-        style={[
-          styles.dot,
-          activeIndex === i && styles.dotActive,
-        ]}
-      />
-    ))}
-  </View>
-</Animated.View>
-
-
+        <FlatList
+          ref={imageRef}
+          data={images}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(_, i) => i.toString()}
+          getItemLayout={(_, index) => ({
+            length: IMAGE_WIDTH,
+            offset: IMAGE_WIDTH * index,
+            index,
+          })}
+          onMomentumScrollEnd={(e) => {
+            const index = Math.round(
+              e.nativeEvent.contentOffset.x / IMAGE_WIDTH
+            );
+            setActiveIndex(index);
+          }}
+          renderItem={({ item }) => (
+            <Image
+              source={{ uri: item }}
+              style={{
+                width: IMAGE_WIDTH,
+                height: IMAGE_HEIGHT,
+              }}
+              resizeMode="cover"
+            />
+          )}
+        />
+        <Pressable
+          onPress={() => {
+            router.push({
+              pathname: "/product/viewer",
+              params: {
+                images: JSON.stringify(images),
+                index: activeIndex,
+              },
+            });
+          }}
+          style={styles.zoomBtn}
+        >
+          <Ionicons name="expand-outline" size={18} color="#000" />
+        </Pressable>
+      </Animated.View>
       {/* ================= TOP BAR ================= */}
-     {/* ================= TOP OVERLAY BAR ================= */}
-<Animated.View style={[styles.topOverlay, uiStyle]}>
-  {/* Back */}
-  <Pressable style={styles.circleBtn} onPress={router.back}>
-    <Ionicons name="arrow-back" size={20} />
-  </Pressable>
+      {/* ================= TOP OVERLAY BAR ================= */}
+      <Animated.View style={[styles.topOverlay, uiStyle]}>
+        {/* Back */}
+        <Pressable style={styles.circleBtn} onPress={router.back}>
+          <Ionicons name="arrow-back" size={20} />
+        </Pressable>
 
-  {/* Right actions */}
-  <View style={styles.topRight}>
-    <CartIcon />
+        {/* Right actions */}
+        <View style={styles.topRight}>
+          <CartIcon />
 
-    <Pressable
-      style={styles.circleBtn}
-      onPress={() =>
-        isInWishlist(product._id)
-          ? removeFromWishlist(product._id)
-          : addToWishlist(product._id)
-      }
-    >
-      <Ionicons
-        name={isInWishlist(product._id) ? "heart" : "heart-outline"}
-        size={20}
-        color={isInWishlist(product._id) ? "#c00000" : "#000"}
-      />
-    </Pressable>
-  </View>
-</Animated.View>
+          <Pressable
+            style={styles.circleBtn}
+            onPress={() =>
+              isInWishlist(product._id)
+                ? removeFromWishlist(product._id)
+                : addToWishlist(product._id)
+            }
+          >
+            <Ionicons
+              name={isInWishlist(product._id) ? "heart" : "heart-outline"}
+              size={20}
+              color={isInWishlist(product._id) ? "#c00000" : "#000"}
+            />
+          </Pressable>
+        </View>
+      </Animated.View>
 
 
       {/* ================= CONTENT ================= */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }}
-      >
-        {/* Spacer for hero */}
-        <View style={{ height: IMAGE_HEIGHT + 60 }} />
+ <View style={styles.contentContainer}>
+  <View style={{paddingHorizontal: 5,paddingVertical: 20, backgroundColor: "#fff", borderRadius: 28, elevation: 2}}>
+  <ScrollView
+    showsVerticalScrollIndicator={false}
+    contentContainerStyle={{ paddingBottom: 2 }}
+  >
 
         <Animated.View style={[styles.card, uiStyle]} pointerEvents="box-none">
           {/* THUMBNAILS */}
@@ -343,46 +342,58 @@ useEffect(() => {
             source={{ html: product.description }}
           />
           <View style={{ marginTop: 20 }}>
-  <Text style={styles.sectionTitle}>You may also like</Text>
+            <Text style={styles.sectionTitle}>You may also like</Text>
 
-  <FlatList
-    data={related}
-    horizontal
-    showsHorizontalScrollIndicator={false}
-    keyExtractor={(item) => item._id}
-    contentContainerStyle={{ paddingVertical: 10 }}
-    renderItem={({ item }) => (
-      <Pressable
-        onPress={() => {
-          router.push({
-            pathname: "/product/[id]",
-            params: {
-              id: item._id,
-              image: item.images?.[0],
-            },
-          });
-        }}
-        style={styles.relatedCard}
-      >
-        <Image
-          source={{ uri: item.images?.[0] }}
-          style={styles.relatedImage}
-        />
+            <FlatList
+              data={related}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item._id}
+              contentContainerStyle={{ paddingVertical: 10 }}
+              renderItem={({ item }) => (
+                <Pressable
+                  ref={(r) => {
+                    relatedRefs.current[item._id] = r;
+                  }}
+                  onPress={() => {
+                    const currentRef = relatedRefs.current[item._id];
 
-        <Text numberOfLines={1} style={styles.relatedTitle}>
-          {item.title}
-        </Text>
+                    currentRef?.measureInWindow((x, y, w, h) => {
+                      router.push({
+                        pathname: "/product/[id]",
+                        params: {
+                          id: item._id,
+                          image: item.images?.[0],
+                          x,
+                          y,
+                          w,
+                          h,
+                        },
+                      });
+                    });
+                  }}
+                  style={styles.relatedCard}
+                >
+                  <Image
+                    source={{ uri: item.images?.[0] }}
+                    style={styles.relatedImage}
+                  />
 
-        <Text style={styles.relatedPrice}>₹{item.price}</Text>
-      </Pressable>
-    )}
-  />
-</View>
+                  <Text numberOfLines={1} style={styles.relatedTitle}>
+                    {item.title}
+                  </Text>
+
+                  <Text style={styles.relatedPrice}>₹{item.price}</Text>
+                </Pressable>
+              )}
+            />
+          </View>
         </Animated.View>
         {/* 🔥 RELATED PRODUCTS */}
 
       </ScrollView>
-
+      </View>
+</View>
       {/* ================= BOTTOM BAR ================= */}
       <Animated.View style={[styles.bottomBar, uiStyle]}>
         <Pressable style={styles.shareBtn}>
@@ -394,7 +405,7 @@ useEffect(() => {
           onPress={() => {
             console.log("ADD TO CART OK", selectedSize);
             if (!selectedSize) {
-             Toast.show({type: "error", text1: "Please select a size"});
+              Toast.show({ type: "error", text1: "Please select a size" });
               return;
             }
             add(product._id, selectedSize);
@@ -408,7 +419,6 @@ useEffect(() => {
     </Screen>
   );
 }
-
 /* ================= STYLES ================= */
 
 const styles = StyleSheet.create({
@@ -527,7 +537,8 @@ topRight: {
     padding: 20,
     zIndex: 2,
      elevation: 1,
-     paddingBottom: 100
+     paddingBottom: 100,
+     paddingTop: 20,
   },
   thumbRow: {
     marginBottom: 16,
@@ -576,6 +587,18 @@ topRight: {
   sizeTitle: {
     fontWeight: "600",
   },
+  zoomBtn: {
+  position: "absolute",
+  bottom: 12,
+  right: 12,
+  width: 36,
+  height: 36,
+  borderRadius: 18,
+  backgroundColor: "#fff",
+  justifyContent: "center",
+  alignItems: "center",
+  elevation: 5,
+},
   sizeChart: {
     color: "#34C759",
     fontWeight: "600",
@@ -586,6 +609,17 @@ topRight: {
     gap: 10,
     marginVertical: 12,
   },
+  contentContainer: {
+  position: "absolute",
+  bottom: 0,
+  left: width * 0.04,
+  right: width * 0.04,
+  justifyContent: "center",
+  alignItems: "center",
+  width: width * 0.92,
+  height: height * 0.45, 
+  borderRadius: 28,
+},
   sizePill: {
     width: 62,
     height: 62,

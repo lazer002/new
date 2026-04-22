@@ -11,10 +11,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
 import api from "@/utils/config";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
+import CartIcon from "@/components/CartIcon";
 
 const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL"];
 
@@ -27,9 +28,19 @@ export default function Wishlist() {
   const [bundles, setBundles] = useState<any[]>([]);
   const [sizeModalVisible, setSizeModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
-
+const [selectedSizes, setSelectedSizes] = useState<{ [key: string]: string }>({});
   /* ================= FETCH DATA ================= */
+const sheetY = useSharedValue(300);
 
+useEffect(() => {
+  sheetY.value = sizeModalVisible
+    ? withTiming(0, { duration: 300 })
+    : withTiming(300, { duration: 200 });
+}, [sizeModalVisible]);
+
+const sheetStyle = useAnimatedStyle(() => ({
+  transform: [{ translateY: sheetY.value }],
+}));
   useEffect(() => {
     const load = async () => {
       try {
@@ -79,64 +90,75 @@ export default function Wishlist() {
 
   /* ================= RENDER CARD ================= */
 
-  const renderItem = ({ item }: any) => {
-    const isBundle = item._type === "bundle";
-    const image = isBundle
-      ? item.mainImages?.[0]
-      : item.images?.[0];
+const renderItem = ({ item }: any) => {
+  const isBundle = item._type === "bundle";
+  const image = isBundle
+    ? item.mainImages?.[0]
+    : item.images?.[0];
 
-    return (
-      <View style={styles.card}>
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={() =>
-            router.push(
-              isBundle
-                ? `/bundle/${item._id}`
-                : `/product/${item._id}`
-            )
-          }
-        >
-          <Image
-            source={{ uri: image || "https://via.placeholder.com/300" }}
-            style={styles.image}
-          />
-        </TouchableOpacity>
+  return (
+    <View style={styles.card}>
+      <TouchableOpacity
+        activeOpacity={0.95}
+        onPress={(e) => {
+          e.currentTarget.measureInWindow((x, y, w, h) => {
+            router.push({
+              pathname: isBundle ? "/bundle/[id]" : "/product/[id]",
+              params: {
+                id: item._id,
+                image,
+                x,
+                y,
+                w,
+                h,
+              },
+            });
+          });
+        }}
+      >
+        <Image
+          source={{ uri: image || "https://via.placeholder.com/300" }}
+          style={styles.image}
+        />
+      </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.heartBtn}
-          onPress={() => removeFromWishlist(item._id)}
-        >
-          <Ionicons name="heart" size={20} color="#000" />
-        </TouchableOpacity>
+      {/* ❤️ Wishlist */}
+      <TouchableOpacity
+        style={styles.heartBtn}
+        onPress={() => removeFromWishlist(item._id)}
+      >
+        <Ionicons name="heart" size={18} color="#111" />
+      </TouchableOpacity>
 
-        <View style={styles.info}>
-          <Text numberOfLines={2} style={styles.title}>
-            {item.title}
-          </Text>
+      {/* INFO */}
+      <View style={styles.info}>
+        <Text numberOfLines={2} style={styles.title}>
+          {item.title}
+        </Text>
 
-          <Text style={styles.price}>₹{item.price}</Text>
+        <Text style={styles.price}>₹{item.price}</Text>
 
-          {isBundle ? (
-            <TouchableOpacity
-              style={styles.bundleBtn}
-              onPress={() => router.push(`/bundle/${item._id}`)}
-            >
-              <Text style={styles.bundleBtnText}>View Bundle</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={styles.addBtn}
-              onPress={() => openSizeModal(item)}
-            >
-              <Ionicons name="cart-outline" size={16} color="#fff" />
-              <Text style={styles.addBtnText}>Add to Cart</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        {/* ACTIONS */}
+        {isBundle ? (
+          <TouchableOpacity
+            style={styles.secondaryBtn}
+            onPress={() => router.push(`/bundle/${item._id}`)}
+          >
+            <Text style={styles.secondaryText}>View Bundle</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={styles.primaryBtn}
+            onPress={() => openSizeModal(item)}
+          >
+            <Ionicons name="bag-add-outline" size={16} color="#fff" />
+            <Text style={styles.primaryText}>Add to Cart</Text>
+          </TouchableOpacity>
+        )}
       </View>
-    );
-  };
+    </View>
+  );
+};
 
   /* ================= UI ================= */
 
@@ -148,7 +170,9 @@ export default function Wishlist() {
           <Ionicons name="chevron-back" size={26} color="#111" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Wishlist</Text>
-        <View style={{ width: 26 }} />
+        <TouchableOpacity onPress={() => router.push("/cart")}>
+          <CartIcon />
+        </TouchableOpacity>
       </View>
 
       {wishlistItems.length === 0 ? (
@@ -169,37 +193,45 @@ export default function Wishlist() {
       )}
 
       {/* SIZE MODAL */}
-      <Modal
-        visible={sizeModalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setSizeModalVisible(false)}
+ <Modal
+  visible={sizeModalVisible}
+  transparent
+  animationType="fade"
+  onRequestClose={() => setSizeModalVisible(false)}
+>
+  <View style={styles.overlay}>
+    
+    {/* BACKDROP CLICK */}
+    <TouchableOpacity
+      style={StyleSheet.absoluteFill}
+      onPress={() => setSizeModalVisible(false)}
+    />
+
+    {/* 🔥 BOTTOM SHEET */}
+<Animated.View style={[styles.sheet, sheetStyle]}>
+      <Text style={styles.sheetTitle}>Select Size</Text>
+
+      <View style={styles.sizeRow}>
+        {SIZE_OPTIONS.map((size) => (
+          <TouchableOpacity
+            key={size}
+            style={styles.sizeChip}
+            onPress={() => addToCartWithSize(size)}
+          >
+            <Text style={styles.sizeText}>{size}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <TouchableOpacity
+        style={styles.cancelBtn}
+        onPress={() => setSizeModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modal}>
-            <Text style={styles.modalTitle}>Select Size</Text>
-
-            <View style={styles.sizeGrid}>
-              {SIZE_OPTIONS.map((size) => (
-                <TouchableOpacity
-                  key={size}
-                  style={styles.sizeBtn}
-                  onPress={() => addToCartWithSize(size)}
-                >
-                  <Text style={styles.sizeText}>{size}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <TouchableOpacity
-              style={styles.cancelBtn}
-              onPress={() => setSizeModalVisible(false)}
-            >
-              <Text style={styles.cancelText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        <Text style={styles.cancelText}>Cancel</Text>
+      </TouchableOpacity>
+    </Animated.View>
+  </View>
+</Modal>
     </SafeAreaView>
   );
 }
@@ -341,17 +373,85 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
 
-  sizeText: { fontWeight: '600' },
-
-  cancelBtn: {
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-
-  cancelText: {
-    color: '#FF4D4F',
-    fontWeight: '600',
-  },
-
   
+
+
+
+/* PRIMARY BUTTON */
+primaryBtn: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: "#111",
+  paddingVertical: 10,
+  borderRadius: 10,
+},
+
+primaryText: {
+  color: "#fff",
+  fontWeight: "600",
+  marginLeft: 6,
+  fontSize: 13,
+},
+
+/* SECONDARY BUTTON */
+secondaryBtn: {
+  borderWidth: 1,
+  borderColor: "#ddd",
+  paddingVertical: 10,
+  borderRadius: 10,
+  alignItems: "center",
+},
+
+secondaryText: {
+  fontWeight: "600",
+  color: "#111",
+},
+overlay: {
+  flex: 1,
+  backgroundColor: "rgba(0,0,0,0.25)",
+  justifyContent: "flex-end",
+},
+
+sheet: {
+  backgroundColor: "#fff",
+  padding: 20,
+  borderTopLeftRadius: 24,
+  borderTopRightRadius: 24,
+},
+
+sheetTitle: {
+  fontSize: 18,
+  fontWeight: "700",
+  marginBottom: 16,
+},
+
+sizeRow: {
+  flexDirection: "row",
+  flexWrap: "wrap",
+  gap: 10,
+  marginBottom: 20,
+},
+
+sizeChip: {
+  borderWidth: 1,
+  borderColor: "#ddd",
+  paddingVertical: 10,
+  paddingHorizontal: 16,
+  borderRadius: 10,
+},
+
+sizeText: {
+  fontWeight: "600",
+},
+
+cancelBtn: {
+  alignItems: "center",
+  paddingVertical: 12,
+},
+
+cancelText: {
+  color: "#FF4D4F",
+  fontWeight: "600",
+},
 });
