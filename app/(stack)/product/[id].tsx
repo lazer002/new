@@ -1,666 +1,1452 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Dimensions,
-  FlatList,
+  View,
+  Text,
+  StyleSheet,
   Image,
+  FlatList,
   Pressable,
   ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  Modal
+  Dimensions,
+  ActivityIndicator,
+
 } from "react-native";
 import Animated, {
-  Easing,
-  useAnimatedStyle,
   useSharedValue,
-  withDelay,
-  withTiming,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  interpolate,
+  Extrapolation,
 } from "react-native-reanimated";
+import { BlurView } from "expo-blur";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import RenderHTML from "react-native-render-html";
+import Toast from "react-native-toast-message";
+
 import Screen from "@/components/Screen";
+import CartIcon from "@/components/CartIcon";
+import api from "@/utils/config";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
-import api from "@/utils/config";
-import CartIcon from "@/components/CartIcon";
+
 const { width, height } = Dimensions.get("window");
-import Toast from "react-native-toast-message";
-const IMAGE_WIDTH = width * 0.92;
-const IMAGE_HEIGHT = Math.min(height * 0.45, 420); // ✅ responsive cap
-import { runOnJS } from "react-native-reanimated";
+
 export default function ProductScreen() {
+
   const router = useRouter();
-  const { id, image, x, y, w, h } = useLocalSearchParams<any>();
+
+   const { id, image, x, y, w, h } = useLocalSearchParams<any>();
 
   const { add } = useCart();
-  const { isInWishlist, addToWishlist, removeFromWishlist } =
-    useWishlist();
-  const [related, setRelated] = useState<any[]>([]);
-  const [product, setProduct] = useState<any>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const relatedRefs = useRef<{ [key: string]: View | null }>({});
 
+  const {
+    addToWishlist,
+    removeFromWishlist,
+    isInWishlist,
+  } = useWishlist();
+
+  const [product, setProduct] = useState<any>(null);
+
+  const [related, setRelated] = useState<any[]>([]);
+
+  const [selectedSize, setSelectedSize] = useState("");
+
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const imageRef = useRef<FlatList>(null);
 
 
-  const startX = x !== undefined ? Number(x) : width / 2; const startY = y !== undefined ? Number(y) : height / 2; const startW = w !== undefined ? Number(w) : 120; const startH = h !== undefined ? Number(h) : 120; const animX = useSharedValue(startX); const animY = useSharedValue(startY); const animW = useSharedValue(startW); const animH = useSharedValue(startH);
-  const animRadius = useSharedValue(12);
-  const heroStyle = useAnimatedStyle(() => ({
-    position: "absolute", left: animX.value, top: animY.value, width: animW.value, height: animH.value, borderRadius: animRadius.value, overflow: "hidden", zIndex: 10,
-  }))
+
+
+  
+
+const scrollY = useSharedValue(0);
+
+const scrollHandler = useAnimatedScrollHandler({
+  onScroll: (event) => {
+    scrollY.value = event.contentOffset.y;
+  },
+});
+
+const footerStyle = useAnimatedStyle(() => {
+  return {
+    transform: [
+      {
+        translateY: interpolate(
+          scrollY.value,
+          [0, 150],
+          [120, 0],
+          Extrapolation.CLAMP
+        ),
+      },
+    ],
+  };
+});
 
   useEffect(() => {
-    if (image) Image.prefetch(image);
-  }, [image]);
+    fetchProduct();
+  }, []);
+
+  const fetchProduct = async () => {
+
+    try {
+
+      const res = await api.get(
+        `/api/products/${id}`
+      );
+
+      setProduct(res.data);
+
+    } catch (err) {
+
+      console.log(err);
+
+    }
+
+  };
+
   useEffect(() => {
 
     if (!product) return;
 
-    // 🔥 FIX CURRENT CATEGORY
-    const currentCat =
-      typeof product.category === "string"
-        ? product.category
-        : product.category?._id;
+    fetchRelated();
 
+  }, [product]);
 
-    if (!currentCat) return;
+  const fetchRelated = async () => {
 
-    (async () => {
-      try {
-        const res = await api.get("/api/products");
+    try {
 
-        const items = res.data.items || [];
+      const res = await api.get(
+        "/api/products"
+      );
 
-        const relatedProducts = items.filter((p: any) => {
-          const itemCat =
+      const items = res.data.items || [];
+
+      const currentCategory =
+        typeof product.category === "string"
+          ? product.category
+          : product.category?._id;
+
+      setRelated(
+
+        items.filter((p: any) => {
+
+          const cat =
             typeof p.category === "string"
               ? p.category
               : p.category?._id;
 
-
-
           return (
             p._id !== product._id &&
-            currentCat === itemCat
+            cat === currentCategory
           );
-        });
 
+        })
 
-        setRelated(relatedProducts.slice(0, 8));
-
-      } catch (err) {
-        console.log("Related error", err);
-      }
-    })();
-  }, [product]);
-  const uiOpacity = useSharedValue(0);
-  const uiTranslate = useSharedValue(30);
-  const uiStyle = useAnimatedStyle(() => ({
-    opacity: uiOpacity.value,
-    transform: [{ translateY: uiTranslate.value }],
-  }));
-
-  useEffect(() => {
-    const D = 600;
-
-    requestAnimationFrame(() => {
-      animX.value = withTiming((width - IMAGE_WIDTH) / 2, {
-        duration: D,
-        easing: Easing.bezier(0.22, 1, 0.36, 1),
-      });
-
-      animY.value = withTiming(90, {
-        duration: D,
-        easing: Easing.bezier(0.22, 1, 0.36, 1),
-      });
-
-      animW.value = withTiming(IMAGE_WIDTH, {
-        duration: D,
-        easing: Easing.bezier(0.22, 1, 0.36, 1),
-      });
-
-      animH.value = withTiming(
-        IMAGE_HEIGHT,
-        { duration: D },
-        () => {
-          animX.value = (width - IMAGE_WIDTH) / 2;
-          animY.value = 90;
-
-
-        }
       );
-      animRadius.value = withTiming(22, { duration: D });
 
-      uiOpacity.value = withDelay(300, withTiming(1, { duration: 300 }));
-      uiTranslate.value = withDelay(300, withTiming(0, { duration: 300 }));
-    });
-  }, []);
+    } catch (err) {
 
-  /* ================= LOAD PRODUCT ================= */
-  useEffect(() => {
-    (async () => {
-      const res = await api.get(`/api/products/${id}`);
-      setProduct(res.data);
-    })();
-  }, [id]);
+      console.log(err);
 
+    }
 
+  };
 
-  if (!product) {
-    return (
-      <Screen style={{ backgroundColor: "#f4f4f4" }}>
+if (!product) {
 
-        <Animated.View style={[styles.imageWrapper, heroStyle]}>
-          <Image
-            source={{ uri: image }}
-            style={{ width: "100%", height: "100%" }}
-            resizeMode="cover"
-          />
-        </Animated.View>
-      </Screen>
-    );
-  }
-
-  const images = product?.images?.length ? product.images : [image];
-  const sizes = product?.inventory ? Object.keys(product.inventory) : [];
-
-
-
-  if (x === undefined || y === undefined || w === undefined || h === undefined) {
-    return (
-      <Screen style={{ backgroundColor: "#f4f4f4" }}>
-        <View />
-      </Screen>
-    );
-  }
   return (
-    <Screen style={{ backgroundColor: "#f4f4f4" }}>
 
-      <Animated.View
-        style={[styles.imageWrapper, heroStyle]}
+    <Screen style={{ flex: 1, backgroundColor: "#111" }}>
+
+      <Image
+        source={{ uri: image }}
+        style={{
+          width: "100%",
+          height: height * 0.62,
+        }}
+        resizeMode="cover"
+      />
+
+      <View
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActivityIndicator
+          color="#B6FF2E"
+          size="large"
+        />
+      </View>
+
+    </Screen>
+
+  );
+
+}
+
+const images =
+  product?.images?.length
+    ? product.images
+    : [image];
+
+  const sizes = Object.keys(
+    product.inventory || {}
+  );
+
+  return (
+
+    <Screen style={styles.container}>
+
+ 
+
+      <Animated.ScrollView
+
+        showsVerticalScrollIndicator={false}
+
+        onScroll={scrollHandler}
+
+        scrollEventThrottle={16}
+
+        contentContainerStyle={{
+          paddingBottom: 170,
+        }}
+
       >
 
-        <FlatList
-          ref={imageRef}
-          data={images}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(_, i) => i.toString()}
-          getItemLayout={(_, index) => ({
-            length: IMAGE_WIDTH,
-            offset: IMAGE_WIDTH * index,
-            index,
-          })}
-          onMomentumScrollEnd={(e) => {
-            const index = Math.round(
-              e.nativeEvent.contentOffset.x / IMAGE_WIDTH
-            );
-            setActiveIndex(index);
-          }}
-          renderItem={({ item }) => (
-            <Image
-              source={{ uri: item }}
-              style={{
-                width: IMAGE_WIDTH,
-                height: IMAGE_HEIGHT,
-              }}
-              resizeMode="cover"
-            />
-          )}
-        />
-        <Pressable
-          onPress={() => {
-            router.push({
-              pathname: "/product/viewer",
-              params: {
-                images: JSON.stringify(images),
-                index: activeIndex,
-              },
-            });
-          }}
-          style={styles.zoomBtn}
-        >
-          <Ionicons name="expand-outline" size={18} color="#000" />
-        </Pressable>
-      </Animated.View>
-      {/* ================= TOP BAR ================= */}
-      {/* ================= TOP OVERLAY BAR ================= */}
-      <Animated.View style={[styles.topOverlay, uiStyle]}>
-        {/* Back */}
-        <Pressable style={styles.circleBtn} onPress={router.back}>
-          <Ionicons name="arrow-back" size={20} />
-        </Pressable>
+        <View style={styles.hero}>
 
-        {/* Right actions */}
-        <View style={styles.topRight}>
-          <CartIcon />
+     <FlatList
+  ref={imageRef}
+  data={images}
+  horizontal
+  pagingEnabled
+  decelerationRate="fast"
+  snapToInterval={width}
+  snapToAlignment="start"
+  disableIntervalMomentum
+  bounces={false}
+  overScrollMode="never"
+  showsHorizontalScrollIndicator={false}
+  keyExtractor={(_, i) => i.toString()}
+  style={styles.heroSlider}
+  renderItem={({ item }) => (
+    <View style={styles.heroSlide}>
+      <Image
+        source={{ uri: item }}
+        style={styles.heroImage}
+      />
+    </View>
+  )}
+  onMomentumScrollEnd={(e) => {
+    const page = Math.round(
+      e.nativeEvent.contentOffset.x / width
+    );
+    setActiveIndex(page);
+  }}
+/>
 
-          <Pressable
-            style={styles.circleBtn}
-            onPress={() =>
-              isInWishlist(product._id)
-                ? removeFromWishlist(product._id)
-                : addToWishlist(product._id)
-            }
-          >
-            <Ionicons
-              name={isInWishlist(product._id) ? "heart" : "heart-outline"}
-              size={20}
-              color={isInWishlist(product._id) ? "#c00000" : "#000"}
-            />
-          </Pressable>
-        </View>
-      </Animated.View>
+<LinearGradient
+  colors={[
+    "transparent",
+    "rgba(0,0,0,0)",
+    "rgba(0,0,0,0.10)",
+    "rgba(0,0,0,0.55)",
+  ]}
+  locations={[0, 0.65, 0.82, 1]}
+  style={styles.heroGradient}
+/>
 
+          <View style={styles.topBar}>
 
-      {/* ================= CONTENT ================= */}
- <View style={styles.contentContainer}>
-  <View style={{paddingHorizontal: 5,paddingVertical: 20, backgroundColor: "#fff", borderRadius: 28, elevation: 2}}>
-  <ScrollView
-    showsVerticalScrollIndicator={false}
-    contentContainerStyle={{ paddingBottom: 2 }}
-  >
+            <Pressable
+              onPress={() => router.back()}
+            >
 
-        <Animated.View style={[styles.card, uiStyle]} pointerEvents="box-none">
-          {/* THUMBNAILS */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.thumbRow}
-          >
-            {images.map((img: string, index: number) => (
-              <Pressable
-                key={index}
-                onPress={() => {
-                  setActiveIndex(index);
-                  imageRef.current?.scrollToIndex({
-                    index,
-                    animated: true,
-                  });
-                }}
-                style={[
-                  styles.thumb,
-                  activeIndex === index && styles.thumbActive,
-                ]}
+              <BlurView
+                intensity={80}
+                tint="light"
+                style={styles.glassButton}
               >
-                <Image source={{ uri: img }} style={styles.thumbImg} />
-              </Pressable>
-            ))}
-          </ScrollView>
 
-          {/* TITLE */}
-          <View style={styles.titleRow}>
-            <View>
-              <Text style={styles.title}>{product.title}</Text>
-              <Text style={styles.category}>Outerwear Men</Text>
-            </View>
-            <Text style={styles.price}>₹{product.price}</Text>
-          </View>
+                <Ionicons
+                  name="chevron-back"
+                  size={22}
+                  color="#111"
+                />
 
-          {/* SIZES */}
-          <View style={styles.sizeHeader}>
-            <Text style={styles.sizeTitle}>Select Size</Text>
-            <Text style={styles.sizeChart}>Size Chart</Text>
-          </View>
+              </BlurView>
 
-          <View style={styles.sizes}>
-            {sizes.map((size) => {
-              const disabled = product.inventory[size] <= 0;
-              return (
-                <Pressable
-                  key={size}
-                  disabled={disabled}
-                  onPress={() => setSelectedSize(size)}
-                  style={[
-                    styles.sizePill,
-                    selectedSize === size && styles.sizeActive,
-                    disabled && styles.sizeDisabled,
-                  ]}
+            </Pressable>
+
+            <View
+              style={styles.rightButtons}
+            >
+
+              <Pressable
+
+                onPress={() =>
+                  isInWishlist(product._id)
+                    ? removeFromWishlist(product._id)
+                    : addToWishlist(product._id)
+                }
+
+              >
+
+                <BlurView
+                  intensity={80}
+                  tint="light"
+                  style={styles.glassButton}
                 >
-                  <Text
-                    style={[
-                      styles.sizeText,
-                      selectedSize === size && { color: "#fff" },
-                      disabled && styles.sizeTextDisabled,
-                    ]}
-                  >
-                    {size}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
 
-          {/* DESCRIPTION */}
-          <RenderHTML
-            contentWidth={width}
-            source={{ html: product.description }}
-          />
-          <View style={{ marginTop: 20 }}>
-            <Text style={styles.sectionTitle}>You may also like</Text>
+                  <Ionicons
 
-            <FlatList
-              data={related}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              keyExtractor={(item) => item._id}
-              contentContainerStyle={{ paddingVertical: 10 }}
-              renderItem={({ item }) => (
-                <Pressable
-                  ref={(r) => {
-                    relatedRefs.current[item._id] = r;
-                  }}
-                  onPress={() => {
-                    const currentRef = relatedRefs.current[item._id];
+                    name={
+                      isInWishlist(product._id)
+                        ? "heart"
+                        : "heart-outline"
+                    }
 
-                    currentRef?.measureInWindow((x, y, w, h) => {
-                      router.push({
-                        pathname: "/product/[id]",
-                        params: {
-                          id: item._id,
-                          image: item.images?.[0],
-                          x,
-                          y,
-                          w,
-                          h,
-                        },
-                      });
-                    });
-                  }}
-                  style={styles.relatedCard}
-                >
-                  <Image
-                    source={{ uri: item.images?.[0] }}
-                    style={styles.relatedImage}
+                    size={20}
+
+                    color={
+                      isInWishlist(product._id)
+                        ? "#D90429"
+                        : "#111"
+                    }
+
                   />
 
-                  <Text numberOfLines={1} style={styles.relatedTitle}>
+                </BlurView>
+
+              </Pressable>
+
+              <View
+                style={{
+                  marginLeft: 12,
+                }}
+              >
+
+                <CartIcon />
+
+              </View>
+
+            </View>
+
+          </View>
+
+          <View
+            style={styles.counter}
+          >
+
+            <Text
+              style={styles.counterText}
+            >
+
+              {activeIndex + 1}/{images.length}
+
+            </Text>
+
+          </View>
+
+   <ScrollView
+  horizontal
+  style={styles.thumbnailContainer}
+  contentContainerStyle={{
+    paddingHorizontal: 20,
+  }}
+  showsHorizontalScrollIndicator={false}
+>
+
+            {images.map(
+              (
+                img: string,
+                index: number
+              ) => (
+
+                <Pressable
+
+                  key={index}
+
+                  onPress={() => {
+
+                    imageRef.current?.scrollToIndex({
+                      index,
+                      animated: true,
+                    });
+
+                    setActiveIndex(index);
+
+                  }}
+
+                >
+
+                  <Image
+
+                    source={{
+                      uri: img,
+                    }}
+
+                    style={[
+                      styles.thumbnail,
+
+                      activeIndex === index &&
+                        styles.thumbnailActive,
+
+                    ]}
+
+                  />
+
+                </Pressable>
+
+              )
+            )}
+
+          </ScrollView>
+
+        </View>
+
+        <View style={styles.infoCard}>
+
+                    <View style={styles.labelRow}>
+
+            <View style={styles.labelBadge}>
+
+              <Text style={styles.labelText}>
+                PREMIUM COLLECTION
+              </Text>
+
+            </View>
+
+            <View style={styles.ratingBox}>
+
+              <Ionicons
+                name="star"
+                size={15}
+                color="#B6FF2E"
+              />
+
+              <Text style={styles.rating}>
+                4.9
+              </Text>
+
+            </View>
+
+          </View>
+
+          <Text
+            style={styles.productTitle}
+          >
+            {product?.title}
+          </Text>
+
+          <Text
+            style={styles.productSubtitle}
+          >
+            {product?.category?.name ||
+              "Luxury Streetwear"}
+          </Text>
+
+          <View style={styles.priceRow}>
+
+            <View>
+
+              <Text style={styles.price}>
+                ₹{product?.price}
+              </Text>
+
+              <Text style={styles.oldPrice}>
+                ₹{Math.round(
+                  product?.price * 1.35
+                )}
+              </Text>
+
+            </View>
+
+            <View
+              style={styles.savePill}
+            >
+
+              <Text
+                style={styles.saveText}
+              >
+                SAVE 35%
+              </Text>
+
+            </View>
+
+          </View>
+
+          <View style={styles.infoRow}>
+
+            <View
+              style={styles.infoItem}
+            >
+
+              <Ionicons
+                name="diamond-outline"
+                size={20}
+                color="#B6FF2E"
+              />
+
+              <Text
+                style={styles.infoTitle}
+              >
+                Premium
+              </Text>
+
+              <Text
+                style={styles.infoSub}
+              >
+                Fabric
+              </Text>
+
+            </View>
+
+            <View
+              style={styles.divider}
+            />
+
+            <View
+              style={styles.infoItem}
+            >
+
+              <Ionicons
+                name="car-outline"
+                size={20}
+                color="#B6FF2E"
+              />
+
+              <Text
+                style={styles.infoTitle}
+              >
+                Free
+              </Text>
+
+              <Text
+                style={styles.infoSub}
+              >
+                Shipping
+              </Text>
+
+            </View>
+
+            <View
+              style={styles.divider}
+            />
+
+            <View
+              style={styles.infoItem}
+            >
+
+              <Ionicons
+                name="refresh-outline"
+                size={20}
+                color="#B6FF2E"
+              />
+
+              <Text
+                style={styles.infoTitle}
+              >
+                Easy
+              </Text>
+
+              <Text
+                style={styles.infoSub}
+              >
+                Return
+              </Text>
+
+            </View>
+
+          </View>
+
+          <View
+            style={styles.section}
+          >
+
+            <View
+              style={styles.sectionHeader}
+            >
+
+              <Text
+                style={styles.sectionTitle}
+              >
+                Select Size
+              </Text>
+
+              <Pressable>
+
+                <Text
+                  style={styles.sizeGuide}
+                >
+                  Size Guide
+                </Text>
+
+              </Pressable>
+
+            </View>
+
+            <View
+              style={styles.sizeGrid}
+            >
+
+              {sizes.map((size) => {
+
+                const stock =
+                  product.inventory?.[
+                    size
+                  ] || 0;
+
+                const active =
+                  selectedSize ===
+                  size;
+
+                return (
+
+                  <Pressable
+
+                    key={size}
+
+                    disabled={
+                      stock <= 0
+                    }
+
+                    onPress={() =>
+                      setSelectedSize(
+                        size
+                      )
+                    }
+
+                    style={[
+                      styles.sizeCard,
+
+                      active &&
+                        styles.sizeCardActive,
+
+                      stock <= 0 &&
+                        styles.sizeDisabled,
+
+                    ]}
+
+                  >
+
+                    <Text
+                      style={[
+                        styles.sizeValue,
+
+                        active &&
+                          styles.sizeValueActive,
+
+                      ]}
+                    >
+
+                      {size}
+
+                    </Text>
+
+                    <Text
+                      style={[
+                        styles.stockLabel,
+
+                        active &&
+                          styles.stockLabelActive,
+
+                        stock <= 0 &&
+                          styles.stockOut,
+
+                      ]}
+                    >
+
+                      {stock > 0
+                        ? `${stock} Left`
+                        : "Sold Out"}
+
+                    </Text>
+
+                  </Pressable>
+
+                );
+
+              })}
+
+            </View>
+
+          </View>
+
+          <View
+            style={styles.section}
+          >
+
+            <Text
+              style={styles.sectionTitle}
+            >
+              Description
+            </Text>
+
+            <View
+              style={
+                styles.descriptionCard
+              }
+            >
+
+              <RenderHTML
+                contentWidth={
+                  width - 44
+                }
+                source={{
+                  html: product.description,
+                }}
+              />
+
+            </View>
+
+          </View>
+
+          <View
+            style={styles.section}
+          >
+
+            <Text
+              style={styles.sectionTitle}
+            >
+              Highlights
+            </Text>
+
+            <View
+              style={
+                styles.featureGrid
+              }
+            >
+                          <View style={styles.featureCard}>
+
+              <Ionicons
+                name="diamond-outline"
+                size={24}
+                color="#111"
+              />
+
+              <Text style={styles.featureTitle}>
+                Premium Quality
+              </Text>
+
+              <Text style={styles.featureSub}>
+                Luxury finish crafted for everyday wear.
+              </Text>
+
+            </View>
+
+            <View style={styles.featureCard}>
+
+              <Ionicons
+                name="leaf-outline"
+                size={24}
+                color="#111"
+              />
+
+              <Text style={styles.featureTitle}>
+                Soft Fabric
+              </Text>
+
+              <Text style={styles.featureSub}>
+                Lightweight & breathable comfort.
+              </Text>
+
+            </View>
+
+            <View style={styles.featureCard}>
+
+              <Ionicons
+                name="shield-checkmark-outline"
+                size={24}
+                color="#111"
+              />
+
+              <Text style={styles.featureTitle}>
+                Authentic
+              </Text>
+
+              <Text style={styles.featureSub}>
+                Genuine premium collection.
+              </Text>
+
+            </View>
+
+            <View style={styles.featureCard}>
+
+              <Ionicons
+                name="refresh-outline"
+                size={24}
+                color="#111"
+              />
+
+              <Text style={styles.featureTitle}>
+                Easy Returns
+              </Text>
+
+              <Text style={styles.featureSub}>
+                7 day hassle-free exchange.
+              </Text>
+
+            </View>
+
+          </View>
+
+        </View>
+
+        <View style={styles.section}>
+
+          <View style={styles.sectionHeader}>
+
+            <Text style={styles.sectionTitle}>
+              You May Also Like
+            </Text>
+
+            <Pressable
+              onPress={() =>
+                router.push("/shop")
+              }
+            >
+
+              <Text style={styles.viewAll}>
+                View All
+              </Text>
+
+            </Pressable>
+
+          </View>
+
+          <FlatList
+            horizontal
+            data={related}
+            keyExtractor={(item) => item._id}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingTop: 18,
+              paddingBottom: 20,
+              paddingRight: 20,
+            }}
+            renderItem={({ item }) => (
+
+              <Pressable
+                style={styles.relatedCard}
+                onPress={() =>
+                  router.replace({
+                    pathname: "/product/[id]",
+                    params: {
+                      id: item._id,
+                    },
+                  })
+                }
+              >
+
+                <Image
+                  source={{
+                    uri: item.images?.[0],
+                  }}
+                  style={styles.relatedImage}
+                />
+
+                <LinearGradient
+                  colors={[
+                    "transparent",
+                    "rgba(0,0,0,.75)",
+                  ]}
+                  style={styles.relatedGradient}
+                />
+
+                <View
+                  style={styles.relatedContent}
+                >
+
+                  <Text
+                    numberOfLines={2}
+                    style={styles.relatedTitle}
+                  >
                     {item.title}
                   </Text>
 
-                  <Text style={styles.relatedPrice}>₹{item.price}</Text>
-                </Pressable>
-              )}
-            />
-          </View>
-        </Animated.View>
-        {/* 🔥 RELATED PRODUCTS */}
+                  <View
+                    style={styles.relatedBottom}
+                  >
 
-      </ScrollView>
+                    <Text
+                      style={styles.relatedPrice}
+                    >
+                      ₹{item.price}
+                    </Text>
+
+                    <View
+                      style={styles.relatedArrow}
+                    >
+
+                      <Ionicons
+                        name="arrow-forward"
+                        size={18}
+                        color="#111"
+                      />
+
+                    </View>
+
+                  </View>
+
+                </View>
+
+              </Pressable>
+
+            )}
+          />
+
+        </View>
+
       </View>
-</View>
-      {/* ================= BOTTOM BAR ================= */}
-      <Animated.View style={[styles.bottomBar, uiStyle]}>
-        <Pressable style={styles.shareBtn}>
-          <Ionicons name="share-social-outline" size={20} />
-        </Pressable>
 
-        <Pressable
-          style={styles.cartBtn}
-          onPress={() => {
-            console.log("ADD TO CART OK", selectedSize);
-            if (!selectedSize) {
-              Toast.show({ type: "error", text1: "Please select a size" });
-              return;
-            }
-            add(product._id, selectedSize);
-          }}
+    </Animated.ScrollView>
+
+<Animated.View
+  style={[styles.bottomBar, footerStyle]}
+>
+
+      <View>
+
+        <Text
+          style={styles.bottomLabel}
         >
-          <Text style={styles.cartText}>Add To Cart</Text>
-        </Pressable>
-      </Animated.View>
+          Total
+        </Text>
 
+        <Text
+          style={styles.bottomPrice}
+        >
+          ₹{product.price}
+        </Text>
 
-    </Screen>
-  );
+      </View>
+
+      <Pressable
+        style={styles.cartButton}
+        onPress={() => {
+
+          if (!selectedSize) {
+
+            Toast.show({
+              type: "error",
+              text1:
+                "Please select a size",
+            });
+
+            return;
+
+          }
+
+          add(
+            product._id,
+            selectedSize,
+            1
+          );
+
+        }}
+      >
+
+        <Text
+          style={styles.cartButtonText}
+        >
+          ADD TO BAG
+        </Text>
+
+        <View
+          style={styles.arrowCircle}
+        >
+
+          <Ionicons
+            name="arrow-forward"
+            size={20}
+            color="#111"
+          />
+
+        </View>
+
+      </Pressable>
+
+    </Animated.View>
+
+  </Screen>
+
+);
+
 }
-/* ================= STYLES ================= */
 
 const styles = StyleSheet.create({
+  container: {
+  flex: 1,
+  backgroundColor: "#F7F7F7",
+},
+
+loader: {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  backgroundColor: "#111",
+},
+
+hero: {
+  width: "100%",
+  height: height * 0.62,
+  overflow: "hidden",
+  borderBottomLeftRadius: 34,
+  borderBottomRightRadius: 34,
+},
+
+heroSlider: {
+  width: "100%",
+  height: "100%",
+},
+
+heroSlide: {
+  width: width,
+  height: "100%",
+},
+
+heroImage: {
+  width: "100%",
+  height: "100%",
+  resizeMode: "cover",
+},
+
+
+
+topBar: {
+  position: "absolute",
+  top: 20,
+  left: 20,
+  right: 20,
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+},
+
+rightButtons: {
+  flexDirection: "row",
+  alignItems: "center",
+},
+
+glassButton: {
+  width: 54,
+  height: 54,
+  borderRadius: 27,
+  overflow: "hidden",
+  justifyContent: "center",
+  alignItems: "center",
+  borderWidth: 1,
+  borderColor: "rgba(255,255,255,.25)",
+},
+
+counter: {
+  position: "absolute",
+  right: 20,
+  bottom: 122,
+  backgroundColor: "rgba(0,0,0,.55)",
+  borderRadius: 20,
+  paddingHorizontal: 14,
+  paddingVertical: 7,
+},
+
+counterText: {
+  color: "#FFF",
+  fontSize: 13,
+  fontWeight: "800",
+},
+
+
+thumbnail: {
+  width: 62,
+  height: 80,
+  borderRadius: 18,
+  marginRight: 12,
+  borderWidth: 2,
+  borderColor: "transparent",
+},
+
+thumbnailActive: {
+  borderColor: "#B6FF2E",
+},
+
+
+
+infoCard: {
+  marginTop: -28,
+  backgroundColor: "#FFF",
+  borderTopLeftRadius: 36,
+  borderTopRightRadius: 36,
+  paddingHorizontal: 12,
+  paddingTop: 28,
+  paddingBottom: 36,
+},
+
+labelRow: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+},
+
+labelBadge: {
+  backgroundColor: "#111",
+  borderRadius: 18,
+  paddingHorizontal: 14,
+  paddingVertical: 8,
+},
+
+labelText: {
+  color: "#FFF",
+  fontSize: 11,
+  fontWeight: "900",
+  letterSpacing: 1.4,
+},
+
+ratingBox: {
+  flexDirection: "row",
+  alignItems: "center",
+},
+
+rating: {
+  marginLeft: 5,
+  fontSize: 15,
+  fontWeight: "800",
+},
+
+productTitle: {
+  marginTop: 18,
+  fontSize: 38,
+  lineHeight: 44,
+  fontWeight: "900",
+  color: "#111",
+},
+
+productSubtitle: {
+  marginTop: 10,
+  color: "#777",
+  fontSize: 16,
+},
+
+priceRow: {
+  marginTop: 26,
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+},
+
+price: {
+  fontSize: 40,
+  fontWeight: "900",
+  color: "#111",
+},
+
+oldPrice: {
+  marginTop: 4,
+  color: "#999",
+  fontSize: 16,
+  textDecorationLine: "line-through",
+},
+
+savePill: {
+  backgroundColor: "#B6FF2E",
+  borderRadius: 22,
+  paddingHorizontal: 16,
+  paddingVertical: 10,
+},
+
+saveText: {
+  color: "#111",
+  fontWeight: "900",
+  fontSize: 12,
+},
+
+infoRow: {
+  marginTop: 28,
+  backgroundColor: "#111",
+  borderRadius: 26,
+  height: 92,
+  flexDirection: "row",
+  justifyContent: "space-evenly",
+  alignItems: "center",
+},
+
+infoItem: {
+  alignItems: "center",
+},
+
+infoTitle: {
+  marginTop: 8,
+  color: "#FFF",
+  fontWeight: "900",
+  fontSize: 16,
+},
+
+infoSub: {
+  marginTop: 3,
+  color: "#888",
+  fontSize: 11,
+},
+
+divider: {
+  width: 1,
+  height: 40,
+  backgroundColor: "#2A2A2A",
+},
+
+section: {
+  marginTop: 34,
+},
+
+sectionHeader: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 18,
+},
 
 sectionTitle: {
+  fontSize: 26,
+  fontWeight: "900",
+  color: "#111",
+},
+
+sizeGuide: {
+  color: "#67C61C",
+  fontWeight: "800",
+},
+sizeGrid: {
+  flexDirection: "row",
+  flexWrap: "wrap",
+  justifyContent: "space-between",
+},
+
+sizeCard: {
+  width: "31.5%",
+  height: 86,
+  borderRadius: 22,
+  backgroundColor: "#F7F7F7",
+  justifyContent: "center",
+  alignItems: "center",
+  marginBottom: 14,
+  borderWidth: 1,
+  borderColor: "#ECECEC",
+},
+
+sizeCardActive: {
+  backgroundColor: "#111",
+  borderColor: "#111",
+},
+
+sizeDisabled: {
+  opacity: 0.35,
+},
+
+sizeValue: {
   fontSize: 18,
-  fontWeight: "700",
-  marginBottom: 10,
+  fontWeight: "900",
+  color: "#111",
+},
+
+sizeValueActive: {
+  color: "#FFF",
+},
+
+stockLabel: {
+  marginTop: 6,
+  fontSize: 11,
+  color: "#777",
+},
+
+stockLabelActive: {
+  color: "#B6FF2E",
+},
+
+stockOut: {
+  color: "#D90429",
+},
+
+descriptionCard: {
+  marginTop: 16,
+  padding: 18,
+  backgroundColor: "#FAFAFA",
+  borderRadius: 24,
+  borderWidth: 1,
+  borderColor: "#ECECEC",
+},
+
+featureGrid: {
+  marginTop: 18,
+  flexDirection: "row",
+  flexWrap: "wrap",
+  justifyContent: "space-between",
+},
+
+featureCard: {
+  width: "48%",
+  backgroundColor: "#F8F8F8",
+  borderRadius: 24,
+  padding: 18,
+  marginBottom: 16,
+},
+
+featureTitle: {
+  marginTop: 16,
+  fontSize: 18,
+  fontWeight: "900",
+  color: "#111",
+},
+
+featureSub: {
+  marginTop: 8,
+  fontSize: 14,
+  lineHeight: 21,
+  color: "#777",
+},
+
+viewAll: {
+  color: "#67C61C",
+  fontWeight: "800",
+  fontSize: 14,
 },
 
 relatedCard: {
-  width: 140,
-  marginRight: 12,
+  width: 180,
+  height: 270,
+  borderRadius: 30,
+  overflow: "hidden",
+  backgroundColor: "#111",
+  marginRight: 18,
 },
 
 relatedImage: {
   width: "100%",
-  height: 180,
-  borderRadius: 16,
-  backgroundColor: "#eee",
+  height: "100%",
+},
+
+relatedGradient: {
+  ...StyleSheet.absoluteFillObject,
+},
+
+relatedContent: {
+  position: "absolute",
+  left: 16,
+  right: 16,
+  bottom: 16,
 },
 
 relatedTitle: {
-  fontSize: 13,
-  marginTop: 6,
-  fontWeight: "500",
+  color: "#FFF",
+  fontSize: 20,
+  fontWeight: "900",
 },
 
-relatedPrice: {
-  fontSize: 14,
-  fontWeight: "700",
-  marginTop: 2,
-},
-
-
-fullscreenImage: {
-  width: "100%",
-  height: "100%",
-  resizeMode: "contain",
-},
-
-topOverlay: {
-  position: "absolute",
-  top: 42,              // safe for status bar
-  left: 16,
-  right: 16,
+relatedBottom: {
+  marginTop: 14,
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
-  zIndex: 20,           // 🔥 ABOVE HERO
-  elevation: 20,        // 🔥 ANDROID FIX
 },
-topRight: {
+
+relatedPrice: {
+  color: "#FFF",
+  fontSize: 24,
+  fontWeight: "900",
+},
+
+relatedArrow: {
+  width: 42,
+  height: 42,
+  borderRadius: 21,
+  backgroundColor: "#B6FF2E",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+bottomBar: {
+  position: "absolute",
+  left: 16,
+  right: 16,
+  bottom: 16,
+  height: 84,
+  borderRadius: 30,
+  backgroundColor: "#111",
+  paddingHorizontal: 22,
   flexDirection: "row",
+  justifyContent: "space-between",
   alignItems: "center",
-  gap: 12,
+
+  shadowColor: "#000",
+  shadowOpacity: 0.22,
+  shadowRadius: 18,
+  shadowOffset: {
+    width: 0,
+    height: 10,
+  },
+
+  elevation: 16,
 },
 
+bottomLabel: {
+  color: "#8F8F8F",
+  fontSize: 11,
+  letterSpacing: 2,
+  fontWeight: "700",
+},
 
-  imageWrapper: {
-    backgroundColor: "#eee",
-  },
-  bigImage: {
-    width: IMAGE_WIDTH,
-    height: IMAGE_HEIGHT,
-    resizeMode: "cover",
-  },
-  dots: {
-    position: "absolute",
-    bottom: 12,
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 6,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 6,
-    backgroundColor: "rgba(255,255,255,0.6)",
-  },
-  dotActive: {
-    width: 14,
-    backgroundColor: "#34C759",
-  },
+bottomPrice: {
+  marginTop: 4,
+  color: "#FFF",
+  fontSize: 30,
+  fontWeight: "900",
+},
 
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  circleBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 99,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-  },
+cartButton: {
+  width: 210,
+  height: 58,
+  borderRadius: 30,
+  backgroundColor: "#B6FF2E",
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  paddingHorizontal: 18,
+},
 
+cartButtonText: {
+  color: "#111",
+  fontSize: 15,
+  fontWeight: "900",
+  letterSpacing: 1,
+},
 
-  card: {
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-  borderBottomLeftRadius: 28,
-  borderBottomRightRadius: 28,
-    padding: 20,
-    zIndex: 2,
-     elevation: 1,
-     paddingBottom: 100,
-     paddingTop: 20,
-  },
-  thumbRow: {
-    marginBottom: 16,
-  },
-  thumb: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#eee",
-    marginRight: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  thumbActive: {
-    borderWidth: 2,
-    borderColor: "#34C759",
-  },
-  thumbImg: {
-    width: "80%",
-    height: "80%",
-    borderRadius: 28,
-  },
-  titleRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  price: {
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  category: {
-    fontSize: 13,
-    color: "#999",
-    marginTop: 4,
-  },
-  sizeHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 16,
-  },
-  sizeTitle: {
-    fontWeight: "600",
-  },
-  zoomBtn: {
-  position: "absolute",
-  bottom: 12,
-  right: 12,
-  width: 36,
-  height: 36,
-  borderRadius: 18,
-  backgroundColor: "#fff",
+arrowCircle: {
+  width: 40,
+  height: 40,
+  borderRadius: 20,
+  backgroundColor: "#FFF",
   justifyContent: "center",
   alignItems: "center",
-  elevation: 5,
 },
-  sizeChart: {
-    color: "#34C759",
-    fontWeight: "600",
-  },
-  sizes: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    marginVertical: 12,
-  },
-  contentContainer: {
+heroGradient: {
   position: "absolute",
+  left: 0,
+  right: 0,
   bottom: 0,
-  left: width * 0.04,
-  right: width * 0.04,
-  justifyContent: "center",
-  alignItems: "center",
-  width: width * 0.92,
-  height: height * 0.45, 
-  borderRadius: 28,
+  height: "35%",
 },
-  sizePill: {
-    width: 62,
-    height: 62,
-    borderRadius: 99,
-    backgroundColor: "#f2f2f2",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  sizeActive: {
-    backgroundColor: "#000",
-  },
-  sizeDisabled: {
-    opacity: 0.4,
-  },
-  sizeText: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  sizeTextDisabled: {
-    color: "#999",
-  },
-  bottomBar: {
-    position: "absolute",
-    bottom: 0,
-    width: width,
-    padding: 16,
-    backgroundColor: "#fff",
-    flexDirection: "row",
-    gap: 12,
-    zIndex: 4,
-  },
-  shareBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#f2f2f2",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  cartBtn: {
-    flex: 1,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#34C759",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  cartText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
+thumbnailContainer: {
+  position: "absolute",
+  bottom: 22,
+  left: 0,
+  right: 0,
+},
 });
