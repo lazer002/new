@@ -230,7 +230,7 @@ return (
   <View style={styles.sectionHeader}>
     <Text style={styles.sectionTitle}>Bundle Studio</Text>
 
-    <TouchableOpacity onPress={() => router.push("/bundles")}>
+    <TouchableOpacity onPress={() => router.push("/bundle")}>
       <Text style={styles.viewAll}>View all</Text>
     </TouchableOpacity>
   </View>

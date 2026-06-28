@@ -13,7 +13,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import api from "@/utils/config";
-
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 const { width } = Dimensions.get("window");
 
 type Product = {
@@ -76,183 +77,224 @@ export default function BundlePLP() {
           paddingBottom: 40,
         }}
 
-        ListHeaderComponent={
-          <>
-            {/* HEADER */}
+    ListHeaderComponent={
+  <View style={styles.listHeader}>
 
-            <View style={styles.header}>
+    <Text style={styles.collectionLabel}>
+      CURATED DROP
+    </Text>
 
-              <View>
+    <Text style={styles.collectionTitle}>
+      Luxury{"\n"}Bundles
+    </Text>
 
-                <Text style={styles.smallTitle}>
-                  CURATED COLLECTIONS
-                </Text>
+    <Text style={styles.collectionSubtitle}>
+      Premium looks curated by our stylists.
+    </Text>
 
-                <Text style={styles.bigTitle}>
-                  Bundle Studio
-                </Text>
+    <View style={styles.searchWrapper}>
 
-              </View>
+      <Ionicons
+        name="search"
+        size={20}
+        color="#888"
+      />
 
-              <TouchableOpacity style={styles.searchCircle}>
-                <Text style={{ fontSize: 22 }}>⌕</Text>
-              </TouchableOpacity>
+      <TextInput
+        value={search}
+        onChangeText={setSearch}
+        placeholder="Search bundles..."
+        placeholderTextColor="#999"
+        style={styles.searchInput}
+      />
 
-            </View>
+    </View>
 
-            {/* SEARCH */}
+  </View>
+}
+renderItem={({ item }) => (
 
-            <View style={styles.searchContainer}>
+<TouchableOpacity
+  activeOpacity={0.94}
+  style={styles.bundleCard}
+  onPress={() =>
+    router.push({
+      pathname: "/bundle/[id]",
+      params: {
+        id: item._id,
+      },
+    })
+  }
+>
 
-              <TextInput
-                value={search}
-                onChangeText={setSearch}
-                placeholder="Search Bundles..."
-                placeholderTextColor="#999"
-                style={styles.searchInput}
-              />
+  {/* Background */}
 
-            </View>
+  <Image
+    source={{
+      uri: item.mainImages?.[0],
+    }}
+    style={styles.bundleImage}
+  />
 
-            {/* HERO */}
+  <View style={styles.overlay} />
 
-            {bundles.length > 0 && (
+  <LinearGradient
+  colors={[
+    "transparent",
+    "rgba(0,0,0,.15)",
+    "rgba(0,0,0,.45)",
+    "rgba(0,0,0,.75)",
+  ]}
+  style={styles.gradient}
+/>
 
-              <TouchableOpacity
-                activeOpacity={0.9}
-                style={styles.heroCard}
-                onPress={() =>
-                  router.push({
-                    pathname: "/bundle/[id]",
-                    params: {
-                      id: bundles[0]._id,
-                    },
-                  })
-                }
-              >
+  {/* Top */}
 
-                <Image
-                  source={{
-                    uri: bundles[0].mainImages[0],
-                  }}
-                  style={styles.heroImage}
-                />
+  <View style={styles.topRow}>
 
-                <View style={styles.heroOverlay} />
+    <View style={styles.bundlePill}>
 
-                <View style={styles.heroContent}>
+      <Text style={styles.bundlePillText}>
+        BUNDLE
+      </Text>
 
-                  <Text style={styles.heroLabel}>
-                    FEATURED
-                  </Text>
+    </View>
 
-                  <Text style={styles.heroTitle}>
-                    {bundles[0].title}
-                  </Text>
+    <View style={styles.discountPill}>
 
-                  <Text style={styles.heroButton}>
-                    Shop Collection →
-                  </Text>
+      <Text style={styles.discountText}>
+        30% OFF
+      </Text>
 
-                </View>
+    </View>
 
-              </TouchableOpacity>
+  </View>
 
-            )}
+  {/* Content */}
 
-            <Text style={styles.sectionTitle}>
-              Explore Bundles
-            </Text>
+<View style={styles.content}>
 
-          </>
-        }
+  <Text style={styles.smallLabel}>
+    CURATED BUNDLE
+  </Text>
 
-        renderItem={({ item, index }) => (
-  <TouchableOpacity
-    activeOpacity={0.92}
-    style={styles.bundleCard}
-    onPress={() =>
-      router.push({
-        pathname: "/bundle/[id]",
-        params: {
-          id: item._id,
-        },
-      })
-    }
+  <Text
+    numberOfLines={2}
+    style={styles.bundleTitle}
   >
-    {/* HERO */}
+    {item.title}
+  </Text>
 
-    <Image
-      source={{
-        uri: item.mainImages?.[0],
-      }}
-      style={styles.bundleImage}
-    />
+  <View style={styles.priceRow}>
 
-    <View style={styles.bundleOverlay} />
+    <Text style={styles.price}>
+      ₹{item.price}
+    </Text>
 
-    {/* SAVE */}
+    <Text style={styles.oldPrice}>
+      ₹{Math.round(item.price * 1.3)}
+    </Text>
 
     <View style={styles.saveBadge}>
+
       <Text style={styles.saveBadgeText}>
-        SAVE
+        SAVE 30%
       </Text>
-    </View>
-
-    {/* PRODUCT COLLAGE */}
-
-    <View style={styles.productStack}>
-
-      {item.products?.slice(0, 3).map((product, i) => (
-        <Image
-          key={product._id}
-          source={{
-            uri: product.images?.[0],
-          }}
-          style={[
-            styles.stackImage,
-            {
-              left: i * 28,
-              zIndex: 20 - i,
-            },
-          ]}
-        />
-      ))}
 
     </View>
 
-    {/* CONTENT */}
+  </View>
 
-    <View style={styles.bundleContent}>
+  <Text
+    numberOfLines={1}
+    style={styles.brandText}
+  >
+    {item.description || "Street Collection"}
+  </Text>
 
-      <Text
-        numberOfLines={2}
-        style={styles.bundleTitle}
-      >
-        {item.title}
-      </Text>
+  {/* ---------- Bottom ---------- */}
 
-      <Text style={styles.bundleCount}>
-        {item.products.length} Products Included
-      </Text>
+  <View style={styles.bottomRow}>
 
-      <View style={styles.priceRow}>
+    <View>
 
-        <Text style={styles.bundlePrice}>
-          ₹{item.price}
-        </Text>
+      <View style={styles.stackRow}>
 
-        <TouchableOpacity style={styles.shopButton}>
-          <Text style={styles.shopButtonText}>
-            View →
-          </Text>
-        </TouchableOpacity>
+        {item.products?.map((product,index)=>(
+
+          <View
+            key={product._id}
+            style={[
+              styles.stackCircle,
+              {
+                marginLeft:index===0?0:-14,
+                zIndex:20-index,
+              },
+            ]}
+          >
+
+            <Image
+              source={{
+                uri:product.images?.[0],
+              }}
+              style={styles.stackImage}
+            />
+
+          </View>
+
+        ))}
 
       </View>
 
     </View>
 
-  </TouchableOpacity>
+    <View style={styles.includeWrap}>
+
+      <Text style={styles.includeLabel}>
+        INCLUDED
+      </Text>
+
+      <Text style={styles.includeCount}>
+        {item.products.length} Items
+      </Text>
+
+    </View>
+
+  </View>
+
+  {/* ---------- CTA ---------- */}
+
+  {/* <View style={styles.ctaRow}>
+
+    <TouchableOpacity
+      style={styles.ctaButton}
+      activeOpacity={0.9}
+    >
+
+      <Text style={styles.ctaText}>
+        VIEW BUNDLE
+      </Text>
+
+    </TouchableOpacity>
+
+    <TouchableOpacity
+      style={styles.arrowButton}
+    >
+
+      <Ionicons
+        name="arrow-forward"
+        size={24}
+        color="#FFF"
+      />
+
+    </TouchableOpacity>
+
+  </View> */}
+
+</View>
+
+</TouchableOpacity>
+
 )}
 
       />
@@ -273,203 +315,379 @@ flex:1,
 justifyContent:"center",
 alignItems:"center",
 },
+bottomRow:{
+  marginTop:24,
 
-header:{
-paddingHorizontal:20,
-paddingTop:12,
-paddingBottom:20,
-flexDirection:"row",
-justifyContent:"space-between",
-alignItems:"center",
+  flexDirection:"row",
+
+  justifyContent:"space-between",
+
+  alignItems:"flex-end",
 },
 
-smallTitle:{
-fontSize:12,
-letterSpacing:2,
-color:"#888",
-fontWeight:"700",
-},
-bundleCard: {
-  marginHorizontal: 20,
-  height: 480,
-  borderRadius: 30,
-  overflow: "hidden",
-  marginBottom: 26,
-  backgroundColor: "#F6F6F6",
+stackRow:{
+  flexDirection:"row",
 
-  shadowColor: "#000",
-  shadowOpacity: 0.08,
-  shadowRadius: 18,
-  shadowOffset: {
-    width: 0,
-    height: 8,
+  alignItems:"center",
+
+  height:56,
+},
+
+stackCircle:{
+  width:58,
+  height:58,
+
+  borderRadius:29,
+
+  backgroundColor:"#FFF",
+
+  padding:3,
+
+  overflow:"hidden",
+
+  borderWidth:2,
+
+  borderColor:"rgba(255,255,255,.35)",
+},
+
+stackImage:{
+  width:"100%",
+  height:"100%",
+
+  borderRadius:26,
+},
+
+includeWrap:{
+  alignItems:"flex-end",
+},
+
+includeLabel:{
+  color:"#CFCFCF",
+
+  fontSize:11,
+
+  fontWeight:"700",
+
+  letterSpacing:3,
+},
+
+includeCount:{
+  marginTop:6,
+
+  color:"#FFF",
+
+  fontSize:26,
+
+  fontWeight:"900",
+},
+
+ctaRow:{
+  marginTop:28,
+
+  flexDirection:"row",
+
+  alignItems:"center",
+},
+
+ctaButton:{
+  flex:1,
+
+  height:58,
+
+  borderRadius:29,
+
+  backgroundColor:"#FFF",
+
+  justifyContent:"center",
+
+  alignItems:"center",
+},
+
+ctaText:{
+  color:"#111",
+
+  fontSize:17,
+
+  fontWeight:"900",
+
+  letterSpacing:1.4,
+},
+
+arrowButton:{
+  width:58,
+  height:58,
+
+  marginLeft:14,
+
+  borderRadius:29,
+
+  backgroundColor:"rgba(255,255,255,.12)",
+
+  borderWidth:1.5,
+
+  borderColor:"rgba(255,255,255,.30)",
+
+  justifyContent:"center",
+
+  alignItems:"center",
+},
+bundleCard:{
+  height:430,
+
+  marginHorizontal:18,
+
+  marginBottom:26,
+
+  borderRadius:34,
+
+  overflow:"hidden",
+
+  backgroundColor:"#111",
+
+  shadowColor:"#000",
+
+  shadowOpacity:.25,
+
+  shadowRadius:22,
+
+  shadowOffset:{
+    width:0,
+    height:10,
   },
 
-  elevation: 8,
+  elevation:12,
 },
 
-bundleImage: {
-  width: "100%",
-  height: 320,
-},
-
-bundleOverlay: {
+bundleImage:{
   ...StyleSheet.absoluteFillObject,
-  backgroundColor: "rgba(0,0,0,.15)",
+
+  width:"100%",
+
+  height:"100%",
 },
 
-saveBadge: {
-  position: "absolute",
-  top: 18,
-  right: 18,
-  backgroundColor: "#111",
-  borderRadius: 30,
-  paddingHorizontal: 14,
-  paddingVertical: 8,
+overlay:{
+  ...StyleSheet.absoluteFillObject,
+
+  backgroundColor:"rgba(0,0,0,.18)",
 },
 
-saveBadgeText: {
-  color: "#FFF",
-  fontWeight: "700",
-  fontSize: 12,
+gradient:{
+  position:"absolute",
+
+  left:0,
+  right:0,
+  bottom:0,
+
+  height:220,
 },
 
-productStack: {
-  position: "absolute",
-  top: 240,
-  left: 20,
-  height: 62,
-  width: 180,
+topRow:{
+  position:"absolute",
+
+  top:22,
+  left:22,
+  right:22,
+
+  flexDirection:"row",
+
+  justifyContent:"space-between",
+
+  alignItems:"center",
 },
 
-stackImage: {
-  position: "absolute",
-  width: 62,
-  height: 62,
-  borderRadius: 18,
-  borderWidth: 3,
-  borderColor: "#FFF",
+bundlePill:{
+  backgroundColor:"#FFF",
+
+  borderRadius:20,
+
+  paddingHorizontal:14,
+
+  paddingVertical:8,
 },
 
-bundleContent: {
-  flex: 1,
-  padding: 22,
-  justifyContent: "space-between",
+bundlePillText:{
+  color:"#111",
+
+  fontWeight:"900",
+
+  fontSize:11,
+
+  letterSpacing:.8,
 },
 
-bundleTitle: {
-  fontSize: 28,
-  fontWeight: "900",
-  color: "#111",
+discountPill:{
+  backgroundColor:"#B6FF2E",
+
+  borderRadius:20,
+
+  paddingHorizontal:14,
+
+  paddingVertical:8,
 },
 
-bundleCount: {
-  color: "#777",
-  marginTop: 8,
-  fontSize: 15,
+discountText:{
+  color:"#111",
+
+  fontWeight:"900",
+
+  fontSize:11,
 },
 
-priceRow: {
-  marginTop: 24,
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
+content:{
+  position:"absolute",
+
+  left:22,
+  right:22,
+
+  bottom:30,
 },
 
-bundlePrice: {
-  fontSize: 30,
-  fontWeight: "900",
+smallLabel:{
+  color:"#D0D0D0",
+
+  letterSpacing:4,
+
+  fontSize:11,
+
+  fontWeight:"700",
 },
 
-shopButton: {
-  backgroundColor: "#111",
-  borderRadius: 30,
-  paddingHorizontal: 22,
-  paddingVertical: 12,
+bundleTitle:{
+  color:"#FFF",
+
+  fontSize:38,
+
+  fontWeight:"900",
+
+  marginTop:10,
 },
 
-shopButtonText: {
-  color: "#FFF",
-  fontWeight: "700",
-},
-bigTitle:{
-fontSize:34,
-fontWeight:"900",
-marginTop:6,
+priceRow:{
+  flexDirection:"row",
+
+  alignItems:"center",
+
+  marginTop:18,
 },
 
-searchCircle:{
-width:52,
-height:52,
-borderRadius:26,
-backgroundColor:"#FFF",
-justifyContent:"center",
-alignItems:"center",
-elevation:6,
+price:{
+  color:"#FFF",
+
+  fontSize:40,
+
+  fontWeight:"900",
 },
 
-searchContainer:{
-paddingHorizontal:20,
-marginBottom:20,
+oldPrice:{
+  color:"#BDBDBD",
+
+  fontSize:18,
+
+  textDecorationLine:"line-through",
+
+  marginLeft:12,
+},
+
+saveBadge:{
+  marginLeft:12,
+
+  backgroundColor:"#B6FF2E",
+
+  borderRadius:18,
+
+  paddingHorizontal:12,
+
+  paddingVertical:7,
+},
+
+saveBadgeText:{
+  color:"#111",
+
+  fontWeight:"900",
+
+  fontSize:11,
+},
+
+brandText:{
+  color:"#DDD",
+
+  marginTop:14,
+
+  fontSize:15,
+},
+
+
+
+
+
+
+listHeader:{
+  paddingHorizontal:22,
+  paddingTop:16,
+  paddingBottom:28,
+},
+
+collectionLabel:{
+  color:"#8F8F8F",
+
+  fontSize:12,
+
+  fontWeight:"800",
+
+  letterSpacing:4,
+},
+
+collectionTitle:{
+  marginTop:10,
+
+  fontSize:48,
+
+  lineHeight:50,
+
+  fontWeight:"900",
+
+  color:"#111",
+},
+
+collectionSubtitle:{
+  marginTop:12,
+
+  color:"#777",
+
+  fontSize:16,
+
+  lineHeight:24,
+
+  width:"80%",
+},
+
+searchWrapper:{
+  marginTop:28,
+
+  height:58,
+
+  borderRadius:29,
+
+  backgroundColor:"#F4F4F4",
+
+  paddingHorizontal:20,
+
+  flexDirection:"row",
+
+  alignItems:"center",
 },
 
 searchInput:{
-height:56,
-backgroundColor:"#F6F6F6",
-borderRadius:18,
-paddingHorizontal:18,
-fontSize:16,
+  flex:1,
+
+  marginLeft:12,
+
+  fontSize:16,
+
+  color:"#111",
 },
 
-heroCard:{
-marginHorizontal:20,
-height:430,
-borderRadius:28,
-overflow:"hidden",
-marginBottom:30,
-},
 
-heroImage:{
-width:"100%",
-height:"100%",
-},
-
-heroOverlay:{
-...StyleSheet.absoluteFillObject,
-backgroundColor:"rgba(0,0,0,.28)",
-},
-
-heroContent:{
-position:"absolute",
-bottom:28,
-left:24,
-},
-
-heroLabel:{
-color:"#FFF",
-letterSpacing:2,
-fontSize:12,
-fontWeight:"700",
-},
-
-heroTitle:{
-color:"#FFF",
-fontSize:34,
-fontWeight:"900",
-marginVertical:10,
-},
-
-heroButton:{
-color:"#FFF",
-fontWeight:"700",
-fontSize:16,
-},
-
-sectionTitle:{
-fontSize:28,
-fontWeight:"900",
-paddingHorizontal:20,
-marginBottom:20,
-},
 
 });

@@ -12,12 +12,18 @@ import {
   StatusBar,
   Modal,
   Pressable,
+  FlatList,
 } from "react-native";
+import { BlurView } from "expo-blur";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import api from "@/utils/config";
-
+// import
+import { useCart } from "@/context/CartContext";
 import { Ionicons } from "@expo/vector-icons";
+import Toast from "react-native-toast-message";
+import CartIcon from "@/components/CartIcon";
+import { useWishlist } from "@/context/WishlistContext";
 const { width, height } = Dimensions.get("window");
 
 const COLORS = {
@@ -47,33 +53,64 @@ type Bundle = {
 export default function BundlePDP() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
-
+  const { addBundleToCart } = useCart();
+    const { isInWishlist, addToWishlist, removeFromWishlist } =
+      useWishlist();
+const [similarBundles, setSimilarBundles] = useState<Bundle[]>([]);
   const [bundle, setBundle] = useState<Bundle | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
 const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>({});
-const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const fade = useRef(new Animated.Value(1)).current;
   const scale = useRef(new Animated.Value(1)).current;
 const [sizeModalVisible, setSizeModalVisible] = useState(false);
 const [activeProduct, setActiveProduct] = useState<Product | null>(null);
+const flatListRef = useRef<FlatList>(null);
   const scrollY = useRef(new Animated.Value(0)).current;
+    const [showDrawer, setShowDrawer] = useState(false);
+
+const drawerTranslate = useRef(new Animated.Value(height)).current;
+
 
   useEffect(() => {
     fetchBundle();
   }, []);
 
-  const fetchBundle = async () => {
-    try {
-      const res = await api.get(`/api/bundles/${id}`);
-      setBundle(res.data);
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchBundle = async () => {
+  try {
+    const [bundleRes, similarRes] = await Promise.all([
+      api.get(`/api/bundles/${id}`),
+      api.get("/api/bundles?limit=10"),
+    ]);
 
+    setBundle(bundleRes.data);
+
+    const currentId = String(id);
+
+    const bundles =
+      (similarRes.data.items || []).filter(
+        (b: Bundle) => b._id !== currentId
+      );
+
+    setSimilarBundles(bundles);
+  } catch (err) {
+    console.log(err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+const handleSizeChange = (
+  productId: string,
+  size: string
+) => {
+  setSelectedSizes((prev) => ({
+    ...prev,
+    [productId]: size,
+  }));
+};
   const images = bundle?.mainImages || [];
 
   const changeImage = (index: number) => {
@@ -118,6 +155,17 @@ const [activeProduct, setActiveProduct] = useState<Product | null>(null);
     extrapolate: "clamp",
   });
 
+
+useEffect(() => {
+  Animated.spring(drawerTranslate, {
+    toValue: showDrawer ? 0 : height,
+    useNativeDriver: true,
+    damping: 18,
+    stiffness: 120,
+    mass: 0.8,
+  }).start();
+}, [showDrawer]);
+
   if (loading) {
     return (
       <SafeAreaView style={styles.loader}>
@@ -159,24 +207,40 @@ const [activeProduct, setActiveProduct] = useState<Product | null>(null);
 
         <View style={styles.heroContainer}>
 
-          <Animated.View
-            style={[
-              styles.imageWrapper,
-              {
-                opacity: fade,
-                transform: [{ scale }],
-              },
-            ]}
-          >
-            <Image
-              source={{
-                uri: images[activeImage],
-              }}
-              style={styles.heroImage}
-            />
+<Animated.FlatList
+  ref={flatListRef}
+  data={images}
+  horizontal
+  pagingEnabled
+  bounces={false}
+  showsHorizontalScrollIndicator={false}
+  keyExtractor={(_, i) => i.toString()}
+  onMomentumScrollEnd={(e) => {
+    const index = Math.round(
+      e.nativeEvent.contentOffset.x / width
+    );
 
-            <View style={styles.overlay} />
-          </Animated.View>
+    setActiveImage(index);
+  }}
+  renderItem={({ item }) => (
+    <Animated.View
+      style={[
+        styles.imageWrapper,
+        {
+          opacity: fade,
+          transform: [{ scale }],
+        },
+      ]}
+    >
+      <Image
+        source={{ uri: item }}
+        style={styles.heroImage}
+      />
+
+      <View style={styles.overlay} />
+    </Animated.View>
+  )}
+/>
 
           {/* LEFT THUMBNAILS */}
 
@@ -204,29 +268,63 @@ const [activeProduct, setActiveProduct] = useState<Product | null>(null);
 
           {/* TOP BAR */}
 
-          <View style={styles.topBar}>
+<View style={styles.topBar}>
 
-            <TouchableOpacity
-              style={styles.circle}
-              onPress={() => router.back()}
-            >
-              <Text style={styles.icon}>←</Text>
-            </TouchableOpacity>
+  <Pressable
+    onPress={() => router.back()}
+    style={styles.topBtnWrapper}
+  >
+    <BlurView
+      intensity={90}
+      tint="light"
+      style={styles.blurButton}
+    >
+      <Ionicons
+        name="chevron-back"
+        size={22}
+        color="#111"
+      />
+    </BlurView>
+  </Pressable>
 
-            <View style={styles.rightIcons}>
+  <View style={styles.rightActions}>
 
-              <TouchableOpacity style={styles.circle}>
-                <Text style={styles.icon}>♡</Text>
-              </TouchableOpacity>
+    <Pressable
+      style={styles.topBtnWrapper}
+      onPress={() =>
+        isInWishlist(bundle._id)
+          ? removeFromWishlist(bundle._id)
+          : addToWishlist(bundle._id)
+      }
+    >
+      <BlurView
+        intensity={90}
+        tint="light"
+        style={styles.blurButton}
+      >
+        <Ionicons
+          name={
+            isInWishlist(bundle._id)
+              ? "heart"
+              : "heart-outline"
+          }
+          size={20}
+          color={
+            isInWishlist(bundle._id)
+              ? "#D90429"
+              : "#111"
+          }
+        />
+      </BlurView>
+    </Pressable>
 
-              <TouchableOpacity style={styles.circle}>
-                <Text style={styles.icon}>↗</Text>
-              </TouchableOpacity>
+    <View style={styles.topBtnWrapper}>
+      <CartIcon />
+    </View>
 
-            </View>
+  </View>
 
-          </View>
-
+</View>
           {/* IMAGE COUNT */}
 
           <View style={styles.imageCount}>
@@ -363,131 +461,69 @@ const [activeProduct, setActiveProduct] = useState<Product | null>(null);
         WHAT'S INSIDE
 ================================ */}
 
-        <View style={styles.section}>
+    <View style={styles.section}>
 
-          <View style={styles.sectionRow}>
+  <View style={styles.sectionRow}>
 
-            <Text style={styles.sectionHeading}>
-              What's Included
-            </Text>
+    <Text style={styles.sectionHeading}>
+      Included In Bundle
+    </Text>
 
-            <Text style={styles.sectionCount}>
-              {bundle.products.length} ITEMS
-            </Text>
+    <TouchableOpacity
+      onPress={() => setShowDrawer(true)}
+    >
+      <Text style={styles.sectionAction}>
+        Customize →
+      </Text>
+    </TouchableOpacity>
 
-          </View>
-
-       {bundle.products.map((product) => (
+  </View>
 
   <TouchableOpacity
-    key={product._id}
-    activeOpacity={0.92}
-    style={styles.bundleItem}
+    activeOpacity={0.95}
+    style={styles.bundlePreviewCard}
+    onPress={() => setShowDrawer(true)}
   >
 
-    <Image
-      source={{ uri: product.images?.[0] }}
-      style={styles.bundleItemImage}
-    />
+    <View style={styles.previewStack}>
 
-    <View style={styles.bundleInfo}>
-
-      <View style={styles.itemTop}>
-
-        <Text
-          numberOfLines={2}
-          style={styles.bundleItemTitle}
-        >
-          {product.title}
-        </Text>
-
-        <View style={styles.includeBadge}>
-          <Text style={styles.includeText}>✓</Text>
-        </View>
-
-      </View>
-
-      <Text style={styles.bundleItemPrice}>
-        ₹{product.price}
-      </Text>
-
-      <View style={styles.sizeRow}>
-
-    <View style={{ flex: 1, zIndex: 999 }}>
-
- <TouchableOpacity
-  activeOpacity={0.9}
-  style={styles.sizeSelector}
-  onPress={() => {
-    setActiveProduct(product);
-    setSizeModalVisible(true);
-  }}
->
-
-<Text style={styles.sizeText}>
-  {selectedSizes[product._id] || "Select Size"}
-</Text>
-
-<Ionicons
-  name="chevron-down"
-  size={18}
-  color="#FFF"
-/>
-
-  </TouchableOpacity>
-
-  {openDropdown === product._id && (
-
-    <View style={styles.customDropdown}>
-
-      {["S", "M", "L", "XL", "XXL"].map((size) => (
-
-        <TouchableOpacity
-          key={size}
-          style={styles.dropdownOption}
-          onPress={() => {
-
-            setSelectedSizes(prev => ({
-              ...prev,
-              [product._id]: size,
-            }));
-
-            setOpenDropdown(null);
-
-          }}
-        >
-
-          <Text style={styles.dropdownOptionText}>
-            {size}
-          </Text>
-
-          {selectedSizes[product._id] === size && (
-            <Ionicons
-              name="checkmark"
-              size={18}
-              color="#7CFC00"
-            />
-          )}
-
-        </TouchableOpacity>
-
+      {bundle.products.slice(0,4).map((product,index)=>(
+        <Image
+          key={product._id}
+          source={{ uri: product.images?.[0] }}
+          style={[
+            styles.previewImage,
+            {
+              left:index*26,
+              zIndex:20-index,
+            }
+          ]}
+        />
       ))}
 
     </View>
 
-  )}
+    <View style={styles.previewContent}>
 
-</View>
+      <Text style={styles.previewTitle}>
+        {bundle.products.length} Premium Items
+      </Text>
 
-        <TouchableOpacity
-          style={styles.previewBtn}
-        >
+      <Text style={styles.previewSubtitle}>
+        Select sizes, preview products and customize your bundle.
+      </Text>
 
-          <Text style={styles.previewText}>
-            Preview
-          </Text>
+      <View style={styles.previewButton}>
 
-        </TouchableOpacity>
+        <Text style={styles.previewButtonText}>
+          OPEN CUSTOMIZER
+        </Text>
+
+        <Ionicons
+          name="chevron-forward"
+          size={18}
+          color="#B6FF2E"
+        />
 
       </View>
 
@@ -495,10 +531,7 @@ const [activeProduct, setActiveProduct] = useState<Product | null>(null);
 
   </TouchableOpacity>
 
-))}
-
-        </View>
-
+</View>
         {/* ================================
         BUNDLE SAVINGS
 ================================ */}
@@ -737,57 +770,73 @@ const [activeProduct, setActiveProduct] = useState<Product | null>(null);
             }}
           >
 
-            {[...Array(5)].map((_, index) => (
+      {similarBundles.map((item) => (
 
-              <TouchableOpacity
-                key={index}
-                style={styles.similarCard}
-                activeOpacity={0.9}
-              >
+  <TouchableOpacity
+    key={item._id}
+    activeOpacity={0.9}
+    style={styles.similarCard}
+    onPress={() =>
+      router.push(`/bundle/${item._id}`)
+    }
+  >
 
-                <Image
-                  source={{
-                    uri: bundle.mainImages?.[0]
-                  }}
-                  style={styles.similarImage}
-                />
+    <Image
+      source={{
+        uri: item.mainImages?.[0],
+      }}
+      style={styles.similarImage}
+    />
 
-                <View style={styles.similarInfo}>
+    <View style={styles.similarInfo}>
 
-                  <Text
-                    numberOfLines={2}
-                    style={styles.similarTitle}
-                  >
+      <Text
+        numberOfLines={2}
+        style={styles.similarTitle}
+      >
+        {item.title}
+      </Text>
 
-                    Minimal Street Bundle
+      <Text style={styles.similarPrice}>
+        ₹{item.price}
+      </Text>
 
-                  </Text>
+      <View style={styles.similarBottom}>
 
-                  <Text style={styles.similarPrice}>
-                    ₹1999
-                  </Text>
+        <View style={styles.discountBadge}>
 
-                  <View style={styles.similarBottom}>
+          <Text style={styles.discountText}>
+            SAVE{" "}
+            {Math.round(
+              ((item.products.reduce(
+                (sum, p) => sum + p.price,
+                0
+              ) -
+                item.price) /
+                item.products.reduce(
+                  (sum, p) => sum + p.price,
+                  0
+                )) *
+                100
+            )}
+            %
+          </Text>
 
-                    <View style={styles.discountBadge}>
+        </View>
 
-                      <Text style={styles.discountText}>
-                        SAVE 25%
-                      </Text>
+        <Ionicons
+          name="chevron-forward"
+          size={22}
+          color="#111"
+        />
 
-                    </View>
+      </View>
 
-                    <Text style={styles.similarArrow}>
-                      →
-                    </Text>
+    </View>
 
-                  </View>
+  </TouchableOpacity>
 
-                </View>
-
-              </TouchableOpacity>
-
-            ))}
+))}
 
           </ScrollView>
 
@@ -846,27 +895,217 @@ const [activeProduct, setActiveProduct] = useState<Product | null>(null);
 <TouchableOpacity
   activeOpacity={0.9}
   style={styles.priceButton}
+  onPress={() => setShowDrawer(true)}
 >
 
   <Text
     numberOfLines={1}
-    adjustsFontSizeToFit
-    minimumFontScale={0.8}
     style={styles.priceText}
   >
     ₹{bundle.price}
   </Text>
-<View style={styles.arrowContainer}>
-  <Ionicons
-    name="chevron-forward"
-    size={22}
-    color="#9EFF32"
-  />
-</View>
+
+  <View style={styles.arrowContainer}>
+    <Ionicons
+      name="chevron-up"
+      size={24}
+      color="#9EFF32"
+    />
+  </View>
 
 </TouchableOpacity>
 
 </Animated.View>
+<>
+{showDrawer && (
+<TouchableOpacity
+activeOpacity={1}
+onPress={()=>setShowDrawer(false)}
+style={styles.backdrop}
+/>
+)}
+
+<Animated.View
+style={[
+styles.drawer,
+{
+transform:[
+{
+translateY:drawerTranslate,
+},
+],
+},
+]}
+>
+
+<View style={styles.handle}/>
+
+<View style={styles.drawerHeader}>
+
+<View>
+
+<Text style={styles.drawerLabel}>
+YOUR BUNDLE
+</Text>
+
+<Text style={styles.drawerTitle}>
+Bundle Items
+</Text>
+
+</View>
+
+<TouchableOpacity
+style={styles.closeBtn}
+onPress={()=>setShowDrawer(false)}
+>
+
+<Ionicons
+name="close"
+size={22}
+color="#111"
+/>
+
+</TouchableOpacity>
+
+</View>
+
+<ScrollView
+showsVerticalScrollIndicator={false}
+contentContainerStyle={{
+padding:20,
+paddingBottom:140,
+}}
+>
+
+{bundle.products.map((product) => (
+
+  <View
+    key={product._id}
+    style={styles.drawerCard}
+  >
+
+    <Image
+      source={{ uri: product.images?.[0] }}
+      style={styles.drawerImage}
+    />
+
+    <View style={styles.bundleInfo}>
+
+      <View style={styles.itemTop}>
+
+        <Text
+          numberOfLines={2}
+          style={styles.drawerProductTitle}
+        >
+          {product.title}
+        </Text>
+
+        <View style={styles.includeBadge}>
+          <Text style={styles.includeText}>
+            ✓
+          </Text>
+        </View>
+
+      </View>
+
+      <Text style={styles.drawerPrice}>
+        ₹{product.price}
+      </Text>
+
+      <View style={styles.sizeRow}>
+
+        <View
+          style={{
+            flex:1,
+            zIndex:999,
+          }}
+        >
+
+          <TouchableOpacity
+            activeOpacity={0.9}
+            style={styles.drawerSize}
+            onPress={()=>{
+              setActiveProduct(product);
+              setSizeModalVisible(true);
+            }}
+          >
+
+            <Text style={styles.sizeText}>
+              {selectedSizes[product._id] || "Select Size"}
+            </Text>
+
+            <Ionicons
+              name="chevron-down"
+              size={18}
+              color="#111"
+            />
+
+          </TouchableOpacity>
+
+        </View>
+
+        <TouchableOpacity
+          style={styles.previewBtn}
+        >
+
+          <Text style={styles.previewText}>
+            Preview
+          </Text>
+
+        </TouchableOpacity>
+
+      </View>
+
+    </View>
+
+  </View>
+
+))}
+
+</ScrollView>
+
+<View style={styles.drawerFooter}>
+
+<TouchableOpacity
+  style={styles.drawerButton}
+  onPress={() => {
+
+    const missing = bundle.products.find(
+      (p) => !selectedSizes[p._id]
+    );
+
+    if (missing) {
+      Toast.show({
+        type: "error",
+        text1: "Select Size",
+        text2: `Please select size for ${missing.title}`
+      });
+      return;
+    }
+
+    addBundleToCart(bundle, selectedSizes);
+
+    setShowDrawer(false);
+
+  }}
+>
+
+  <Text style={styles.drawerButtonText}>
+    ADD BUNDLE TO BAG
+  </Text>
+
+  <Ionicons
+    name="arrow-forward"
+    size={20}
+    color="#B6FF2E"
+  />
+
+</TouchableOpacity>
+
+</View>
+
+</Animated.View>
+</>
 <Modal
   visible={sizeModalVisible}
   transparent
@@ -976,7 +1215,181 @@ modalOverlay:{
   justifyContent:"center",
   padding:24,
 },
+backdrop:{
+...StyleSheet.absoluteFillObject,
+backgroundColor:"rgba(0,0,0,.45)",
+zIndex:100,
+},
 
+drawer:{
+position:"absolute",
+
+left:0,
+right:0,
+bottom:0,
+
+height:"82%",
+
+backgroundColor:"#FFF",
+
+borderTopLeftRadius:34,
+borderTopRightRadius:34,
+
+zIndex:101,
+},
+
+handle:{
+width:55,
+height:5,
+borderRadius:3,
+backgroundColor:"#DDD",
+
+alignSelf:"center",
+
+marginTop:12,
+},
+
+drawerHeader:{
+paddingHorizontal:22,
+paddingVertical:20,
+
+flexDirection:"row",
+
+justifyContent:"space-between",
+
+alignItems:"center",
+
+borderBottomWidth:1,
+
+borderColor:"#EEE",
+},
+
+drawerLabel:{
+fontSize:12,
+
+letterSpacing:2,
+
+color:"#888",
+
+fontWeight:"700",
+},
+
+drawerTitle:{
+marginTop:6,
+
+fontSize:32,
+
+fontWeight:"900",
+
+color:"#111",
+},
+
+closeBtn:{
+width:42,
+height:42,
+
+borderRadius:21,
+
+backgroundColor:"#F4F4F4",
+
+justifyContent:"center",
+
+alignItems:"center",
+},
+drawerCard:{
+  backgroundColor:"#FFF",
+
+  borderRadius:24,
+
+  padding:14,
+
+  marginBottom:16,
+
+  borderWidth:1,
+
+  borderColor:"#ECECEC",
+
+  flexDirection:"row",
+},
+
+drawerImage:{
+  width:100,
+  height:125,
+
+  borderRadius:18,
+
+  marginRight:16,
+},
+
+drawerProductTitle:{
+  flex:1,
+
+  fontSize:18,
+
+  fontWeight:"800",
+
+  color:"#111",
+},
+
+drawerPrice:{
+  marginTop:8,
+
+  fontSize:24,
+
+  fontWeight:"900",
+
+  color:"#111",
+},
+
+drawerSize:{
+  height:42,
+
+  backgroundColor:"#000000",
+
+  borderRadius:14,
+
+  paddingHorizontal:14,
+
+  flexDirection:"row",
+
+  justifyContent:"space-between",
+
+  alignItems:"center",
+
+  marginRight:10,
+},
+
+drawerFooter:{
+padding:20,
+
+borderTopWidth:1,
+
+borderColor:"#EEE",
+},
+
+drawerButton:{
+height:58,
+
+borderRadius:30,
+
+backgroundColor:"#111",
+
+justifyContent:"center",
+
+alignItems:"center",
+
+flexDirection:"row",
+},
+
+drawerButtonText:{
+color:"#FFF",
+
+fontWeight:"900",
+
+letterSpacing:1,
+
+marginRight:10,
+},
 bottomSheet:{
   width:"100%",
 
@@ -1139,7 +1552,7 @@ modalSizeText:{
     backgroundColor:"#F7F7F5",
   },
   similarSection: {
-    marginTop: 60,backgroundColor:"#F7F7F5",
+    marginTop: 20,backgroundColor:"#F7F7F5",
     paddingLeft: 24,
   },
 
@@ -1373,7 +1786,7 @@ arrow: {
     fontWeight: "900",
   },
   lookSection: {
-    marginTop: 55,
+    marginTop: 25,
     paddingHorizontal: 24,backgroundColor:"#F7F7F5",
     position: "relative",
   },
@@ -1444,7 +1857,7 @@ arrow: {
   },
 
   whySection: {
-    marginTop: 55,
+    marginTop: 25,
     paddingHorizontal: 24,backgroundColor:"#F7F7F5",
   },
 
@@ -1492,7 +1905,7 @@ arrow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 22,
+    marginBottom: 2,
   },
 
   sectionHeading: {
@@ -1500,7 +1913,71 @@ arrow: {
     fontWeight: "900",
     color: "#000000",
   },
+bundlePreviewCard:{
+  marginTop:16,
+  backgroundColor:"#FFF",
+  borderRadius:28,
+  padding:22,
+  flexDirection:"row",
+  alignItems:"center",
+  borderWidth:1,
+  borderColor:"#ECECEC",
+},
 
+previewStack:{
+  width:110,
+  height:70,
+  position:"relative",
+},
+
+previewImage:{
+  position:"absolute",
+  width:62,
+  height:62,
+  borderRadius:18,
+  borderWidth:3,
+  borderColor:"#FFF",
+},
+
+previewContent:{
+  flex:1,
+  marginLeft:10,
+},
+
+previewTitle:{
+  fontSize:20,
+  fontWeight:"900",
+  color:"#111",
+},
+
+previewSubtitle:{
+  marginTop:6,
+  color:"#777",
+  lineHeight:22,
+},
+
+previewButton:{
+  marginTop:6,
+  alignSelf:"flex-start",
+  backgroundColor:"#111",
+  borderRadius:20,
+  paddingHorizontal:16,
+  paddingVertical:10,
+  flexDirection:"row",
+  alignItems:"center",
+},
+
+previewButtonText:{
+  color:"#FFF",
+  fontWeight:"800",
+  marginRight:6,
+},
+
+sectionAction:{
+  color:"#B6FF2E",
+  fontWeight:"800",
+  fontSize:15,
+},
   sectionCount: {
     fontSize: 12,
     letterSpacing: 2,
@@ -1614,7 +2091,7 @@ bundleItem: {
   },
 
   savingSection: {
-    marginTop: 6,
+    marginTop: 26,
     paddingHorizontal: 24,
     backgroundColor:"#F7F7F5",
   },
@@ -1694,7 +2171,7 @@ bundleItem: {
   },
   content: {
     paddingHorizontal: 24,
-    paddingTop: 28,
+    paddingTop: 8,
     backgroundColor:"#F7F7F5",
   },
 
@@ -1768,6 +2245,38 @@ priceLeft:{
   flex:1,
 },
 
+
+
+
+topAction:{
+  width:50,
+  height:50,
+
+  marginLeft:12,
+
+  borderRadius:25,
+
+  backgroundColor:"rgba(255,255,255,.92)",
+
+  justifyContent:"center",
+  alignItems:"center",
+
+  borderWidth:1,
+  borderColor:"rgba(255,255,255,.85)",
+
+  shadowColor:"#000",
+
+  shadowOpacity:.10,
+
+  shadowRadius:12,
+
+  shadowOffset:{
+    width:0,
+    height:5,
+  },
+
+  elevation:8,
+},
 saveBadge:{
   alignSelf:"flex-start",
 
@@ -1908,7 +2417,47 @@ bundleOffer:{
     fontSize: 26,
     color: "#000",
   },
+topBar: {
+  position: "absolute",
+  top: 38,
+  left: 20,
+  right: 20,
 
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+
+  zIndex: 999,
+  overflow: "visible",
+},
+
+rightActions: {
+  flexDirection: "row",
+  alignItems: "center",
+  overflow: "visible",
+},
+
+topBtnWrapper: {
+  marginLeft: 12,
+  overflow: "visible",
+},
+
+blurButton: {
+  width: 54,
+  height: 54,
+
+  borderRadius: 27,
+
+  overflow: "hidden",
+
+  justifyContent: "center",
+  alignItems: "center",
+
+  borderWidth: 1,
+  borderColor: "rgba(255,255,255,.35)",
+
+  backgroundColor: "rgba(255,255,255,.08)",
+},
   featureContainer: {
     marginTop: 34,
     flexDirection: "row",
@@ -1924,7 +2473,38 @@ bundleOffer:{
     borderWidth: 1,
   
   },
+circleBtn: {
+  width: 48,
+  height: 48,
 
+  borderRadius: 24,
+
+  backgroundColor: "rgba(255,255,255,.95)",
+
+  justifyContent: "center",
+  alignItems: "center",
+
+  borderWidth: 1,
+  borderColor: "#ECECEC",
+
+  shadowColor: "#000",
+  shadowOpacity: 0.08,
+  shadowRadius: 10,
+  shadowOffset: {
+    width: 0,
+    height: 3,
+  },
+
+  elevation: 8,
+},
+cartWrapper: {
+  marginLeft: 12,
+  overflow: "visible",
+},
+rightIcons: {
+  flexDirection: "row",
+  gap: 20,
+},
   featureIcon: {
     width: 52,
     height: 52,
@@ -2145,19 +2725,8 @@ sizeChipTextActive: {
     height: "100%",
   },
 
-  topBar: {
-    position: "absolute",
-    top: 60,
-    left: 20,
-    right: 20,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
 
-  rightIcons: {
-    flexDirection: "row",
-  },
+
 
   circle: {
     width: 48,
@@ -2179,7 +2748,7 @@ sizeChipTextActive: {
 
   imageCount: {
     position: "absolute",
-    bottom: 40,
+    bottom: 46,
     right: 22,
     backgroundColor: "rgba(0,0,0,.7)",
     borderRadius: 30,
@@ -2195,7 +2764,7 @@ sizeChipTextActive: {
 
   bundleChip: {
     position: "absolute",
-    bottom: 40,
+    bottom: 46,
     left: 22,
     backgroundColor: "#111",
     borderRadius: 30,

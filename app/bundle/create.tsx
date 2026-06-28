@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -15,13 +15,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import api from "@/utils/config";
 import { useCart } from "@/context/CartContext";
+import CartIcon from "@/components/CartIcon";
 
 const { width } = Dimensions.get("window");
 
 export default function BuildYourLook() {
   const router = useRouter();
   const { addBundleToCart } = useCart();
-
+const imageRefs = useRef<Record<string, View | null>>({});
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
 
@@ -81,7 +82,7 @@ export default function BuildYourLook() {
 
   async function fetchProducts() {
     try {
-      const res = await api.get("/products");
+      const res = await api.get("api/products");
 
       setProducts(res.data.items || []);
     } finally {
@@ -90,7 +91,7 @@ export default function BuildYourLook() {
   }
 
   async function fetchCategories() {
-    const res = await api.get("/categories");
+    const res = await api.get("api/categories");
 
     setCategories(res.data.categories || []);
   }
@@ -186,6 +187,10 @@ export default function BuildYourLook() {
 
     setSelectedProducts([]);
     setSelectedSizes({});
+    setTimeout(() => {
+      setDrawerVisible(false);
+    }, 300);
+    
 
     AsyncStorage.removeItem(
       "build-look-products"
@@ -215,27 +220,10 @@ export default function BuildYourLook() {
     BUILD YOUR LOOK
   </Text>
 
-  <TouchableOpacity
-    onPress={() => router.push("/cart")}
-    style={styles.bagBtn}
-  >
-
-    <Ionicons
-      name="bag-outline"
-      size={24}
-      color="#111"
-    />
-
-    {selectedProducts.length > 0 && (
-      <View style={styles.badge}>
-        <Text style={styles.badgeText}>
-          {selectedProducts.length}
-        </Text>
+      <View style={styles.topBtnWrapper}>
+        <CartIcon
+         />
       </View>
-    )}
-
-  </TouchableOpacity>
-
 </View>
 
 {/* CATEGORY TABS */}
@@ -361,18 +349,40 @@ export default function BuildYourLook() {
 
         {/* IMAGE */}
 
-        <TouchableOpacity
-          onPress={() =>
-            router.push(`/product/${item._id}`)
-          }
-        >
+<TouchableOpacity
+  activeOpacity={0.95}
+  onPress={() => {
+    imageRefs.current[item._id]?.measureInWindow(
+      (x, y, w, h) => {
+        router.push({
+          pathname: "/product/[id]",
+          params: {
+            id: item._id,
+            image: item.images?.[0],
+            x: String(x),
+            y: String(y),
+            w: String(w),
+            h: String(h),
+          },
+        });
+      }
+    );
+  }}
+>
 
-          <Image
-            source={{
-              uri: item.images?.[0],
-            }}
-            style={styles.productImage}
-          />
+  <View
+    ref={(ref) => {
+      imageRefs.current[item._id] = ref;
+    }}
+    collapsable={false}
+  >
+    <Image
+      source={{ uri: item.images?.[0] }}
+      style={styles.productImage}
+    />
+  </View>
+
+</TouchableOpacity>
 
           {selected && (
 
@@ -387,8 +397,6 @@ export default function BuildYourLook() {
             </View>
 
           )}
-
-        </TouchableOpacity>
 
         <View style={styles.productBody}>
 
@@ -958,6 +966,10 @@ const styles = StyleSheet.create({
   },
 
   /* ---------- FLOATING BAR ---------- */
+topBtnWrapper: {
+  marginLeft: 12,
+  overflow: "visible",
+},
 
   floatingBar: {
     position: "absolute",

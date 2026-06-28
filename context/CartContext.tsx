@@ -258,40 +258,65 @@ export function CartProvider({ children }: CartProviderProps) {
 
   /* ---------- BUNDLE ---------- */
 
-  const addBundleToCart = async (
-    bundle: any,
-    selectedSizes: Record<string, string>
-  ) => {
-    if (!guestId) return;
+const addBundleToCart = async (
+  bundle: any,
+  selectedSizes: Record<string, string>
+) => {
+  try {
+    const payload: any = {
+      bundleProducts: bundle.products.map((p: any) => ({
+        productId: p._id,
+        size: selectedSizes[p._id],
+        quantity: 1,
+      })),
 
-    try {
-      await api.post(
-        "/api/cart/addbundle",
-        {
-          bundleId: bundle._id,
-          mainImage: bundle.mainImages?.[0] || "",
-          bundleProducts: bundle.products.map((p: any) => ({
-            productId: p._id,
-            size: selectedSizes[p._id],
-            quantity: 1,
-          })),
-        },
-        {
+      customBundle: {
+        title: bundle.title,
+        price: bundle.price,
+      },
+
+      mainImage:
+        bundle.mainImages?.[0] ||
+        bundle.products?.[0]?.images?.[0] ||
+        "",
+    };
+
+    // Prebuilt bundle
+    if (!bundle.custom && bundle._id) {
+      payload.bundleId = bundle._id;
+    }
+
+    const config = guestId
+      ? {
           headers: {
             "x-guest-id": guestId,
           },
         }
-      );
+      : {};
 
-      await refresh();
+    await api.post(
+      "/api/cart/addbundle",
+      payload,
+      config
+    );
 
-      Toast.show({ type: "success", text1: "Bundle added" });
-    } catch (err) {
-      console.error(err);
-      Toast.show({ type: "error", text1: "Failed to add bundle" });
-      await refresh();
-    }
-  };
+    await refresh();
+
+    Toast.show({
+      type: "success",
+      text1: "Bundle added",
+    });
+  } catch (err) {
+    console.error(err);
+
+    Toast.show({
+      type: "error",
+      text1: "Failed to add bundle",
+    });
+
+    await refresh();
+  }
+};
 
   /* ---------- COUNT ---------- */
 
