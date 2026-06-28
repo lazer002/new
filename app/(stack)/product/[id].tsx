@@ -504,16 +504,7 @@ topRight: {
     width: 14,
     backgroundColor: "#34C759",
   },
-  topBar: {
-    position: "absolute",
-    top: 42,
-    left: 16,
-    right: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    zIndex: 3,
-  },
+
   headerTitle: {
     fontSize: 18,
     fontWeight: "700",
