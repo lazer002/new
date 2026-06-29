@@ -17,10 +17,11 @@ import { router, useRouter } from "expo-router";
 import { useFilter } from "@/context/FilterContext";
 import BottomFilterSheet from "@/components/BottomFilterSheet";
 import { useWishlist } from "@/context/WishlistContext";
+import { LinearGradient } from "expo-linear-gradient";
 
 
 const { width } = Dimensions.get("window");
-const CARD_WIDTH = (width - 48) / 2;
+const CARD_WIDTH = (width - 60) / 2;
 
 /* ───────────────── PRODUCT CARD ───────────────── */
 const getProductMeta = (id: string) => {
@@ -44,13 +45,28 @@ const getProductMeta = (id: string) => {
 
 
 function ProductCard({ item }: { item: any }) {
-const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+
   const router = useRouter();
+
   const imageRef = useRef<View>(null);
-  const { rating, buyCount } = getProductMeta(item._id);
- const isFav = isInWishlist(item._id);
+
+  const {
+    addToWishlist,
+    removeFromWishlist,
+    isInWishlist,
+  } = useWishlist();
+
+  const {
+    rating,
+    buyCount,
+  } = getProductMeta(item._id);
+
+  const isFav = isInWishlist(item._id);
+
   const onOpenPDP = () => {
+
     imageRef.current?.measureInWindow((x, y, w, h) => {
+
       router.push({
         pathname: "/product/[id]",
         params: {
@@ -62,51 +78,204 @@ const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
           h,
         },
       });
+
     });
+
   };
 
-
   return (
-    <View style={styles.card}>
-      {/* PDP PRESS */}
-      <Pressable onPress={onOpenPDP}>
-        <View ref={imageRef} collapsable={false}>
-          <Image source={{ uri: item.images?.[0] }} style={styles.image} />
-        </View>
-      </Pressable>
 
-      {/* ❤️ WISHLIST PRESS */}
-      <Pressable
-        onPress={() => isFav ? removeFromWishlist(item._id) : addToWishlist(item._id)}
-        hitSlop={10}
-        style={styles.heart}
+    <Pressable
+
+      onPress={onOpenPDP}
+
+      style={({ pressed }) => [
+
+        styles.card,
+
+        pressed && {
+          transform: [
+            {
+              scale: .98,
+            },
+          ],
+        },
+
+      ]}
+
+    >
+
+      {/* IMAGE */}
+
+      <View
+        ref={imageRef}
+        collapsable={false}
       >
-        <Ionicons name={isFav ? "heart" : "heart-outline"} size={18} color={isFav ? "#000000" : "#000"} />
-      </Pressable>
 
-      {/* DETAILS */}
-      <View style={{ paddingHorizontal: 7, paddingBottom: 12, paddingTop: 8 }}>
-        <View style={styles.ratingRow}>
-          <Ionicons name="star" size={14} color="#d37b09c5" />
-          <Text style={styles.ratingText}>{rating}</Text>
-          <Text style={styles.buyText}> ({buyCount})</Text>
-        </View>
+        <Image
 
-        <Text style={styles.title} numberOfLines={1}>
-          {item.title}
+          source={{
+            uri: item.images?.[0],
+          }}
+
+          style={styles.image}
+
+        />
+
+      </View>
+
+      {/* DARK GRADIENT */}
+
+      <LinearGradient
+
+        colors={[
+
+          "transparent",
+
+          "rgba(0,0,0,.10)",
+
+          "rgba(0,0,0,.45)",
+
+          "rgba(0,0,0,.92)",
+
+        ]}
+
+        locations={[
+
+          0,
+
+          .45,
+
+          .72,
+
+          1,
+
+        ]}
+
+        style={styles.cardGradient}
+
+      />
+
+      {/* NEW BADGE */}
+
+      <View style={styles.newBadge}>
+
+        <Text style={styles.newText}>
+          NEW
         </Text>
 
-        <View style={styles.priceRow}>
-          <Text style={styles.price}>₹{item.price}</Text>
-
-          <View style={styles.oldPriceWrapper}>
-            <Text style={styles.oldPriceText}>₹999</Text>
-            <View style={styles.strikeLine} />
-          </View>
-        </View>
       </View>
+
+      {/* WISHLIST */}
+
+
+
+<Pressable
+  hitSlop={15}
+  style={styles.heart}
+  onPress={() =>
+    isFav
+      ? removeFromWishlist(item._id)
+      : addToWishlist(item._id)
+  }
+>
+
+  <View style={styles.heartGlass}>
+
+    <Ionicons
+      name={
+        isFav
+          ? "heart"
+          : "heart-outline"
+      }
+      size={22}
+      color={
+        isFav
+          ? "#3ae706"
+          : "#FFF"
+      }
+    />
+
+  </View>
+
+</Pressable>
+
+{/* ---------- PREMIUM BADGE ---------- */}
+
+
+      {/* CONTENT */}
+
+      <View style={styles.cardContent}>
+
+        {/* RATING */}
+{/* 
+        <View style={styles.ratingRow}>
+
+          <Ionicons
+            name="star"
+            size={16}
+            color="#B6FF2E"
+          />
+
+          <Text style={styles.ratingText}>
+            {rating}
+          </Text>
+
+          <Text style={styles.buyText}>
+            ({buyCount})
+          </Text>
+
+        </View>
+
+    */}
+
+      
+
+  
+
+<View style={styles.bottomRow}>
+
+  <View style={{ flex: 1 }}>
+
+    <Text
+      numberOfLines={2}
+      style={styles.cardTitle}
+    >
+      {item.title}
+    </Text>
+
+    <View style={styles.priceRow}>
+
+      <Text style={styles.price}>
+        ₹{item.price}
+      </Text>
+
+      <Text style={styles.oldPrice}>
+        ₹999
+      </Text>
+
     </View>
+
+  </View>
+
+  <Pressable style={styles.arrowBtn}>
+
+    <Ionicons
+      name="arrow-forward"
+      size={20}
+      color="#111"
+    />
+
+  </Pressable>
+
+</View>
+
+      </View>
+
+    </Pressable>
+
   );
+
 }
 /* ───────────────── HOME ───────────────── */
 
@@ -173,7 +342,9 @@ export default function Home() {
         data={filteredProducts}
         keyExtractor={(item) => item._id}
         numColumns={2}
-        columnWrapperStyle={{ justifyContent: "space-between" }}
+     columnWrapperStyle={{
+  justifyContent: "space-between",
+}}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <> 
@@ -193,12 +364,35 @@ export default function Home() {
           <SectionHeader onSeeAll={() => router.push("/category")} />
             </>
         }
-        contentContainerStyle={{ paddingBottom: 24 }}
-       renderItem={({ item, index }) => (
-  <View style={{ marginTop: index % 2 !== 0 ? 20 : 0 }}>
-    <ProductCard item={item} />
-  </View>
-)}
+        contentContainerStyle={{   paddingTop: 10,
+  paddingBottom: 120, }}
+renderItem={({ item, index }) => {
+
+  const isLeft = index % 2 === 0;
+
+  return (
+
+    <View
+      style={{
+        width: CARD_WIDTH,
+
+        marginBottom: 2,
+
+        marginTop: isLeft ? 0 : 34,
+
+        marginLeft: isLeft ? 12  : 8,
+
+        marginRight: isLeft ? 8 : 16,
+      }}
+    >
+
+      <ProductCard item={item} />
+
+    </View>
+
+  );
+
+}}
 
       />
 
@@ -213,18 +407,53 @@ export default function Home() {
 }
 
 /* ───────────────── HEADER ───────────────── */
-function SectionHeader({ onSeeAll }: { onSeeAll: () => void }) {
+function SectionHeader({
+  onSeeAll,
+}: {
+  onSeeAll: () => void;
+}) {
+
   return (
+
     <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle}>Special For You</Text>
 
-      <Pressable onPress={onSeeAll}>
-        <Text style={styles.seeAll}>See All</Text>
+      <View>
+
+        <Text style={styles.sectionLabel}>
+          JUST DROPPED
+        </Text>
+
+        <Text style={styles.sectionTitle}>
+          Curated For You
+        </Text>
+
+      </View>
+
+      <Pressable
+        onPress={onSeeAll}
+        style={styles.sectionBtn}
+      >
+
+        <Text style={styles.sectionBtnText}>
+          View All
+        </Text>
+
+        <Ionicons
+          name="arrow-forward"
+          size={16}
+          color="#B6FF2E"
+          style={{
+            marginLeft: 6,
+          }}
+        />
+
       </Pressable>
-    </View>
-  );
-}
 
+    </View>
+
+  );
+
+}
 
 function Header({
   categories,
@@ -241,91 +470,152 @@ function Header({
   setSearchQuery: (v: string) => void;
   openFilter: () => void;
 }) {
-return (
-  <View style={styles.header}>
 
-    {/* 🔎 SEARCH ROW */}
-    <View style={styles.searchRow}>
+  return (
 
-      {/* SEARCH INPUT */}
-      <View style={styles.search}>
-        <Ionicons name="search-outline" size={25} color="#aaa" />
-        <TextInput
-          placeholder="Explore Fashion"
-          placeholderTextColor="#aaa"
-          style={styles.searchInput}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
+    <View style={styles.header}>
+
+      {/* ---------- TOP ---------- */}
+
+      <View style={styles.topRow}>
+
+        <Pressable style={styles.iconBtn}>
+
+          <Ionicons
+            name="menu"
+            size={26}
+            color="#111"
+          />
+
+        </Pressable>
+
+        <Pressable
+          style={styles.iconBtn}
+          onPress={openFilter}
+        >
+
+          <Ionicons
+            name="notifications-outline"
+            size={24}
+            color="#111"
+          />
+
+          <View style={styles.notifyDot} />
+
+        </Pressable>
+
       </View>
 
-      {/* FILTER BUTTON (OUTSIDE INPUT) */}
-      <Pressable style={styles.filterBtn} onPress={openFilter}>
-        <Ionicons name="options-outline" size={23} color="#555" />
-      </Pressable>
+      {/* ---------- TITLE ---------- */}
+
+      <Text style={styles.explore}>
+        Explore
+      </Text>
+
+      <Text style={styles.heroTitle}>
+
+        The Latest
+
+      </Text>
+
+      <Text style={styles.heroAccent}>
+
+        Drops
+
+      </Text>
+
+      {/* ---------- SEARCH ---------- */}
+
+      <View style={styles.searchBox}>
+
+        <Ionicons
+          name="search-outline"
+          size={24}
+          color="#7A7A7A"
+        />
+
+        <TextInput
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Search sneakers, apparel..."
+          placeholderTextColor="#9A9A9A"
+          style={styles.searchInput}
+        />
+
+      </View>
+
+      {/* ---------- CATEGORY ---------- */}
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tabs}
+      >
+
+        <Pressable
+          onPress={() =>
+            setActiveCategory("all")
+          }
+          style={[
+            styles.pill,
+            activeCategory === null &&
+              styles.pillActive,
+          ]}
+        >
+
+          <Text
+            style={[
+              styles.pillText,
+              activeCategory === null &&
+                styles.pillTextActive,
+            ]}
+          >
+            All
+          </Text>
+
+        </Pressable>
+
+        {categories.map((cat) => {
+
+          const active =
+            activeCategory === cat._id;
+
+          return (
+
+            <Pressable
+              key={cat._id}
+              onPress={() =>
+                setActiveCategory(cat._id)
+              }
+              style={[
+                styles.pill,
+                active &&
+                  styles.pillActive,
+              ]}
+            >
+
+              <Text
+                numberOfLines={1}
+                style={[
+                  styles.pillText,
+                  active &&
+                    styles.pillTextActive,
+                ]}
+              >
+                {cat.name}
+              </Text>
+
+            </Pressable>
+
+          );
+
+        })}
+
+      </ScrollView>
 
     </View>
 
-    {/* CATEGORY TABS */}
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.tabs}
-    >
- <Pressable
-  onPress={() => setActiveCategory("all")}
-  style={[
-    styles.tab,
-    activeCategory === null && styles.tabActive,
-  ]}
->
-  <View style={styles.tabContent}>
-    {activeCategory === null && (
-      <Ionicons name="sparkles" size={14} color="#0af16bff" style={{ marginRight: 6 }} />
-    )}
-    <Text
-      style={[
-        styles.tabText,
-        activeCategory === null && styles.tabTextActive,
-      ]}
-    >
-      All
-    </Text>
-  </View>
-</Pressable>
-
-{categories.map((cat) => {
-  const isActive = activeCategory === cat._id;
-
-  return (
-    <Pressable
-      key={cat._id}
-      onPress={() => setActiveCategory(cat._id)}
-      style={[styles.tab, isActive && styles.tabActive]}
-    >
-      <View style={styles.tabContent}>
-        {isActive && (
-          <Ionicons
-            name="sparkles"
-            size={14}
-            color="#0af16bff"
-            style={{ marginRight: 6 }}
-          />
-        )}
-        <Text
-          style={[styles.tabText, isActive && styles.tabTextActive]}
-        >
-          {cat.name}
-        </Text>
-      </View>
-    </Pressable>
   );
-})}
-
-    </ScrollView>
-
-  </View>
-);
 
 }
 
@@ -334,8 +624,31 @@ return (
 const styles = StyleSheet.create({
   screen: { backgroundColor: "#fafafa" },
 
-  header: { paddingHorizontal: 16, paddingTop: 16 },
 
+
+headerTop: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+},
+
+headerLabel: {
+  fontSize: 12,
+  fontWeight: "700",
+  color: "#9A9A9A",
+  letterSpacing: 2,
+  textTransform: "uppercase",
+},
+
+headerTitle: {
+  marginTop: 4,
+  fontSize: 36,
+  fontWeight: "900",
+  color: "#111",
+  letterSpacing: -.8,
+}
+
+,
 search: {
   flex: 1,
   flexDirection: "row",
@@ -347,16 +660,7 @@ search: {
   height: 46,
 },
 
-searchInput: {
-  flex: 1,
-  marginLeft: 2,
-  marginTop: -1,
-  fontSize: 18,
-  color: "#000",
-},
 
-
-  tabs: { paddingVertical: 16 },
 
 tab: {
   paddingHorizontal: 24,
@@ -387,26 +691,8 @@ tabContent: {
 },
 
 
-  card: { width: CARD_WIDTH, marginBottom: 20, borderRadius: 20 },
 
-  image: {
-    width: "100%",
-    height: CARD_WIDTH * 1.3,
-    borderRadius: 20,
-  },
 
-  heart: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#ffffffff",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 2,
-  },
 
   category: {
     fontSize: 14,
@@ -420,47 +706,59 @@ tabContent: {
     marginTop: 2,
   },
 
-  priceRow: { flexDirection: "row", marginTop: 4, alignItems: "center" },
-
-  price: { fontSize: 18, fontWeight: "700" },
-
-  oldPrice: {
-    marginTop: 5,
-    marginLeft: 6,
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#616161ff",
-    textDecorationLine: "line-through",
-  },
   searchRow: {
   flexDirection: "row",
   alignItems: "center",
   gap: 10, // if not supported use marginRight
 },
 
-filterBtn: {
-  width: 46,
-  height: 46,
-  borderRadius: 23,
-  backgroundColor: "#f2f2f2",
-  justifyContent: "center",
-  alignItems: "center",
-},
-ratingRow: {
+
+
+sectionHeader: {
   flexDirection: "row",
-  alignItems: "center",
-  marginTop: 6,
+  justifyContent: "space-between",
+  alignItems: "flex-end",
+
+  paddingHorizontal: 20,
+
+  marginTop: 18,
+  marginBottom: 24,
 },
 
-ratingText: {
-  marginLeft: 4,
-  fontSize: 15,
-  fontWeight: "600",
+sectionLabel: {
+  fontSize: 11,
+  fontWeight: "800",
+  color: "#A1A1A1",
+  letterSpacing: 2,
+  textTransform: "uppercase",
 },
-buyText: {
-  fontSize: 12,
-  color: "#3f3e3eff",
+
+sectionTitle: {
+  marginTop: 6,
+  fontSize: 30,
+  fontWeight: "900",
+  color: "#111",
+  letterSpacing: -.5,
 },
+
+sectionBtn: {
+  flexDirection: "row",
+  alignItems: "center",
+
+  paddingHorizontal: 16,
+  height: 42,
+
+  borderRadius: 21,
+
+  backgroundColor: "#111",
+},
+
+sectionBtnText: {
+  color: "#FFF",
+  fontSize: 14,
+  fontWeight: "700",
+},
+
 
 oldPriceWrapper: {
   marginLeft: 8,
@@ -483,24 +781,269 @@ strikeLine: {
   backgroundColor: "red",
   transform: [{ rotate: "-12deg" }], // 👈 diagonal slash
 },
-sectionHeader: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  paddingHorizontal: 16,
-  marginTop: 10,
-  marginBottom: 20,
-},
 
-sectionTitle: {
-  fontSize: 24,
-  fontWeight: "700",
-},
 
 seeAll: {
   fontSize: 18,
   color: "#464747ff", // green accent
   fontWeight: "600",
 },
+card: {
+  width: CARD_WIDTH,
+  height: CARD_WIDTH * 1.55,
+  borderRadius: 30,
+  overflow: "hidden",
+  marginBottom: 26,
+  backgroundColor: "#111",
+  shadowColor: "#000",
+  shadowOpacity: 0.22,
+  shadowRadius: 18,
+  shadowOffset: {
+    width: 0,
+    height: 10,
+  },
+  elevation: 12,
+},
 
+image: {
+  width: "100%",
+  height: "100%",
+  resizeMode: "cover",
+},
+
+cardGradient: {
+  ...StyleSheet.absoluteFillObject,
+},
+
+newBadge: {
+  position: "absolute",
+  top: 16,
+  left: 16,
+  backgroundColor: "#B6FF2E",
+  borderRadius: 18,
+  paddingHorizontal: 14,
+  paddingVertical: 8,
+},
+
+newText: {
+  color: "#111",
+  fontSize: 11,
+  fontWeight: "900",
+  letterSpacing: 1.2,
+},
+
+heart: {
+  position: "absolute",
+  top: 14,
+  right: 14,
+  width: 42,
+  height: 42,
+  borderRadius: 21,
+  backgroundColor: "rgba(255, 255, 255, 0)",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+cardContent: {
+  position: "absolute",
+  left: 18,
+  right: 18,
+  bottom: 18,
+},
+
+ratingRow: {
+  flexDirection: "row",
+  alignItems: "center",
+},
+
+ratingText: {
+  marginLeft: 5,
+  color: "#FFF",
+  fontSize: 15,
+  fontWeight: "800",
+},
+
+buyText: {
+  marginLeft: 4,
+  color: "#D5D5D5",
+  fontSize: 13,
+},
+
+cardTitle: {
+  marginTop: 12,
+  color: "#FFF",
+  fontSize: 22,
+  fontWeight: "900",
+  lineHeight: 28,
+},
+
+bottomRow: {
+  marginTop: 18,
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "flex-end",
+},
+
+price: {
+  color: "#FFF",
+  fontSize: 28,
+  fontWeight: "900",
+},
+
+oldPrice: {
+  marginTop: 5,
+  color: "#9A9A9A",
+  fontSize: 15,
+  textDecorationLine: "line-through",
+},
+
+
+heartGlass: {
+  width: 46,
+  height: 46,
+  borderRadius: 23,
+  backgroundColor: "rgba(255, 255, 255, 0)",
+
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+badgeRow: {
+  position: "absolute",
+  top: 16,
+  left: 16,
+  right: 16,
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+},
+
+ratingPill: {
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "rgba(0,0,0,.55)",
+  paddingHorizontal: 10,
+  height: 30,
+  borderRadius: 15,
+},
+
+ratingPillText: {
+  color: "#FFF",
+  fontWeight: "700",
+  marginLeft: 4,
+},
+
+priceRow: {
+  marginTop: 8,
+  flexDirection: "row",
+  alignItems: "center",
+},
+
+arrowBtn: {
+  width: 50,
+  height: 50,
+  borderRadius: 25,
+  backgroundColor: "#B6FF2E",
+  justifyContent: "center",
+  alignItems: "center",
+  marginLeft: 12,
+},
+header: {
+  paddingHorizontal: 12,
+  paddingTop: 8,
+  paddingBottom: 6,
+},
+
+topRow: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+},
+
+iconBtn: {
+  width: 46,
+  height: 46,
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+notifyDot: {
+  position: "absolute",
+  top: 10,
+  right: 10,
+  width: 9,
+  height: 9,
+  borderRadius: 5,
+  backgroundColor: "#B6FF2E",
+},
+
+explore: {
+  marginTop: 34,
+  color: "#B6FF2E",
+  fontSize: 18,
+  fontWeight: "500",
+},
+
+heroTitle: {
+  marginTop: 8,
+  fontSize: 58,
+  fontWeight: "900",
+  color: "#111",
+  lineHeight: 60,
+},
+
+heroAccent: {
+  marginTop: -2,
+  fontSize: 58,
+  fontWeight: "900",
+  color: "#B6FF2E",
+  lineHeight: 60,
+},
+
+searchBox: {
+  marginTop: 32,
+  height: 60,
+  borderRadius: 32,
+  backgroundColor: "#F5F5F5",
+  flexDirection: "row",
+  alignItems: "center",
+  paddingHorizontal: 20,
+},
+
+searchInput: {
+  flex: 1,
+  marginLeft: 12,
+  color: "#111",
+  fontSize: 17,
+},
+
+tabs: {
+  paddingTop: 22,
+  paddingBottom: 10,
+  paddingRight: 20,
+},
+
+pill: {
+  height: 42,
+  borderRadius: 21,
+  backgroundColor: "#F5F5F5",
+  justifyContent: "center",
+  alignItems: "center",
+  paddingHorizontal: 20,
+  marginRight: 12,
+},
+
+pillActive: {
+  backgroundColor: "#111",
+},
+
+pillText: {
+  color: "#444",
+  fontWeight: "700",
+  fontSize: 15,
+},
+
+pillTextActive: {
+  color: "#FFF",
+},
 });
