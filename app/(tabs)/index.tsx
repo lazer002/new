@@ -10,7 +10,7 @@ import {
   Dimensions,
   TextInput,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons,AntDesign  } from "@expo/vector-icons";
 import Screen from "@/components/Screen";
 import api from "@/utils/config";
 import { router, useRouter } from "expo-router";
@@ -18,8 +18,16 @@ import { useFilter } from "@/context/FilterContext";
 import BottomFilterSheet from "@/components/BottomFilterSheet";
 import { useWishlist } from "@/context/WishlistContext";
 import { LinearGradient } from "expo-linear-gradient";
+import PremiumDrawer from "@/components/PremiumDrawer";
 
-
+import Animated, {
+  useAnimatedScrollHandler,
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+    withTiming,
+} from "react-native-reanimated";
+import { useUI } from "@/context/UIContext";
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 60) / 2;
 
@@ -284,6 +292,11 @@ export default function Home() {
   const [products, setProducts] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
+const { setTabBarVisible } = useUI();
+const {
+  drawerOpen,
+  setDrawerOpen,
+} = useUI();
   const { filters, setFilters,isFilterOpen, setIsFilterOpen } = useFilter();
   useEffect(() => {
     api.get("/api/categories").then((res) =>
@@ -293,6 +306,64 @@ export default function Home() {
       setProducts(res.data.items || [])
     );
   }, []);
+
+const scrollY = useSharedValue(0);
+
+const scrollHandler = useAnimatedScrollHandler({
+  onScroll: (event) => {
+    scrollY.value = event.contentOffset.y;
+  },
+});
+const lastOffset = useRef(0);
+
+const scrollingDown = useRef(false);
+
+
+const handleScroll = (
+  event: any
+) => {
+
+  const offset =
+    event.nativeEvent
+      .contentOffset.y;
+
+  if (offset < 10) {
+
+    setTabBarVisible(true);
+
+    lastOffset.current = offset;
+
+    return;
+
+  }
+
+  if (
+    offset >
+      lastOffset.current + 8 &&
+    !scrollingDown.current
+  ) {
+
+    scrollingDown.current = true;
+
+    setTabBarVisible(false);
+
+  }
+
+  else if (
+    offset <
+      lastOffset.current - 8 &&
+    scrollingDown.current
+  ) {
+
+    scrollingDown.current = false;
+
+    setTabBarVisible(true);
+
+  }
+
+  lastOffset.current = offset;
+
+};
 
 
   /* ───────── FILTER LOGIC (INVENTORY SAFE) ───────── */
@@ -345,6 +416,9 @@ export default function Home() {
      columnWrapperStyle={{
   justifyContent: "space-between",
 }}
+  onScroll={handleScroll}
+  scrollEventThrottle={16}
+
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <> 
@@ -360,6 +434,7 @@ export default function Home() {
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             openFilter={() => setIsFilterOpen(true)} // ✅ FIXED
+            openMenu={() => setDrawerOpen(true)}
           />
           <SectionHeader onSeeAll={() => router.push("/category")} />
             </>
@@ -402,6 +477,11 @@ renderItem={({ item, index }) => {
         categories={categories}
         onClose={() => setIsFilterOpen(false)}
       />
+<PremiumDrawer
+  visible={drawerOpen}
+  categories={categories}
+  onClose={() => setDrawerOpen(false)}
+/>
     </Screen>
   );
 }
@@ -409,8 +489,10 @@ renderItem={({ item, index }) => {
 /* ───────────────── HEADER ───────────────── */
 function SectionHeader({
   onSeeAll,
+
 }: {
   onSeeAll: () => void;
+
 }) {
 
   return (
@@ -462,6 +544,7 @@ function Header({
   searchQuery,
   setSearchQuery,
   openFilter,
+    openMenu,
 }: {
   categories: any[];
   activeCategory: string | null;
@@ -469,6 +552,7 @@ function Header({
   searchQuery: string;
   setSearchQuery: (v: string) => void;
   openFilter: () => void;
+  openMenu: () => void;
 }) {
 
   return (
@@ -479,30 +563,34 @@ function Header({
 
       <View style={styles.topRow}>
 
-        <Pressable style={styles.iconBtn}>
+<Pressable
+  style={styles.menuButton}
+  onPress={openMenu}
+>
 
-          <Ionicons
-            name="menu"
-            size={26}
-            color="#111"
-          />
+  <View style={styles.menuLineTop} />
 
-        </Pressable>
+  <View style={styles.menuLineMiddle} />
 
-        <Pressable
-          style={styles.iconBtn}
-          onPress={openFilter}
-        >
+  <View style={styles.menuLineBottom} />
 
-          <Ionicons
-            name="notifications-outline"
-            size={24}
-            color="#111"
-          />
+</Pressable>
 
-          <View style={styles.notifyDot} />
+   <Pressable
+  style={styles.profileBtn}
+  onPress={() => router.push("/profile")}
+>
 
-        </Pressable>
+  <Image
+    source={{
+      uri: "https://i.pravatar.cc/150?img=12",
+    }}
+    style={styles.profileImage}
+  />
+
+  <View style={styles.onlineDot} />
+
+</Pressable>
 
       </View>
 
@@ -526,92 +614,142 @@ function Header({
 
       {/* ---------- SEARCH ---------- */}
 
-      <View style={styles.searchBox}>
+<View style={styles.searchBox}>
 
-        <Ionicons
-          name="search-outline"
-          size={24}
-          color="#7A7A7A"
-        />
+  <Ionicons
+    name="search-outline"
+    size={23}
+    color="#8A8A8A"
+  />
 
-        <TextInput
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder="Search sneakers, apparel..."
-          placeholderTextColor="#9A9A9A"
-          style={styles.searchInput}
-        />
+  <TextInput
+    value={searchQuery}
+    onChangeText={setSearchQuery}
+    placeholder="Search sneakers, apparel..."
+    placeholderTextColor="#9A9A9A"
+    style={styles.searchInput}
+  />
 
-      </View>
+  <Pressable
+    onPress={openFilter}
+    style={styles.filterIcon}
+  >
+
+    <Ionicons
+      name="options-outline"
+      size={22}
+      color="#ffffffc0"
+      
+    />
+
+  </Pressable>
+
+</View>
 
       {/* ---------- CATEGORY ---------- */}
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.tabs}
+   <ScrollView
+  horizontal
+  showsHorizontalScrollIndicator={false}
+  contentContainerStyle={styles.tabs}
+>
+
+  {/* ALL */}
+
+  <Pressable
+    onPress={() => setActiveCategory("all")}
+    style={[
+      styles.pill,
+      activeCategory === null &&
+        styles.pillActive,
+    ]}
+  >
+
+    <View style={styles.pillRow}>
+
+      {activeCategory === null && (
+
+        <Ionicons
+          name="sparkles"
+          size={14}
+          color="#9dff00"
+          style={{
+            marginRight: 6,
+          }}
+        />
+
+      )}
+
+      <Text
+        style={[
+          styles.pillText,
+          activeCategory === null &&
+            styles.pillTextActive,
+        ]}
+      >
+        All
+      </Text>
+
+    </View>
+
+  </Pressable>
+
+  {/* CATEGORIES */}
+
+  {categories.map((cat) => {
+
+    const active =
+      activeCategory === cat._id;
+
+    return (
+
+      <Pressable
+        key={cat._id}
+        onPress={() =>
+          setActiveCategory(cat._id)
+        }
+        style={[
+          styles.pill,
+          active &&
+            styles.pillActive,
+        ]}
       >
 
-        <Pressable
-          onPress={() =>
-            setActiveCategory("all")
-          }
-          style={[
-            styles.pill,
-            activeCategory === null &&
-              styles.pillActive,
-          ]}
-        >
+        <View style={styles.pillRow}>
+
+          {active && (
+
+            <Ionicons
+              name="sparkles"
+              size={14}
+              color="#9dff00"
+              style={{
+                marginRight: 6,
+              }}
+            />
+
+          )}
 
           <Text
+            numberOfLines={1}
             style={[
               styles.pillText,
-              activeCategory === null &&
+              active &&
                 styles.pillTextActive,
             ]}
           >
-            All
+            {cat.name}
           </Text>
 
-        </Pressable>
+        </View>
 
-        {categories.map((cat) => {
+      </Pressable>
 
-          const active =
-            activeCategory === cat._id;
+    );
 
-          return (
+  })}
 
-            <Pressable
-              key={cat._id}
-              onPress={() =>
-                setActiveCategory(cat._id)
-              }
-              style={[
-                styles.pill,
-                active &&
-                  styles.pillActive,
-              ]}
-            >
-
-              <Text
-                numberOfLines={1}
-                style={[
-                  styles.pillText,
-                  active &&
-                    styles.pillTextActive,
-                ]}
-              >
-                {cat.name}
-              </Text>
-
-            </Pressable>
-
-          );
-
-        })}
-
-      </ScrollView>
+</ScrollView>
 
     </View>
 
@@ -960,23 +1098,90 @@ topRow: {
   alignItems: "center",
 },
 
-iconBtn: {
+
+menuButton: {
+  width: 52,
+  height: 52,
+
+  borderRadius: 18,
+
+  backgroundColor: "#FFF",
+
+  justifyContent: "center",
+
+  paddingHorizontal: 14,
+
+  shadowColor: "#000",
+
+  shadowOpacity: 0.08,
+
+
+
+
+  elevation: 1,
+},
+
+menuLineTop: {
+  width: 26,
+  height: 3,
+  borderRadius: 2,
+  backgroundColor: "#111",
+
+  marginBottom: 6,
+},
+
+menuLineMiddle: {
+  width: 20,
+  height: 3,
+  borderRadius: 2,
+  backgroundColor: "#B6FF2E",
+
+  marginBottom: 6,
+},
+
+menuLineBottom: {
+  width: 26,
+  height: 3,
+  borderRadius: 2,
+  backgroundColor: "#111",
+},
+profileBtn: {
   width: 46,
   height: 46,
-  justifyContent: "center",
-  alignItems: "center",
+  borderRadius: 23,
+  overflow: "hidden",
+
+  shadowColor: "#000",
+  shadowOpacity: 0.12,
+  shadowRadius: 10,
+  shadowOffset: {
+    width: 0,
+    height: 4,
+  },
+  elevation: 6,
 },
 
-notifyDot: {
+profileImage: {
+  width: "100%",
+  height: "100%",
+},
+
+onlineDot: {
   position: "absolute",
-  top: 10,
-  right: 10,
-  width: 9,
-  height: 9,
+  right: 2,
+  top: 2,
+  width: 10,
+  height: 10,
   borderRadius: 5,
   backgroundColor: "#B6FF2E",
+  borderWidth: 2,
+  borderColor: "#FFF",
 },
-
+pillRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+},
 explore: {
   marginTop: 34,
   color: "#B6FF2E",
@@ -1016,7 +1221,24 @@ searchInput: {
   color: "#111",
   fontSize: 17,
 },
+filterIcon: {
+  width: 42,
+  height: 42,
+  borderRadius: 8,
+  backgroundColor: "#000000ee",
 
+  justifyContent: "center",
+  alignItems: "center",
+
+  shadowColor: "#000",
+  shadowOpacity: 0.08,
+  shadowRadius: 8,
+  shadowOffset: {
+    width: 0,
+    height: 3,
+  },
+ 
+},
 tabs: {
   paddingTop: 22,
   paddingBottom: 10,
