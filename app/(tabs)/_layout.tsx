@@ -1,4 +1,4 @@
-import { Tabs } from "expo-router";
+import { Tabs, router } from "expo-router";
 import {
   View,
   Pressable,
@@ -7,19 +7,17 @@ import {
   useWindowDimensions,
   Text,
 } from "react-native";
-import { useEffect, useRef, useState,useCallback } from "react";
-import {api} from "@/utils/config";
+import { useEffect, useRef } from "react";
+
 import Octicons from "@expo/vector-icons/Octicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useWishlist } from "@/context/WishlistContext";
-import { useCart } from "@/context/CartContext";
-import { useAuth } from "@/context/AuthContext";
-import { useFilter } from "@/context/FilterContext";
-import { useFocusEffect } from "@react-navigation/native";
-/* ---------------- CONSTANTS ---------------- */
-import { useNotification } from "@/context/NotificationContext";
 
-const CIRCLE_SIZE = 56;
+import { useWishlist } from "@/context/WishlistContext";
+import { useFilter } from "@/context/FilterContext";
+import { useUI } from "@/context/UIContext";
+const ACTIVE_WIDTH = 82;
+const ACTIVE_HEIGHT = 54;
+
 const Badge = ({ count }: { count: number }) => {
   if (!count) return null;
 
@@ -31,154 +29,365 @@ const Badge = ({ count }: { count: number }) => {
     </View>
   );
 };
-/* ---------------- CUSTOM TAB BAR ---------------- */
 
-function CustomTabBar({ state, navigation }: any) {
-  const { width } = useWindowDimensions();
-  const { isFilterOpen } = useFilter();
+function CustomTabBar({
+  state,
+  navigation,
+}: any) {
 
-  const tabCount = state.routes.length;
+  const { width } =
+    useWindowDimensions();
 
-const { notifCount } = useNotification();
-  const { wishlist } = useWishlist();
+  const { wishlist } =
+    useWishlist();
 
-  const { user, logout,guestId, loading } = useAuth()
-const [hasProfileAlert, setHasProfileAlert] = useState(false);
-  const navWidth = width * 0.85;
-  const tabWidth = navWidth / tabCount;
+  const { isFilterOpen } =
+    useFilter();
 
-  const translateX = useRef(new Animated.Value(0)).current;
-const Dot = ({ show }: { show: boolean }) => {
-  if (!show) return null;
-  return <View style={styles.dot} />;
-};
+const {
+  drawerOpen,
+  tabBarVisible,
+} = useUI();
+
+  const tabCount =
+    state.routes.length;
+
+  const navWidth =
+    width * 0.88;
+
+  const tabWidth =
+    navWidth / tabCount;
+
+  const translateX =
+    useRef(
+      new Animated.Value(0)
+    ).current;
+
+  const scale =
+    useRef(
+      new Animated.Value(1)
+    ).current;
+
+    const footerTranslateY =
+  useRef(
+    new Animated.Value(0)
+  ).current;
+
+const footerOpacity =
+  useRef(
+    new Animated.Value(1)
+  ).current;
+
   useEffect(() => {
+
     const toValue =
-      state.index * tabWidth + (tabWidth - CIRCLE_SIZE) / 2;
+      state.index * tabWidth +
+      (tabWidth - ACTIVE_WIDTH) / 2;
 
-    Animated.spring(translateX, {
-      toValue,
-      useNativeDriver: true,
-      damping: 18,
-      stiffness: 120,
-    }).start();
-  }, [state.index, tabWidth]);
+    Animated.parallel([
 
+      Animated.spring(
+        translateX,
+        {
+          toValue,
+          useNativeDriver: true,
+          tension: 120,
+          friction: 12,
+        }
+      ),
 
+      Animated.sequence([
 
+        Animated.timing(
+          scale,
+          {
+            toValue: .95,
+            duration: 90,
+            useNativeDriver: true,
+          }
+        ),
 
-
-useEffect(() => {
-  // 🔥 STOP only if NO identity at all
-  if (!user && !guestId) {
-    setHasProfileAlert(false);
-    return;
-  }
-
-  const checkProfileAlert = async () => {
-    try {
-      const res = await api.get("/api/orders/mine");
-
-      const orders = res.data.orders || [];
-
-      const activeStatuses = [
-        "pending",
-        "confirmed",
-        "dispatched",
-        "shipped",
-        "out for delivery",
-      ];
-
-      const hasActive = orders.some((o: any) =>
-        activeStatuses.includes(
-          (o.orderStatus || "").toLowerCase()
+        Animated.spring(
+          scale,
+          {
+            toValue: 1,
+            useNativeDriver: true,
+            tension: 180,
+            friction: 8,
+          }
         )
-      );
 
-      setHasProfileAlert(hasActive);
-    } catch (err) {
-      console.log("Profile dot error", err);
-      setHasProfileAlert(false);
-    }
-  };
+      ])
 
-  checkProfileAlert();
-}, [user, guestId]); // 🔥 include guestId
- 
-  if (isFilterOpen) return null;
+    ]).start();
+
+  }, [
+    state.index,
+    tabWidth,
+  ]);
+
+  useEffect(() => {
+
+  const visible =
+    !drawerOpen &&
+    !isFilterOpen &&
+    tabBarVisible;
+
+  Animated.parallel([
+
+    Animated.timing(
+      footerOpacity,
+      {
+        toValue: visible ? 1 : 0,
+        duration: 220,
+        useNativeDriver: true,
+      }
+    ),
+
+    Animated.spring(
+      footerTranslateY,
+      {
+        toValue: visible ? 0 : 120,
+        tension: 120,
+        friction: 12,
+        useNativeDriver: true,
+      }
+    ),
+
+  ]).start();
+
+}, [
+  drawerOpen,
+  isFilterOpen,
+  tabBarVisible,
+]);
+
+  if (isFilterOpen)
+    return null;
+
+
   return (
-    <View style={[styles.wrapper, { width: navWidth }]}>
-      {/* 🔘 Sliding Circle */}
+<Animated.View
+  style={[
+    styles.wrapper,
+    {
+      width: navWidth,
+
+      opacity: footerOpacity,
+
+      transform: [
+        {
+          translateY:
+            footerTranslateY,
+        },
+      ],
+
+    },
+  ]}
+>
+      {/* Active Pill */}
+
       <Animated.View
         style={[
-          styles.circle,
-          { transform: [{ translateX }] },
+          styles.activePill,
+          {
+            transform: [
+              {
+                translateX,
+              },
+              {
+                scale,
+              },
+            ],
+          },
         ]}
       />
 
-      {state.routes.map((route: any, index: number) => {
-        const isFocused = state.index === index;
+      {state.routes.map(
+        (
+          route: any,
+          index: number
+        ) => {
 
-        return (
-          <Pressable
-            key={route.key}
-            onPress={() => navigation.navigate(route.name)}
-            style={[styles.tab, { width: tabWidth }]}
-          >
-            {/* Notifications (MaterialIcons) */}
-     {route.name === "notifications" ? (
-  <View>
-    <MaterialIcons
-      name={
-        isFocused
-          ? "notifications"
-          : "notifications-none"
-      }
-      size={26}
-      color={isFocused ? "#000" : "#999"}
-    />
-    <Badge count={notifCount} />
-  </View>
-) : route.name === "wishlist" ? (
-  <View>
-    <Octicons
-      name={isFocused ? "heart-fill" : "heart"}
-      size={22}
-      color={isFocused ? "#000" : "#999"}
-    />
-    <Badge count={wishlist.length} />
-  </View>
-) : route.name === "profile" ? (
-  <View>
-    <Octicons
-      name={isFocused ? "person-fill" : "person"}
-      size={22}
-      color={isFocused ? "#000" : "#999"}
-    />
-  <Dot show={hasProfileAlert} />
-  </View>
-) : (
-  <Octicons
-    name={isFocused ? "home-fill" : "home"}
-    size={22}
-    color={isFocused ? "#000" : "#999"}
-  />
-)}
-          </Pressable>
-        );
-      })}
-    </View>
-  );
+          const isFocused =
+            state.index === index;
+
+          const iconColor =
+            isFocused
+              ? "#111"
+              : "#7B7B7B";
+
+          let label = "";
+          let icon;
+
+          switch (route.name) {
+
+            case "index":
+
+              label = "Home";
+
+              icon = (
+                <Octicons
+                  name={
+                    isFocused
+                      ? "home-fill"
+                      : "home"
+                  }
+                  size={
+  isFocused
+    ? 26
+    : 21
 }
+                  color={iconColor}
+                />
+              );
 
-/* ---------------- TABS LAYOUT ---------------- */
+              break;
+
+            case "wishlist":
+
+              label = "Wishlist";
+
+              icon = (
+                <View>
+
+                  <Octicons
+                    name={
+                      isFocused
+                        ? "heart-fill"
+                        : "heart"
+                    }
+                    size={
+  isFocused
+    ? 26
+    : 21
+}
+                    color={iconColor}
+                  />
+
+                  <Badge
+                    count={
+                      wishlist.length
+                    }
+                  />
+
+                </View>
+              );
+
+              break;
+
+            case "notifications":
+
+              label = "Bundle";
+
+              icon = (
+                <MaterialIcons
+                  name="inventory-2"
+                  size={23}
+                  color={iconColor}
+                />
+              );
+
+              break;
+
+            case "profile":
+
+              label = "Cart";
+
+              icon = (
+                <MaterialIcons
+                  name="shopping-bag"
+                  size={23}
+                  color={iconColor}
+                />
+              );
+
+              break;
+
+            default:
+              return null;
+
+          }
+
+          return (
+
+            <Pressable
+              key={route.key}
+              style={styles.tab}
+              onPress={() => {
+
+                if (
+                  route.name ===
+                  "notifications"
+                ) {
+
+                  router.push(
+                    "/bundle"
+                  );
+
+                  return;
+
+                }
+
+                if (
+                  route.name ===
+                  "profile"
+                ) {
+
+                  router.push(
+                    "/(stack)/cart"
+                  );
+
+                  return;
+
+                }
+
+                navigation.navigate(
+                  route.name
+                );
+
+              }}
+            >
+
+<View
+  style={{
+ transform: [
+  { scale: isFocused ? 1.12 : 1 },
+  { translateY: isFocused ? -2 : 0 },
+]
+  }}
+>
+  {icon}
+</View>
+        {isFocused && (
+
+  <Text
+    style={styles.activeLabel}
+  >
+    {label}
+  </Text>
+
+)}
+
+            </Pressable>
+
+          );
+
+        }
+      )}
+
+    </Animated.View>
+  )
+}
 
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        sceneStyle: { backgroundColor: "transparent" },
+        sceneStyle: {
+          backgroundColor: "transparent",
+        },
       }}
       tabBar={(props) => <CustomTabBar {...props} />}
     >
@@ -190,70 +399,141 @@ export default function TabsLayout() {
   );
 }
 
-/* ---------------- STYLES ---------------- */
-
 const styles = StyleSheet.create({
-  wrapper: {
-    position: "absolute",
-    bottom: 28,
-    alignSelf: "center",
-    height: 72,
-    borderRadius: 40,
-    backgroundColor: "#fff",
-    flexDirection: "row",
-    alignItems: "center",
-    overflow: "hidden",
 
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 8 },
-    shadowRadius: 20,
-    elevation: 15,
-    
-  },
+wrapper: {
 
-  tab: {
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100%",
-    zIndex: 2,
-  },
-
-  circle: {
-    position: "absolute",
-    width: CIRCLE_SIZE,
-    height: CIRCLE_SIZE,
-    borderRadius: CIRCLE_SIZE / 2,
-    backgroundColor: "#e2dedeff",
-    left: 0,
-    zIndex: 1,
-  },
-  badge: {
   position: "absolute",
-  top: -6,
-  right: -10,
-  backgroundColor: "#22c55e",
-  borderRadius: 10,
-  minWidth: 18,
-  height: 18,
-  justifyContent: "center",
+
+  bottom: 18,
+
+  alignSelf: "center",
+
+  height: 78,
+
+  width: "90%",
+
+  borderRadius: 30,
+
+  backgroundColor: "#0E0E0E",
+
+  flexDirection: "row",
+
   alignItems: "center",
-  paddingHorizontal: 4,
-  elevation: 3,
+
+  paddingHorizontal: 10,
+
+  borderWidth: 1,
+
+  borderColor: "#1D1D1D",
+
+  shadowColor: "#000",
+
+  shadowOpacity: 0.32,
+
+  shadowRadius: 26,
+
+  shadowOffset: {
+    width: 0,
+    height: 14,
+  },
+
+  elevation: 24,
+
 },
 
-badgeText: {
-  color: "#fff",
-  fontSize: 10,
-  fontWeight: "700",
-},
-dot: {
+activePill: {
+
   position: "absolute",
-  top: -2,
-  right: -4,
-  width: 8,
-  height: 8,
-  borderRadius: 4,
-  backgroundColor: "#22c55e",
+
+  left: 8,
+
+  width: ACTIVE_WIDTH,
+
+  height: ACTIVE_HEIGHT,
+
+  borderRadius: 22,
+
+  backgroundColor: "#B6FF2E",
+
+  borderWidth: 1,
+
+  borderColor: "#D8FF77",
+
+  shadowColor: "#B6FF2E",
+
+  shadowOpacity: 0.65,
+
+  shadowRadius: 22,
+
+  shadowOffset: {
+    width: 0,
+    height: 10,
+  },
+
+  elevation: 18,
+
 },
+tab:{
+
+  flex:1,
+
+  justifyContent:"center",
+
+  alignItems:"center",
+
+  paddingTop:8,
+
+},
+
+activeLabel:{
+
+  marginTop:4,
+
+  fontSize:10,
+
+  fontWeight:"800",
+
+  color:"#111",
+
+  letterSpacing:.5,
+
+  textTransform:"uppercase",
+
+},
+
+  badge: {
+
+    position: "absolute",
+
+    top: -6,
+
+    right: -10,
+
+    backgroundColor: "#9DFF00",
+
+    minWidth: 18,
+
+    height: 18,
+
+    borderRadius: 9,
+
+    justifyContent: "center",
+
+    alignItems: "center",
+
+    paddingHorizontal: 4,
+
+  },
+
+  badgeText: {
+
+    color: "#111",
+
+    fontWeight: "900",
+
+    fontSize: 10,
+
+  },
+
 });

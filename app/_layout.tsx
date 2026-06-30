@@ -13,6 +13,7 @@ import { FilterProvider } from "@/context/FilterContext";
 import Toast from "react-native-toast-message";
 import { pillToastConfig } from "@/components/PillToast";
 import { NotificationProvider } from "@/context/NotificationContext";
+import { UIProvider } from "@/context/UIContext";
 export default function RootLayout() {
 const [fontsLoaded] = useFonts({
   "RobotoCondensed-Thin": require("../assets/font/RobotoCondensed-Thin.ttf"),
@@ -53,14 +54,29 @@ const [fontsLoaded] = useFonts({
  <NotificationProvider>
       <CartProvider>
         <WishlistProvider>
-          <FilterProvider>
-            <View style={styles.container}>
-              <View style={styles.darkBg} />
-              <AnimatedBackground />
-              <Slot />
-              <Toast config={pillToastConfig} position="bottom" topOffset={50}/>
-            </View>
-          </FilterProvider>
+    <FilterProvider>
+
+  <UIProvider>
+
+    <View style={styles.container}>
+
+      <View style={styles.darkBg} />
+
+      <AnimatedBackground />
+
+      <Slot />
+
+      <Toast
+        config={pillToastConfig}
+        position="bottom"
+        topOffset={50}
+      />
+
+    </View>
+
+  </UIProvider>
+
+</FilterProvider>
         </WishlistProvider>
       </CartProvider>
       </NotificationProvider>
