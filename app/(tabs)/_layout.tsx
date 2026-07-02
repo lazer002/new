@@ -15,8 +15,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useWishlist } from "@/context/WishlistContext";
 import { useFilter } from "@/context/FilterContext";
 import { useUI } from "@/context/UIContext";
-const ACTIVE_WIDTH = 82;
-const ACTIVE_HEIGHT = 54;
+
 
 const Badge = ({ count }: { count: number }) => {
   if (!count) return null;
@@ -29,6 +28,8 @@ const Badge = ({ count }: { count: number }) => {
     </View>
   );
 };
+const WRAPPER_HEIGHT = 78;
+const PILL_HEIGHT = 54;
 
 function CustomTabBar({
   state,
@@ -44,19 +45,24 @@ function CustomTabBar({
   const { isFilterOpen } =
     useFilter();
 
-const {
-  drawerOpen,
-  tabBarVisible,
-} = useUI();
+  const {
+    drawerOpen,
+    tabBarVisible,
+  } = useUI();
 
   const tabCount =
     state.routes.length;
 
-  const navWidth =
-    width * 0.88;
+    const HORIZONTAL_PADDING = 10;
+  const navWidth =    width * 0.88;
 
-  const tabWidth =
-    navWidth / tabCount;
+const tabWidth = (navWidth - HORIZONTAL_PADDING * 2) / tabCount;
+
+
+
+  const activeWidth = tabWidth 
+
+  const activeHeight = 54;
 
   const translateX =
     useRef(
@@ -68,21 +74,21 @@ const {
       new Animated.Value(1)
     ).current;
 
-    const footerTranslateY =
-  useRef(
-    new Animated.Value(0)
-  ).current;
+  const footerTranslateY =
+    useRef(
+      new Animated.Value(0)
+    ).current;
 
-const footerOpacity =
-  useRef(
-    new Animated.Value(1)
-  ).current;
+  const footerOpacity =
+    useRef(
+      new Animated.Value(1)
+    ).current;
 
   useEffect(() => {
 
-    const toValue =
-      state.index * tabWidth +
-      (tabWidth - ACTIVE_WIDTH) / 2;
+const toValue =
+  HORIZONTAL_PADDING +
+  state.index * tabWidth;
 
     Animated.parallel([
 
@@ -128,69 +134,72 @@ const footerOpacity =
 
   useEffect(() => {
 
-  const visible =
-    !drawerOpen &&
-    !isFilterOpen &&
-    tabBarVisible;
+    const visible =
+      !drawerOpen &&
+      !isFilterOpen &&
+      tabBarVisible;
 
-  Animated.parallel([
+    Animated.parallel([
 
-    Animated.timing(
-      footerOpacity,
-      {
-        toValue: visible ? 1 : 0,
-        duration: 220,
-        useNativeDriver: true,
-      }
-    ),
+      Animated.timing(
+        footerOpacity,
+        {
+          toValue: visible ? 1 : 0,
+          duration: 220,
+          useNativeDriver: true,
+        }
+      ),
 
-    Animated.spring(
-      footerTranslateY,
-      {
-        toValue: visible ? 0 : 120,
-        tension: 120,
-        friction: 12,
-        useNativeDriver: true,
-      }
-    ),
+      Animated.spring(
+        footerTranslateY,
+        {
+          toValue: visible ? 0 : 120,
+          tension: 120,
+          friction: 12,
+          useNativeDriver: true,
+        }
+      ),
 
-  ]).start();
+    ]).start();
 
-}, [
-  drawerOpen,
-  isFilterOpen,
-  tabBarVisible,
-]);
+  }, [
+    drawerOpen,
+    isFilterOpen,
+    tabBarVisible,
+  ]);
 
   if (isFilterOpen)
     return null;
 
 
   return (
-<Animated.View
-  style={[
-    styles.wrapper,
-    {
-      width: navWidth,
-
-      opacity: footerOpacity,
-
-      transform: [
+    <Animated.View
+      style={[
+        styles.wrapper,
         {
-          translateY:
-            footerTranslateY,
-        },
-      ],
+          width: navWidth,
 
-    },
-  ]}
->
+          opacity: footerOpacity,
+
+          transform: [
+            {
+              translateY:
+                footerTranslateY,
+            },
+          ],
+
+        },
+      ]}
+    >
       {/* Active Pill */}
 
       <Animated.View
         style={[
           styles.activePill,
           {
+            width: activeWidth,
+            height: activeHeight,
+
             transform: [
               {
                 translateX,
@@ -234,10 +243,10 @@ const footerOpacity =
                       : "home"
                   }
                   size={
-  isFocused
-    ? 26
-    : 21
-}
+                    isFocused
+                      ? 26
+                      : 21
+                  }
                   color={iconColor}
                 />
               );
@@ -258,10 +267,10 @@ const footerOpacity =
                         : "heart"
                     }
                     size={
-  isFocused
-    ? 26
-    : 21
-}
+                      isFocused
+                        ? 26
+                        : 21
+                    }
                     color={iconColor}
                   />
 
@@ -276,28 +285,28 @@ const footerOpacity =
 
               break;
 
-            case "notifications":
+            case "bundle":
 
               label = "Bundle";
 
               icon = (
                 <MaterialIcons
                   name="inventory-2"
-                  size={23}
+                  size={isFocused ? 26 : 21}
                   color={iconColor}
                 />
               );
 
               break;
 
-            case "profile":
+            case "cart":
 
               label = "Cart";
 
               icon = (
                 <MaterialIcons
                   name="shopping-bag"
-                  size={23}
+              size={isFocused ? 26 : 21}
                   color={iconColor}
                 />
               );
@@ -316,32 +325,6 @@ const footerOpacity =
               style={styles.tab}
               onPress={() => {
 
-                if (
-                  route.name ===
-                  "notifications"
-                ) {
-
-                  router.push(
-                    "/bundle"
-                  );
-
-                  return;
-
-                }
-
-                if (
-                  route.name ===
-                  "profile"
-                ) {
-
-                  router.push(
-                    "/(stack)/cart"
-                  );
-
-                  return;
-
-                }
-
                 navigation.navigate(
                   route.name
                 );
@@ -349,25 +332,28 @@ const footerOpacity =
               }}
             >
 
-<View
-  style={{
- transform: [
-  { scale: isFocused ? 1.12 : 1 },
-  { translateY: isFocused ? -2 : 0 },
-]
-  }}
->
-  {icon}
-</View>
-        {isFocused && (
+          <View style={styles.tabContent}>
 
-  <Text
-    style={styles.activeLabel}
+  <View
+    style={{
+      transform: [
+        { scale: isFocused ? 1.12 : 1 },
+        { translateY: isFocused ? -1 : 0 },
+      ],
+    }}
   >
-    {label}
-  </Text>
+    {icon}
+  </View>
 
-)}
+  <View style={styles.labelContainer}>
+    {isFocused && (
+      <Text style={styles.activeLabel}>
+        {label}
+      </Text>
+    )}
+  </View>
+
+</View>
 
             </Pressable>
 
@@ -393,114 +379,104 @@ export default function TabsLayout() {
     >
       <Tabs.Screen name="index" />
       <Tabs.Screen name="wishlist" />
-      <Tabs.Screen name="notifications" />
-      <Tabs.Screen name="profile" />
+      <Tabs.Screen name="bundle" />
+      <Tabs.Screen name="cart" />
     </Tabs>
   );
 }
 
 const styles = StyleSheet.create({
 
-wrapper: {
+  wrapper: {
 
-  position: "absolute",
+    position: "absolute",
 
-  bottom: 18,
+    bottom: 18,
 
-  alignSelf: "center",
+    alignSelf: "center",
 
-  height: 78,
+    height: 78,
 
-  width: "90%",
+    // width: "90%",
 
-  borderRadius: 30,
+    borderRadius: 30,
 
-  backgroundColor: "#0E0E0E",
+    backgroundColor: "#0E0E0E",
 
-  flexDirection: "row",
+    flexDirection: "row",
 
-  alignItems: "center",
+    alignItems: "center",
 
-  paddingHorizontal: 10,
+    paddingHorizontal: 10,
 
-  borderWidth: 1,
+    borderWidth: 1,
 
-  borderColor: "#1D1D1D",
+    borderColor: "#1D1D1D",
 
-  shadowColor: "#000",
+    shadowColor: "#000",
 
-  shadowOpacity: 0.32,
+    shadowOpacity: 0.32,
 
-  shadowRadius: 26,
+    shadowRadius: 26,
 
-  shadowOffset: {
-    width: 0,
-    height: 14,
+    shadowOffset: {
+      width: 0,
+      height: 14,
+    },
+
+    elevation: 24,
+
   },
 
-  elevation: 24,
+  activePill: {
 
-},
+    position: "absolute",
 
-activePill: {
+    left: 0,
+top: (WRAPPER_HEIGHT - PILL_HEIGHT) / 2,
+    borderRadius: 22,
 
-  position: "absolute",
+    backgroundColor: "#B6FF2E",
 
-  left: 8,
+    borderWidth: 1,
 
-  width: ACTIVE_WIDTH,
+    borderColor: "#D8FF77",
 
-  height: ACTIVE_HEIGHT,
+    shadowColor: "#B6FF2E",
 
-  borderRadius: 22,
+    shadowOpacity: 0.65,
 
-  backgroundColor: "#B6FF2E",
+    shadowRadius: 22,
 
-  borderWidth: 1,
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
 
-  borderColor: "#D8FF77",
+    elevation: 18,
 
-  shadowColor: "#B6FF2E",
-
-  shadowOpacity: 0.65,
-
-  shadowRadius: 22,
-
-  shadowOffset: {
-    width: 0,
-    height: 10,
   },
-
-  elevation: 18,
-
+tab: {
+    flex: 1,
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
 },
-tab:{
+  activeLabel: {
 
-  flex:1,
+    marginTop: 0,
 
-  justifyContent:"center",
+    fontSize: 10,
 
-  alignItems:"center",
+    fontWeight: "800",
 
-  paddingTop:8,
+    color: "#111",
 
-},
+    letterSpacing: .5,
 
-activeLabel:{
+    textTransform: "uppercase",
 
-  marginTop:4,
-
-  fontSize:10,
-
-  fontWeight:"800",
-
-  color:"#111",
-
-  letterSpacing:.5,
-
-  textTransform:"uppercase",
-
-},
+  },
 
   badge: {
 
@@ -525,7 +501,18 @@ activeLabel:{
     paddingHorizontal: 4,
 
   },
+tabContent: {
+  width: "100%",
+ height:"100%",
+  justifyContent: "center",
+  alignItems: "center",
+},
 
+labelContainer: {
+  height: 12,
+  justifyContent: "center",
+  alignItems: "center",
+},
   badgeText: {
 
     color: "#111",

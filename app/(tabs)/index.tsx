@@ -19,6 +19,7 @@ import BottomFilterSheet from "@/components/BottomFilterSheet";
 import { useWishlist } from "@/context/WishlistContext";
 import { LinearGradient } from "expo-linear-gradient";
 import PremiumDrawer from "@/components/PremiumDrawer";
+import FloatingHeader from "@/components/FloatingHeader";
 
 import Animated, {
   useAnimatedScrollHandler,
@@ -291,7 +292,8 @@ export default function Home() {
   const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-
+const [showFloatingHeader, setShowFloatingHeader] = useState(false);
+const [headerHeight, setHeaderHeight] = useState(0);
 const { setTabBarVisible } = useUI();
 const {
   drawerOpen,
@@ -326,16 +328,25 @@ const handleScroll = (
   const offset =
     event.nativeEvent
       .contentOffset.y;
+      
+const SHOW_AT = Math.max(headerHeight - 10, 120);
+const HIDE_AT = Math.max(headerHeight - 70, 80);
 
-  if (offset < 10) {
+if (!showFloatingHeader && offset >= SHOW_AT) {
+  setShowFloatingHeader(true);
+} else if (showFloatingHeader && offset <= HIDE_AT) {
+  setShowFloatingHeader(false);
+}
 
-    setTabBarVisible(true);
+if (offset < 10) {
 
-    lastOffset.current = offset;
+  setTabBarVisible(true);
 
-    return;
+  lastOffset.current = offset;
 
-  }
+  return;
+
+}
 
   if (
     offset >
@@ -409,6 +420,20 @@ const handleScroll = (
 
   return (
     <Screen style={styles.screen}>
+      <FloatingHeader
+  visible={showFloatingHeader}
+  categories={categories}
+  activeCategory={filters.category}
+  setActiveCategory={(id) =>
+    setFilters((f) => ({
+      ...f,
+      category: id === "all" ? null : id,
+    }))
+  }
+  searchQuery={searchQuery}
+  setSearchQuery={setSearchQuery}
+  openFilter={() => setIsFilterOpen(true)}
+/>
       <FlatList
         data={filteredProducts}
         keyExtractor={(item) => item._id}
@@ -422,20 +447,21 @@ const handleScroll = (
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <> 
-          <Header
-            categories={categories}
-            activeCategory={filters.category}
-            setActiveCategory={(id) =>
-              setFilters((f) => ({
-                ...f,
-                category: id === "all" ? null : id,
-              }))
-            }
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            openFilter={() => setIsFilterOpen(true)} // ✅ FIXED
-            openMenu={() => setDrawerOpen(true)}
-          />
+       <Header
+  categories={categories}
+  activeCategory={filters.category}
+  setActiveCategory={(id) =>
+    setFilters((f) => ({
+      ...f,
+      category: id === "all" ? null : id,
+    }))
+  }
+  searchQuery={searchQuery}
+  setSearchQuery={setSearchQuery}
+  openFilter={() => setIsFilterOpen(true)}
+  openMenu={() => setDrawerOpen(true)}
+  setHeaderHeight={setHeaderHeight}
+/>
           <SectionHeader onSeeAll={() => router.push("/category")} />
             </>
         }
@@ -545,6 +571,7 @@ function Header({
   setSearchQuery,
   openFilter,
     openMenu,
+    setHeaderHeight
 }: {
   categories: any[];
   activeCategory: string | null;
@@ -553,11 +580,15 @@ function Header({
   setSearchQuery: (v: string) => void;
   openFilter: () => void;
   openMenu: () => void;
+  setHeaderHeight: (height: number) => void;
 }) {
 
   return (
 
-    <View style={styles.header}>
+    <View style={styles.header}
+      onLayout={(e) =>
+    setHeaderHeight(e.nativeEvent.layout.height)
+  }>
 
       {/* ---------- TOP ---------- */}
 
