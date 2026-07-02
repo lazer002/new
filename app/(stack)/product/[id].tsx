@@ -495,12 +495,7 @@ return (
         }
       >
 
-        <BlurView
-          intensity={90}
-          tint="light"
-          style={styles.glassButton}
-        >
-
+      
           <Ionicons
             name={
               isInWishlist(product._id)
@@ -510,13 +505,12 @@ return (
             size={20}
             color={
               isInWishlist(product._id)
-                ? "#E11D48"
+                ? "#000000"
                 : "#111"
             }
           />
 
-        </BlurView>
-
+      
       </Pressable>
 
       <View
@@ -642,20 +636,19 @@ return (
         {/* ---------- PRICE ---------- */}
 
         <View style={styles.priceRow}>
+<View>
+  <Text style={styles.price}>
+    ₹{product.price}
+  </Text>
 
-          <View>
+  <View style={styles.oldPriceContainer}>
+    <Text style={styles.oldPrice}>
+      ₹{Math.round(product.price * 1.35)}
+    </Text>
 
-            <Text style={styles.price}>
-              ₹{product.price}
-            </Text>
-
-            <Text style={styles.oldPrice}>
-              ₹{Math.round(
-                product.price * 1.35
-              )}
-            </Text>
-
-          </View>
+    <View style={styles.oldPriceStrike} />
+  </View>
+</View>
 
           <View style={styles.savePill}>
 
@@ -1382,12 +1375,27 @@ heroSlide: {
     color: "#111",
   },
 
-  oldPrice: {
-    marginTop: 4,
-    fontSize: 16,
-    color: "#999",
-    textDecorationLine: "line-through",
-  },
+ oldPriceContainer: {
+  position: "relative",
+  alignSelf: "flex-start",
+  marginTop: 2,
+},
+
+oldPrice: {
+  color: "#9A9A9A",
+  fontSize: 18,
+  lineHeight: 18,
+},
+
+oldPriceStrike: {
+  position: "absolute",
+  left: -1,
+  right: -1,
+  top: 11, // Adjust to 8-10 if needed
+  height: 1,
+  backgroundColor: "#B6FF2E",
+  borderRadius: 2,
+},
 
   savePill: {
     backgroundColor: "#B6FF2E",

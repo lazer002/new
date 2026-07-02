@@ -199,8 +199,8 @@ function ProductCard({ item }: { item: any }) {
       size={22}
       color={
         isFav
-          ? "#3ae706"
-          : "#FFF"
+          ? "#000000"
+          : "#000000"
       }
     />
 
@@ -252,17 +252,17 @@ function ProductCard({ item }: { item: any }) {
       {item.title}
     </Text>
 
-    <View style={styles.priceRow}>
+<View style={styles.priceRow}>
+  <Text style={styles.price}>₹{item.price}</Text>
 
-      <Text style={styles.price}>
-        ₹{item.price}
-      </Text>
+  <View style={styles.oldPriceContainer}>
+    <Text style={styles.oldPrice}>
+      ₹{Math.round(item.price * 1.3)}
+    </Text>
 
-      <Text style={styles.oldPrice}>
-        ₹999
-      </Text>
-
-    </View>
+    <View style={styles.oldPriceStrike} />
+  </View>
+</View>
 
   </View>
 
@@ -957,14 +957,14 @@ newBadge: {
   position: "absolute",
   top: 16,
   left: 16,
-  backgroundColor: "#B6FF2E",
+  backgroundColor: "#000000",
   borderRadius: 18,
   paddingHorizontal: 14,
   paddingVertical: 8,
 },
 
 newText: {
-  color: "#111",
+  color: "#ffffff",
   fontSize: 11,
   fontWeight: "900",
   letterSpacing: 1.2,
@@ -1028,13 +1028,28 @@ price: {
   fontWeight: "900",
 },
 
-oldPrice: {
-  marginTop: 5,
-  color: "#9A9A9A",
-  fontSize: 15,
-  textDecorationLine: "line-through",
+oldPriceContainer: {
+  position: "relative",
+  marginLeft: 4,
+  justifyContent: "center",
+  alignSelf: "center",
 },
 
+oldPrice: {
+  color: "#9A9A9A",
+  fontSize: 17,
+  paddingHorizontal: 2,
+},
+
+oldPriceStrike: {
+  position: "absolute",
+  left: 0,
+  right: 0,
+  top: 11, // Adjust between 8-10 if needed
+  height: 1,
+  backgroundColor: "#B6FF2E",
+  borderRadius: 2,
+},
 
 heartGlass: {
   width: 46,
@@ -1184,7 +1199,7 @@ pillRow: {
 },
 explore: {
   marginTop: 34,
-  color: "#B6FF2E",
+  color: "#000000",
   fontSize: 18,
   fontWeight: "500",
 },
