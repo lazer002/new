@@ -18,12 +18,26 @@ import {
   Animated
 } from "react-native";
 import { Image } from "react-native";
+import Screen from "@/components/Screen";
 import Toast from "react-native-toast-message";
 const { height, width } = Dimensions.get("window");
 const slides = [
-  { title: "Monkey", subtitle: "Fast & Smart" },
-  { title: "Secure", subtitle: "Your data is safe" },
-  { title: "Easy", subtitle: "One tap login" },
+
+  {
+    title: "Premium",
+    subtitle: "Streetwear Without Limits",
+  },
+
+  {
+    title: "Curated",
+    subtitle: "Luxury Meets Everyday",
+  },
+
+  {
+    title: "Minimal",
+    subtitle: "Built For Modern Fashion",
+  },
+
 ];
 export default function Login() {
   const { promptGoogleLogin, user } = useAuth();
@@ -129,136 +143,253 @@ useEffect(() => {
     >
       <View style={styles.container}>
         
-        {/* 🔵 HEADER */}
-<LinearGradient
-  colors={["#757575", "#0a0a0a"]}
-  style={styles.top}
->
-  {/* TOP BAR */}
-  <View style={styles.topBar}>
-    <TouchableOpacity onPress={() => router.back()}>
-      <Ionicons name="chevron-back" size={22} color="#fff" />
+
+<View style={styles.hero}>
+
+  {/* Top Navigation */}
+
+  <View style={styles.heroTop}>
+
+    <TouchableOpacity
+      style={styles.backButton}
+      onPress={() => router.back()}
+    >
+
+      <Ionicons
+        name="chevron-back"
+        size={22}
+        color="#111"
+      />
+
     </TouchableOpacity>
 
-    <TouchableOpacity style={styles.switchBtn} >
-      <Text style={styles.switchText}>Get Started</Text>
+    <TouchableOpacity
+      onPress={() => router.push("/register")}
+    >
+
+      <Text style={styles.createAccount}>
+        CREATE ACCOUNT
+      </Text>
+
     </TouchableOpacity>
+
   </View>
 
-  {/* 🔥 SWIPER */}
+  {/* Brand */}
+
   <Animated.View
     style={[
-      styles.sliderContainer,
-    
+      styles.heroCenter,
+      {
+        opacity,
+      },
     ]}
   >
-<Animated.View style={[styles.slide, { opacity }]}>
-  <Text style={styles.logo}>{slides[index].title}</Text>
-  <Text style={styles.tag}>{slides[index].subtitle}</Text>
-</Animated.View>
+
+    <Text style={styles.brand}>
+      GARRIB
+    </Text>
+
+    <View style={styles.brandAccent} />
+
+    <Text style={styles.heroTitle}>
+      {slides[index].title.toUpperCase()}
+    </Text>
+
+    <Text style={styles.heroSubtitle}>
+      {slides[index].subtitle}
+    </Text>
+
   </Animated.View>
-</LinearGradient>
 
+  {/* Decorative Block */}
+
+  <View style={styles.heroCard}>
+
+    <View style={styles.heroGlow} />
+
+<MaterialCommunityIcons
+  name="tshirt-crew-outline"
+  size={72}
+  color="#111"
+/>
+
+  </View>
+
+</View>
+<View style={styles.sheet}>
         {/* ⚪ SHEET */}
-        <View
-          style={[
-            styles.sheet,
-            {
-              top: isSmall ? height * 0.28 : height * 0.32,
-              padding: isSmall ? 18 : 24,
-            },
-          ]}
-        >
-          <Text style={styles.smallTop}>
-            Don’t have an account?
-            <Text style={styles.link} onPress={() => router.push("/register")}>
-              Get Started
-            </Text>
-          </Text>
+   <Text style={styles.sheetTitle}>
+  Welcome Back
+</Text>
 
-          <Text style={styles.heading}>Welcome Back</Text>
-          <Text style={styles.sub}>Enter your details below</Text>
+<Text style={styles.sheetSubtitle}>
+  Sign in to continue your premium shopping experience.
+</Text>
 
-          {/* EMAIL */}
-          <View style={styles.inputBox}>
-            <TextInput
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Email Address"
-              style={styles.input}
-              placeholderTextColor="#aaa"
-            />
-          </View>
+{/* EMAIL */}
 
-          {/* PASSWORD */}
-          <View style={styles.inputBox}>
-            <TextInput
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Password"
-              secureTextEntry={!showPass}
-              style={styles.input}
-              placeholderTextColor="#aaa"
-            />
-            <TouchableOpacity onPress={() => setShowPass(!showPass)}>
-              <Ionicons
-                name={showPass ? "eye-off-outline" : "eye-outline"}
-                size={18}
-                color="#999"
-              />
-            </TouchableOpacity>
-          </View>
+<Text style={styles.fieldLabel}>
+  EMAIL
+</Text>
 
-          {/* FORGOT */}
-     
+<View style={styles.inputBox}>
 
-          {/* BUTTON */}
-          <LinearGradient
-            colors={["#757575", "#0a0a0a"]}
-            style={styles.btn}
-          >
-            <TouchableOpacity
-              style={styles.btnInner}
-              onPress={handleContinue}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.btnText}>Sign in</Text>
-              )}
-            </TouchableOpacity>
-          </LinearGradient>
-     <TouchableOpacity>
-            <Text style={styles.forgot}>Forgot your password?</Text>
-          </TouchableOpacity>
-          {/* DIVIDER */}
-          <View style={styles.dividerRow}>
-            <View style={styles.line} />
-            <Text style={styles.or}>Or sign in with</Text>
-            <View style={styles.line} />
-          </View>
+  <TextInput
+    value={email}
+    onChangeText={setEmail}
+    placeholder="Enter your email"
+    placeholderTextColor="#999"
+    keyboardType="email-address"
+    autoCapitalize="none"
+    style={styles.input}
+  />
 
-          {/* SOCIAL */}
-   <View style={styles.socialRow}>
-  {/* GOOGLE */}
-  <TouchableOpacity style={styles.socialBtn} onPress={handleGoogle}>
-    <Image
-    source={require("@/assets/public/google.png")}
-      style={styles.socialIcon}
+</View>
+
+{/* PASSWORD */}
+
+<Text style={styles.fieldLabel}>
+  PASSWORD
+</Text>
+
+<View style={styles.inputBox}>
+
+  <TextInput
+    value={password}
+    onChangeText={setPassword}
+    placeholder="Enter your password"
+    placeholderTextColor="#999"
+    secureTextEntry={!showPass}
+    style={styles.input}
+  />
+
+  <TouchableOpacity
+    onPress={() =>
+      setShowPass(!showPass)
+    }
+  >
+
+    <Ionicons
+      name={
+        showPass
+          ? "eye-off-outline"
+          : "eye-outline"
+      }
+      size={20}
+      color="#666"
     />
-    <Text style={styles.socialDark}>Google</Text>
+
   </TouchableOpacity>
 
-  {/* FACEBOOK */}
-  {/* <TouchableOpacity style={styles.socialBtn}>
-    <Image
-      source={require("@/assets/public/fb.png")}
-      style={styles.socialIcon}
-    />
-    <Text style={styles.socialDark}>Facebook</Text> 
-  </TouchableOpacity> */}
 </View>
-        </View>
+
+<TouchableOpacity>
+
+  <Text style={styles.forgot}>
+    Forgot Password?
+  </Text>
+
+</TouchableOpacity>
+
+{/* LOGIN */}
+
+<TouchableOpacity
+  style={styles.loginButton}
+  onPress={handleContinue}
+>
+
+  {loading ? (
+
+    <ActivityIndicator
+      color="#111"
+    />
+
+  ) : (
+
+    <Text style={styles.loginText}>
+      SIGN IN
+    </Text>
+
+  )}
+
+</TouchableOpacity>
+
+{/* DIVIDER */}
+
+<View style={styles.dividerRow}>
+
+  <View style={styles.line} />
+
+  <Text style={styles.or}>
+    CONTINUE WITH
+  </Text>
+
+  <View style={styles.line} />
+
+</View>
+
+{/* GOOGLE */}
+
+<TouchableOpacity
+  style={styles.googleButton}
+  onPress={handleGoogle}
+>
+
+  <Image
+    source={require("@/assets/public/google.png")}
+    style={styles.socialIcon}
+  />
+
+  <Text style={styles.googleText}>
+    Continue with Google
+  </Text>
+
+</TouchableOpacity>
+
+<View
+  style={{
+    marginTop:28,
+    alignItems:"center",
+  }}
+>
+
+  <Text
+    style={{
+      color:"#777",
+      fontSize:13,
+    }}
+  >
+
+    New to GARRIB?
+
+  </Text>
+
+  <TouchableOpacity
+    onPress={() =>
+      router.push("/register")
+    }
+  >
+
+    <Text
+      style={{
+        marginTop:10,
+        color:"#111",
+        fontWeight:"900",
+        letterSpacing:1,
+      }}
+    >
+
+      CREATE ACCOUNT
+
+    </Text>
+
+  </TouchableOpacity>
+
+</View>
+
+</View>
+
       </View>
     </KeyboardAvoidingView>
   );
@@ -269,7 +400,7 @@ useEffect(() => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#eef1f7",
+    backgroundColor: "#FFFFFF",
   },
 socialIcon: {
   width: 20,
@@ -281,54 +412,9 @@ socialDark: {
   fontWeight: "600",
   color: "#333",
 },
-top: {
-  height: height * 0.4,
-  borderBottomLeftRadius: 40,
-  borderBottomRightRadius: 40,
-  justifyContent: "center",
-  overflow: "hidden", // 🔥 MUST ADD
-},
 
-  topBar: {
-    position: "absolute",
-    top: Platform.OS === "ios" ? 60 : 40,
-    left: 20,
-    right: 20,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
 
-  switchBtn: {
-    backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-
-  switchText: {
-    color: "#fff",
-    fontSize: 12,
-  },
-
-  logo: {
-    color: "#fff",
-    fontSize: 28,
-    fontWeight: "700",
-  },
-
-  sheet: {
-    position: "absolute",
-    left: 1,
-    right: 1,
-    bottom: 0,
-    
-    backgroundColor: "#fff",
-    borderRadius: 26,
-    shadowColor: "#000",
-    shadowOpacity: 0.12,
-    shadowRadius: 20,
-    elevation: 10,
-  },
+  
 
   smallTop: {
     textAlign: "right",
@@ -354,30 +440,7 @@ top: {
     marginBottom: 20,
   },
 
-  inputBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f7f8fc",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    height: 52,
-    marginBottom: 14,
-    justifyContent: "space-between",
-    borderWidth: 1,
-    borderColor: "#eee",
-  },
 
-  input: {
-    flex: 1,
-    fontSize: 15,
-  },
-
-  forgot: {
-    textAlign: "center",
-    color: "#888",
-    marginVertical: 20,
-    fontSize: 12,
-  },
 
   btn: {
     borderRadius: 12,
@@ -396,24 +459,8 @@ top: {
     fontSize: 15,
   },
 
-  dividerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 16,
-  },
 
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#eee",
-  },
 
-  or: {
-    marginVertical: 10,
-    marginHorizontal: 10,
-    color: "#aaa",
-    fontSize: 12,
-  },
 
   socialRow: {
     flexDirection: "row",
@@ -431,23 +478,370 @@ top: {
     borderColor: "#eee",
     gap: 6,
   },
-sliderContainer: {
-  flexDirection: "row",
-  width: width * slides.length, // 🔥 dynamic
-},
 
-slide: {
-  width: width, // 🔥 must match screen
-  justifyContent: "center",
-  alignItems: "center",
-},
-
-tag: {
-  color: "#ddd",
-  fontSize: 13,
-  marginTop: 6,
-},
   socialText: {
     fontWeight: "600",
   },
+  hero: {
+
+  height: height * 0.42,
+
+  backgroundColor: "#FFF",
+
+  paddingTop: Platform.OS === "ios"
+    ? 62
+    : 46,
+
+  paddingHorizontal: 24,
+
+},
+
+heroTop: {
+
+  flexDirection: "row",
+
+  justifyContent: "space-between",
+
+  alignItems: "center",
+
+},
+
+backButton: {
+
+  width: 48,
+
+  height: 48,
+
+  borderRadius: 16,
+
+  backgroundColor: "#F5F5F5",
+
+  justifyContent: "center",
+
+  alignItems: "center",
+
+},
+
+createAccount: {
+
+  fontSize: 12,
+
+  fontWeight: "800",
+
+  letterSpacing: 1.2,
+
+  color: "#111",
+
+},
+
+heroCenter: {
+
+  marginTop: 46,
+
+},
+
+brand: {
+
+  fontSize: 42,
+
+  fontWeight: "900",
+
+  letterSpacing: 2,
+
+  color: "#111",
+
+},
+
+brandAccent: {
+
+  width: 82,
+
+  height: 5,
+
+  borderRadius: 3,
+
+  backgroundColor: "#B6FF2E",
+
+  marginTop: 12,
+
+  marginBottom: 26,
+
+},
+
+heroTitle: {
+
+  fontSize: 30,
+
+  fontWeight: "900",
+
+  color: "#111",
+
+  letterSpacing: 1,
+
+},
+
+heroSubtitle: {
+
+  marginTop: 10,
+
+  fontSize: 16,
+
+  color: "#777",
+
+  lineHeight: 24,
+
+},
+
+heroCard: {
+
+  position: "absolute",
+
+  right: 24,
+
+  bottom: 10,
+
+  width: 130,
+
+  height: 130,
+
+  borderRadius: 32,
+
+  backgroundColor: "#F6F6F6",
+
+  justifyContent: "center",
+
+  alignItems: "center",
+
+  borderWidth: 1,
+
+  borderColor: "#ECECEC",
+
+},
+
+heroGlow: {
+
+  position: "absolute",
+
+  width: 60,
+
+  height: 60,
+
+  borderRadius: 30,
+
+  backgroundColor: "#B6FF2E",
+
+  opacity: .18,
+
+},
+
+sliderContainer: {
+
+  flex: 1,
+
+},
+
+slide: {
+
+  width: "100%",
+
+},
+sheet:{
+
+  position:"absolute",
+
+  left:0,
+
+  right:0,
+
+  bottom:0,
+
+  backgroundColor:"#FFF",
+
+  borderTopLeftRadius:40,
+
+  borderTopRightRadius:40,
+
+  paddingHorizontal:28,
+
+  paddingTop:34,
+
+  paddingBottom:36,
+
+},
+
+sheetTitle:{
+
+  fontSize:34,
+
+  fontWeight:"900",
+
+  color:"#111",
+
+  letterSpacing:.4,
+
+},
+
+sheetSubtitle:{
+
+  marginTop:10,
+
+  marginBottom:34,
+
+  fontSize:15,
+
+  lineHeight:24,
+
+  color:"#777",
+
+},
+
+fieldLabel:{
+
+  fontSize:11,
+
+  fontWeight:"800",
+
+  letterSpacing:1.2,
+
+  color:"#999",
+
+  marginBottom:10,
+
+},
+
+inputBox:{
+
+  height:58,
+
+  borderRadius:18,
+
+  backgroundColor:"#F7F7F7",
+
+  borderWidth:1,
+
+  borderColor:"#ECECEC",
+
+  flexDirection:"row",
+
+  alignItems:"center",
+
+  paddingHorizontal:18,
+
+  marginBottom:22,
+
+},
+
+input:{
+
+  flex:1,
+
+  color:"#111",
+
+  fontSize:16,
+
+  fontWeight:"600",
+
+},
+
+forgot:{
+
+  alignSelf:"flex-end",
+
+  color:"#777",
+
+  fontSize:13,
+
+  marginBottom:28,
+
+},
+
+loginButton:{
+
+  height:60,
+
+  borderRadius:18,
+
+  backgroundColor:"#111",
+
+  justifyContent:"center",
+
+  alignItems:"center",
+
+},
+
+loginText:{
+
+  color:"#FFF",
+
+  fontSize:16,
+
+  fontWeight:"900",
+
+  letterSpacing:1,
+
+},
+
+dividerRow:{
+
+  flexDirection:"row",
+
+  alignItems:"center",
+
+  marginVertical:28,
+
+},
+
+line:{
+
+  flex:1,
+
+  height:1,
+
+  backgroundColor:"#ECECEC",
+
+},
+
+or:{
+
+  marginHorizontal:14,
+
+  fontSize:11,
+
+  color:"#999",
+
+  fontWeight:"700",
+
+  letterSpacing:1.5,
+
+},
+
+googleButton:{
+
+  height:58,
+
+  borderRadius:18,
+
+  borderWidth:1,
+
+  borderColor:"#ECECEC",
+
+  flexDirection:"row",
+
+  justifyContent:"center",
+
+  alignItems:"center",
+
+},
+
+googleText:{
+
+  marginLeft:12,
+
+  color:"#111",
+
+  fontSize:15,
+
+  fontWeight:"700",
+
+},
 });

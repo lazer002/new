@@ -6,7 +6,7 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
+
   Dimensions,
   KeyboardAvoidingView,
   Platform,
@@ -23,9 +23,22 @@ const { height } = Dimensions.get("window");
 
 /* 🔥 HEADER SLIDES */
 const slides = [
-  { title: "Join Monkey", subtitle: "Create your account" },
-  { title: "Fast Setup", subtitle: "Get started quickly" },
-  { title: "Secure", subtitle: "Your data is safe" },
+
+  {
+    title: "PREMIUM",
+    subtitle: "Join the Future of Streetwear",
+  },
+
+  {
+    title: "CURATED",
+    subtitle: "Luxury Meets Everyday Style",
+  },
+
+  {
+    title: "GARRIB",
+    subtitle: "Create Your Fashion Identity",
+  },
+
 ];
 
 export default function Register() {
@@ -150,110 +163,217 @@ export default function Register() {
       <View style={styles.container}>
         
         {/* 🔵 HEADER */}
-        <LinearGradient
-          colors={["#757575", "#0a0a0a"]}
-          style={styles.top}
-        >
-          <View style={styles.topBar}>
-            <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="chevron-back" size={22} color="#fff" />
-            </TouchableOpacity>
-          </View>
+  {/* ================= HERO ================= */}
 
-          {/* 🔥 FADE TEXT */}
-          <Animated.View
-            style={[
-              styles.slide,
-              {
-                opacity,
-                transform: [{ scale }],
-              },
-            ]}
-          >
-            <Text style={styles.logo}>{slides[index].title}</Text>
-            <Text style={styles.tag}>{slides[index].subtitle}</Text>
-          </Animated.View>
-        </LinearGradient>
+<View style={styles.hero}>
+
+  <View style={styles.heroTop}>
+
+    <TouchableOpacity
+      style={styles.backButton}
+      onPress={() => router.back()}
+    >
+
+      <Ionicons
+        name="chevron-back"
+        size={22}
+        color="#111"
+      />
+
+    </TouchableOpacity>
+
+    <TouchableOpacity
+      onPress={() => router.push("/login")}
+    >
+
+      <Text style={styles.loginLink}>
+        SIGN IN
+      </Text>
+
+    </TouchableOpacity>
+
+  </View>
+
+  <Animated.View
+    style={[
+      styles.heroCenter,
+      {
+        opacity,
+        transform:[
+          { scale }
+        ]
+      },
+    ]}
+  >
+
+    <Text style={styles.brand}>
+      GARRIB
+    </Text>
+
+    <View style={styles.brandAccent} />
+
+    <Text style={styles.heroTitle}>
+      {slides[index].title}
+    </Text>
+
+    <Text style={styles.heroSubtitle}>
+      {slides[index].subtitle}
+    </Text>
+
+  </Animated.View>
+
+  <View style={styles.heroCard}>
+
+    <View style={styles.heroGlow} />
+
+    <Ionicons
+      name="shirt-outline"
+      size={74}
+      color="#111"
+    />
+
+  </View>
+
+</View>
 
         {/* ⚪ FORM */}
-        <View
-          style={[
-            styles.sheet,
-            {
-              top: isSmall ? height * 0.28 : height * 0.32,
-              padding: isSmall ? 18 : 24,
-            },
-          ]}
-        >
-          <Text style={styles.heading}>Create Account</Text>
-          <Text style={styles.sub}>Enter your details</Text>
+<View
+  style={[
+    styles.sheet,
+    {
+      top: isSmall
+        ? height * 0.31
+        : height * 0.34,
+    },
+  ]}
+>
 
-          {/* NAME */}
-          <View style={styles.inputBox}>
-            <TextInput
-              value={name}
-              onChangeText={setName}
-              placeholder="Full Name"
-              style={styles.input}
-              placeholderTextColor="#aaa"
-            />
-          </View>
+  <Text style={styles.sheetTitle}>
+    Create Account
+  </Text>
 
-          {/* EMAIL */}
-          <View style={styles.inputBox}>
-            <TextInput
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Email Address"
-              style={styles.input}
-              placeholderTextColor="#aaa"
-            />
-          </View>
+  <Text style={styles.sheetSubtitle}>
+    Build your premium fashion profile and start shopping.
+  </Text>
 
-          {/* PASSWORD */}
-          <View style={styles.inputBox}>
-            <TextInput
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Password"
-              secureTextEntry={!showPass}
-              style={styles.input}
-              placeholderTextColor="#aaa"
-            />
-            <TouchableOpacity onPress={() => setShowPass(!showPass)}>
-              <Ionicons
-                name={showPass ? "eye-off-outline" : "eye-outline"}
-                size={18}
-                color="#999"
-              />
-            </TouchableOpacity>
-          </View>
+  {/* NAME */}
 
-          {/* BUTTON */}
-          <LinearGradient
-            colors={["#757575", "#0a0a0a"]}
-            style={styles.btn}
-          >
-            <TouchableOpacity
-              style={styles.btnInner}
-              onPress={handleRegister}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.btnText}>Sign Up</Text>
-              )}
-            </TouchableOpacity>
-          </LinearGradient>
+  <Text style={styles.fieldLabel}>
+    FULL NAME
+  </Text>
 
-          {/* LOGIN LINK */}
-          <TouchableOpacity onPress={() => router.push("/login")}>
-            <Text style={styles.loginText}>
-              Already have an account? Login
-            </Text>
-          </TouchableOpacity>
+  <View style={styles.inputBox}>
+
+    <TextInput
+      value={name}
+      onChangeText={setName}
+      placeholder="John Doe"
+      placeholderTextColor="#999"
+      style={styles.input}
+    />
+
+  </View>
+
+  {/* EMAIL */}
+
+  <Text style={styles.fieldLabel}>
+    EMAIL ADDRESS
+  </Text>
+
+  <View style={styles.inputBox}>
+
+    <TextInput
+      value={email}
+      onChangeText={setEmail}
+      placeholder="Enter your email"
+      placeholderTextColor="#999"
+      keyboardType="email-address"
+      autoCapitalize="none"
+      style={styles.input}
+    />
+
+  </View>
+
+  {/* PASSWORD */}
+
+  <Text style={styles.fieldLabel}>
+    PASSWORD
+  </Text>
+
+  <View style={styles.inputBox}>
+
+    <TextInput
+      value={password}
+      onChangeText={setPassword}
+      placeholder="Create password"
+      placeholderTextColor="#999"
+      secureTextEntry={!showPass}
+      style={styles.input}
+    />
+
+    <TouchableOpacity
+      onPress={() =>
+        setShowPass(!showPass)
+      }
+    >
+
+      <Ionicons
+        name={
+          showPass
+            ? "eye-off-outline"
+            : "eye-outline"
+        }
+        size={20}
+        color="#666"
+      />
+
+    </TouchableOpacity>
+
+  </View>
+
+  <TouchableOpacity
+    style={styles.registerButton}
+    onPress={handleRegister}
+  >
+
+    {loading ? (
+
+      <ActivityIndicator
+        color="#FFF"
+      />
+
+    ) : (
+
+      <Text style={styles.registerText}>
+        CREATE ACCOUNT
+      </Text>
+
+    )}
+
+  </TouchableOpacity>
+
+  <View style={styles.bottomRow}>
+
+    <Text style={styles.bottomText}>
+      Already have an account?
+    </Text>
+
+    <TouchableOpacity
+      onPress={() =>
+        router.push("/login")
+      }
+    >
+
+      <Text style={styles.bottomLink}>
+        SIGN IN
+      </Text>
+
+    </TouchableOpacity>
+
+  </View>
+
+</View>
         </View>
-      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -266,94 +386,324 @@ const styles = StyleSheet.create({
     backgroundColor: "#eef1f7",
   },
 
-  top: {
-    height: height * 0.4,
-    borderBottomLeftRadius: 40,
-    borderBottomRightRadius: 40,
-    justifyContent: "center",
+  hero: {
+
+  height: height * 0.42,
+
+  backgroundColor: "#FFF",
+
+  paddingTop:
+    Platform.OS === "ios"
+      ? 62
+      : 46,
+
+  paddingHorizontal: 24,
+
+},
+sheet: {
+
+  position: "absolute",
+
+  left: 0,
+
+  right: 0,
+
+  bottom: 0,
+
+  backgroundColor: "#FFF",
+
+  borderTopLeftRadius: 42,
+
+  borderTopRightRadius: 42,
+
+  paddingHorizontal: 28,
+
+  paddingTop: 36,
+
+  paddingBottom: 36,
+
+  shadowColor: "#000",
+
+  shadowOpacity: .08,
+
+  shadowRadius: 25,
+
+  shadowOffset: {
+    width: 0,
+    height: -8,
   },
 
-  topBar: {
-    position: "absolute",
-    top: Platform.OS === "ios" ? 60 : 40,
-    left: 20,
-  },
+},
 
-  logo: {
-    color: "#fff",
-    fontSize: 28,
-    fontWeight: "700",
-  },
+sheetTitle: {
 
-  tag: {
-    color: "#ddd",
-    fontSize: 13,
-    marginTop: 6,
-  },
+  fontSize: 34,
 
-  slide: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  fontWeight: "900",
 
-  sheet: {
-    position: "absolute",
-    left: 1,
-    right: 1,
-    bottom: 0,
-    backgroundColor: "#fff",
-    borderRadius: 26,
-    elevation: 10,
-  },
+  color: "#111",
 
-  heading: {
-    fontSize: 22,
-    fontWeight: "700",
-  },
+  letterSpacing: .5,
 
-  sub: {
-    fontSize: 13,
-    color: "#888",
-    marginBottom: 20,
-  },
+},
 
-  inputBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f7f8fc",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    height: 52,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: "#eee",
-  },
+sheetSubtitle: {
 
-  input: {
-    flex: 1,
-    fontSize: 15,
-  },
+  marginTop: 10,
 
-  btn: {
-    borderRadius: 12,
-    marginTop: 10,
-  },
+  marginBottom: 32,
 
-  btnInner: {
-    height: 50,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  color: "#777",
 
-  btnText: {
-    color: "#fff",
-    fontWeight: "600",
-  },
+  fontSize: 15,
 
-  loginText: {
-    textAlign: "center",
-    marginTop: 20,
-    color: "#666",
-  },
+  lineHeight: 23,
+
+},
+
+fieldLabel: {
+
+  color: "#999",
+
+  fontSize: 11,
+
+  fontWeight: "800",
+
+  letterSpacing: 1.3,
+
+  marginBottom: 10,
+
+},
+
+inputBox: {
+
+  height: 58,
+
+  borderRadius: 18,
+
+  backgroundColor: "#F8F8F8",
+
+  borderWidth: 1,
+
+  borderColor: "#ECECEC",
+
+  flexDirection: "row",
+
+  alignItems: "center",
+
+  paddingHorizontal: 18,
+
+  marginBottom: 20,
+
+},
+
+input: {
+
+  flex: 1,
+
+  color: "#111",
+
+  fontSize: 16,
+
+  fontWeight: "600",
+
+},
+
+registerButton: {
+
+  marginTop: 14,
+
+  height: 60,
+
+  borderRadius: 18,
+
+  backgroundColor: "#111",
+
+  justifyContent: "center",
+
+  alignItems: "center",
+
+},
+
+registerText: {
+
+  color: "#FFF",
+
+  fontSize: 16,
+
+  fontWeight: "900",
+
+  letterSpacing: 1,
+
+},
+
+bottomRow: {
+
+  marginTop: 30,
+
+  flexDirection: "row",
+
+  justifyContent: "center",
+
+  alignItems: "center",
+
+},
+
+bottomText: {
+
+  color: "#777",
+
+  fontSize: 14,
+
+},
+
+bottomLink: {
+
+  marginLeft: 8,
+
+  color: "#111",
+
+  fontWeight: "900",
+
+  letterSpacing: .8,
+
+},
+heroTop: {
+
+  flexDirection: "row",
+
+  justifyContent: "space-between",
+
+  alignItems: "center",
+
+},
+
+backButton: {
+
+  width: 48,
+
+  height: 48,
+
+  borderRadius: 16,
+
+  backgroundColor: "#F5F5F5",
+
+  justifyContent: "center",
+
+  alignItems: "center",
+
+},
+
+loginLink: {
+
+  fontSize: 12,
+
+  fontWeight: "900",
+
+  letterSpacing: 1.2,
+
+  color: "#111",
+
+},
+
+heroCenter: {
+
+  marginTop: 48,
+
+},
+
+brand: {
+
+  fontSize: 42,
+
+  fontWeight: "900",
+
+  color: "#111",
+
+  letterSpacing: 2,
+
+},
+
+brandAccent: {
+
+  width: 84,
+
+  height: 5,
+
+  borderRadius: 3,
+
+  backgroundColor: "#B6FF2E",
+
+  marginTop: 12,
+
+  marginBottom: 26,
+
+},
+
+heroTitle: {
+
+  fontSize: 30,
+
+  fontWeight: "900",
+
+  color: "#111",
+
+  letterSpacing: 1,
+
+},
+
+heroSubtitle: {
+
+  marginTop: 10,
+
+  fontSize: 16,
+
+  color: "#777",
+
+  lineHeight: 24,
+
+},
+
+heroCard: {
+
+  position: "absolute",
+
+  right: 26,
+
+  bottom: 12,
+
+  width: 132,
+
+  height: 132,
+
+  borderRadius: 34,
+
+  backgroundColor: "#F7F7F7",
+
+  borderWidth: 1,
+
+  borderColor: "#ECECEC",
+
+  justifyContent: "center",
+
+  alignItems: "center",
+
+},
+
+heroGlow: {
+
+  position: "absolute",
+
+  width: 62,
+
+  height: 62,
+
+  borderRadius: 31,
+
+  backgroundColor: "#B6FF2E",
+
+  opacity: .18,
+
+},
 });
 

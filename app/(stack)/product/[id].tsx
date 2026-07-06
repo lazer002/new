@@ -160,6 +160,30 @@ export default function ProductScreen() {
         },
       ],
     }));
+
+
+    const floatingHeaderStyle =
+  useAnimatedStyle(() => ({
+
+    opacity: interpolate(
+      scrollY.value,
+      [HERO_HEIGHT - 120, HERO_HEIGHT - 60],
+      [0, 1],
+      Extrapolation.CLAMP,
+    ),
+
+    transform: [
+      {
+        translateY: interpolate(
+          scrollY.value,
+          [HERO_HEIGHT - 120, HERO_HEIGHT - 60],
+          [-18, 0],
+          Extrapolation.CLAMP,
+        ),
+      },
+    ],
+
+  }));
     /* ----------------------------- */
 /* Fetch Product                 */
 /* ----------------------------- */
@@ -1076,6 +1100,69 @@ return (
       </View>
 
     </Animated.ScrollView>
+
+<Animated.View
+  style={[
+    styles.floatingHeader,
+    floatingHeaderStyle,
+  ]}
+>
+
+  <Pressable
+    onPress={() => router.back()}
+    style={styles.iconButton}
+  >
+
+    <Ionicons
+      name="chevron-back"
+      size={24}
+      color="#FFF"
+    />
+
+  </Pressable>
+
+  <Text
+    numberOfLines={1}
+    style={styles.headerTitle}
+  >
+    {product.title}
+  </Text>
+
+  <View style={styles.headerActions}>
+
+    <Pressable
+      style={styles.iconButton}
+      onPress={() =>
+        isInWishlist(product._id)
+          ? removeFromWishlist(product._id)
+          : addToWishlist(product._id)
+      }
+    >
+
+      <Ionicons
+        name={
+          isInWishlist(product._id)
+            ? "heart"
+            : "heart-outline"
+        }
+        size={22}
+        color={
+          isInWishlist(product._id)
+            ? "#B6FF2E"
+            : "#FFF"
+        }
+      />
+
+    </Pressable>
+
+    <View style={{ marginLeft: 14 }}>
+      <CartIcon />
+    </View>
+
+  </View>
+<View style={styles.greenLine} />
+</Animated.View>
+
     <Animated.View
       style={[
         styles.bottomBar,
@@ -1473,7 +1560,101 @@ oldPriceStrike: {
     flexWrap: "wrap",
     justifyContent: "space-between",
   },
+greenLine:{
 
+  position:"absolute",
+
+  bottom:0,
+
+  left:18,
+
+  right:18,
+
+  height:2,
+
+  backgroundColor:"#B6FF2E",
+
+  borderRadius:2,
+
+},
+floatingHeader:{
+
+  position:"absolute",
+
+  top:height*0.045,
+
+  left:16,
+
+  right:16,
+
+  height:60,
+
+  flexDirection:"row",
+
+  alignItems:"center",
+
+  paddingHorizontal:8,
+
+  backgroundColor:"rgba(17,17,17,.94)",
+
+  borderRadius:20,
+
+  borderWidth:1,
+
+  borderColor:"rgba(182,255,46,.12)",
+
+  shadowColor:"#000",
+
+  shadowOpacity:.28,
+
+  shadowRadius:18,
+
+  shadowOffset:{
+    width:0,
+    height:8,
+  },
+
+  elevation:20,
+
+},
+
+headerTitle:{
+
+  flex:1,
+
+  marginHorizontal:10,
+
+  color:"#FFF",
+
+  fontSize:15,
+
+  fontWeight:"800",
+
+  textAlign:"center",
+
+  letterSpacing:.3,
+
+},
+
+headerActions:{
+
+  flexDirection:"row",
+
+  alignItems:"center",
+
+},
+
+iconButton:{
+
+  width:46,
+
+  height:46,
+
+  justifyContent:"center",
+
+  alignItems:"center",
+
+},
   sizeCard: {
     width: "31.5%",
     height: 86,

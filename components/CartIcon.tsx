@@ -19,100 +19,104 @@ export default function CartIcon() {
     0
   );
 
-  return (
-    <Pressable
-      style={styles.wrapper}
-      onPress={() => router.push("/cart")}
-    >
-      <BlurView
-        intensity={70}
-        tint="light"
-        style={styles.container}
-      >
-        <Ionicons
-          name="bag-handle-outline"
-          size={22}
-          color="#111"
-        />
-      </BlurView>
+ return (
+  <Pressable
+    style={styles.wrapper}
+    onPress={() => router.push("/cart")}
+  >
+
+    <View style={styles.container}>
+
+      <Ionicons
+        name="bag-handle-outline"
+        size={22}
+        color="#FFF"
+      />
 
       {itemCount > 0 && (
+
         <View style={styles.badge}>
+
           <Text style={styles.badgeText}>
             {itemCount > 99 ? "99+" : itemCount}
           </Text>
+
         </View>
+
       )}
-    </Pressable>
-  );
+
+    </View>
+
+  </Pressable>
+);
 }
 
 const styles = StyleSheet.create({
 
-  wrapper: {
-    position: "relative",
-    overflow: "visible",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+wrapper:{
 
-  container: {
-    width: 54,
-    height: 54,
+  justifyContent:"center",
 
-    borderRadius: 27,
+  alignItems:"center",
 
-    overflow: "hidden",
+},
 
-    justifyContent: "center",
-    alignItems: "center",
+container:{
 
-    backgroundColor: "rgba(255,255,255,.12)",
+  width:48,
 
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,.45)",
+  height:48,
 
-    shadowColor: "#000",
-    shadowOpacity: 0.12,
-    shadowRadius: 14,
-    shadowOffset: {
-      width: 0,
-      height: 6,
-    },
+  borderRadius:16,
 
-    elevation: 12,
-  },
+  backgroundColor:"#111",
 
-  badge: {
-    position: "absolute",
+  justifyContent:"center",
 
-    top: -5,
-    right: -5,
+  alignItems:"center",
 
-    minWidth: 22,
-    height: 22,
+  borderWidth:1,
 
-    paddingHorizontal: 5,
+  borderColor:"#242424",
 
-    borderRadius: 11,
+},
 
-    backgroundColor: "#B6FF2E",
+badge:{
 
-    justifyContent: "center",
-    alignItems: "center",
+  position:"absolute",
 
-    borderWidth: 2,
-    borderColor: "#FFF",
+  top:-4,
 
-    zIndex: 9999,
-    elevation: 9999,
-  },
+  right:-4,
 
-  badgeText: {
-    color: "#111",
-    fontSize: 11,
-    fontWeight: "900",
-    includeFontPadding: false,
-  },
+  minWidth:20,
+
+  height:20,
+
+  paddingHorizontal:4,
+
+  borderRadius:10,
+
+  backgroundColor:"#B6FF2E",
+
+  justifyContent:"center",
+
+  alignItems:"center",
+
+  borderWidth:2,
+
+  borderColor:"#111",
+
+},
+
+badgeText:{
+
+  color:"#111",
+
+  fontSize:10,
+
+  fontWeight:"900",
+
+},
 
 });
