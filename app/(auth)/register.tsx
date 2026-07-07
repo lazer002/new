@@ -6,7 +6,7 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-
+Image,
   Dimensions,
   KeyboardAvoidingView,
   Platform,
@@ -15,10 +15,9 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Animated,
+  Animated,ScrollView 
 } from "react-native";
 import Toast from "react-native-toast-message";
-
 const { height } = Dimensions.get("window");
 
 /* 🔥 HEADER SLIDES */
@@ -45,7 +44,6 @@ export default function Register() {
   const { register, user } = useAuth();
   const router = useRouter();
 
-  const isSmall = height < 700;
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -155,227 +153,283 @@ export default function Register() {
 
   /* ---------- UI ---------- */
 
-  return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <View style={styles.container}>
-        
-        {/* 🔵 HEADER */}
-  {/* ================= HERO ================= */}
 
-<View style={styles.hero}>
-
-  <View style={styles.heroTop}>
-
-    <TouchableOpacity
-      style={styles.backButton}
-      onPress={() => router.back()}
-    >
-
-      <Ionicons
-        name="chevron-back"
-        size={22}
-        color="#111"
-      />
-
-    </TouchableOpacity>
-
-    <TouchableOpacity
-      onPress={() => router.push("/login")}
-    >
-
-      <Text style={styles.loginLink}>
-        SIGN IN
-      </Text>
-
-    </TouchableOpacity>
-
-  </View>
-
-  <Animated.View
-    style={[
-      styles.heroCenter,
-      {
-        opacity,
-        transform:[
-          { scale }
-        ]
-      },
-    ]}
+return (
+  <KeyboardAvoidingView
+    style={{ flex: 1 }}
+    behavior={Platform.OS === "ios" ? "padding" : undefined}
   >
-
-    <Text style={styles.brand}>
-      GARRIB
-    </Text>
-
-    <View style={styles.brandAccent} />
-
-    <Text style={styles.heroTitle}>
-      {slides[index].title}
-    </Text>
-
-    <Text style={styles.heroSubtitle}>
-      {slides[index].subtitle}
-    </Text>
-
-  </Animated.View>
-
-  <View style={styles.heroCard}>
-
-    <View style={styles.heroGlow} />
-
-    <Ionicons
-      name="shirt-outline"
-      size={74}
-      color="#111"
-    />
-
-  </View>
-
-</View>
-
-        {/* ⚪ FORM */}
-<View
-  style={[
-    styles.sheet,
-    {
-      top: isSmall
-        ? height * 0.31
-        : height * 0.34,
-    },
-  ]}
->
-
-  <Text style={styles.sheetTitle}>
-    Create Account
-  </Text>
-
-  <Text style={styles.sheetSubtitle}>
-    Build your premium fashion profile and start shopping.
-  </Text>
-
-  {/* NAME */}
-
-  <Text style={styles.fieldLabel}>
-    FULL NAME
-  </Text>
-
-  <View style={styles.inputBox}>
-
-    <TextInput
-      value={name}
-      onChangeText={setName}
-      placeholder="John Doe"
-      placeholderTextColor="#999"
-      style={styles.input}
-    />
-
-  </View>
-
-  {/* EMAIL */}
-
-  <Text style={styles.fieldLabel}>
-    EMAIL ADDRESS
-  </Text>
-
-  <View style={styles.inputBox}>
-
-    <TextInput
-      value={email}
-      onChangeText={setEmail}
-      placeholder="Enter your email"
-      placeholderTextColor="#999"
-      keyboardType="email-address"
-      autoCapitalize="none"
-      style={styles.input}
-    />
-
-  </View>
-
-  {/* PASSWORD */}
-
-  <Text style={styles.fieldLabel}>
-    PASSWORD
-  </Text>
-
-  <View style={styles.inputBox}>
-
-    <TextInput
-      value={password}
-      onChangeText={setPassword}
-      placeholder="Create password"
-      placeholderTextColor="#999"
-      secureTextEntry={!showPass}
-      style={styles.input}
-    />
-
-    <TouchableOpacity
-      onPress={() =>
-        setShowPass(!showPass)
-      }
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      bounces={false}
     >
+      {/* ================= HERO ================= */}
 
-      <Ionicons
-        name={
-          showPass
-            ? "eye-off-outline"
-            : "eye-outline"
-        }
-        size={20}
-        color="#666"
-      />
+      <View style={styles.hero}>
+        <Image
+          source={require("@/assets/public/banner3.jpg")}
+          style={styles.heroImage}
+        />
 
-    </TouchableOpacity>
+        <LinearGradient
+          colors={[
+            "rgba(0,0,0,0)",
+            "rgba(0,0,0,.20)",
+            "rgba(0,0,0,.88)",
+          ]}
+          style={StyleSheet.absoluteFillObject}
+        />
 
-  </View>
+        {/* Top Bar */}
 
-  <TouchableOpacity
-    style={styles.registerButton}
-    onPress={handleRegister}
-  >
+        <View style={styles.heroTop}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={22}
+              color="#FFF"
+            />
+          </TouchableOpacity>
 
-    {loading ? (
-
-      <ActivityIndicator
-        color="#FFF"
-      />
-
-    ) : (
-
-      <Text style={styles.registerText}>
-        CREATE ACCOUNT
-      </Text>
-
-    )}
-
-  </TouchableOpacity>
-
-  <View style={styles.bottomRow}>
-
-    <Text style={styles.bottomText}>
-      Already have an account?
-    </Text>
-
-    <TouchableOpacity
-      onPress={() =>
-        router.push("/login")
-      }
-    >
-
-      <Text style={styles.bottomLink}>
-        SIGN IN
-      </Text>
-
-    </TouchableOpacity>
-
-  </View>
-
-</View>
+          <TouchableOpacity
+            onPress={() => router.push("/login")}
+          >
+            <Text style={styles.loginLink}>
+              SIGN IN
+            </Text>
+          </TouchableOpacity>
         </View>
-    </KeyboardAvoidingView>
-  );
+
+        {/* Hero */}
+
+        <Animated.View
+          style={[
+            styles.heroContent,
+            {
+              opacity,
+              transform: [{ scale }],
+            },
+          ]}
+        >
+          <View style={styles.collectionTag}>
+            <View style={styles.collectionDot} />
+
+            <Text style={styles.collectionText}>
+              NEW COLLECTION
+            </Text>
+          </View>
+
+          <Text style={styles.brand}>
+            GARRIB
+          </Text>
+
+          <Text style={styles.heroTitle}>
+            {slides[index].title}
+          </Text>
+
+          <Text style={styles.heroSubtitle}>
+            {slides[index].subtitle}
+          </Text>
+
+          <View style={styles.sliderRow}>
+            {slides.map((_, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.sliderDot,
+                  i === index &&
+                    styles.sliderDotActive,
+                ]}
+              />
+            ))}
+          </View>
+        </Animated.View>
+      </View>
+
+      {/* ================= FORM ================= */}
+
+      <View style={styles.formCard}>
+        <View style={styles.handle} />
+
+        <Text style={styles.sheetEyebrow}>
+          CREATE ACCOUNT
+        </Text>
+
+        <Text style={styles.sheetTitle}>
+          Join{"\n"}the Collective.
+        </Text>
+
+        <Text style={styles.sheetSubtitle}>
+          Create your premium fashion profile and
+          discover curated collections.
+        </Text>
+
+        {/* NAME */}
+
+        <Text style={styles.fieldLabel}>
+          FULL NAME
+        </Text>
+
+        <View style={styles.inputBox}>
+          <Ionicons
+            name="person-outline"
+            size={20}
+            color="#666"
+            style={{ marginRight: 12 }}
+          />
+
+          <TextInput
+            value={name}
+            onChangeText={setName}
+            placeholder="John Doe"
+            placeholderTextColor="#999"
+            style={styles.input}
+          />
+        </View>
+
+        {/* EMAIL */}
+
+        <Text style={styles.fieldLabel}>
+          EMAIL ADDRESS
+        </Text>
+
+        <View style={styles.inputBox}>
+          <Ionicons
+            name="mail-outline"
+            size={20}
+            color="#666"
+            style={{ marginRight: 12 }}
+          />
+
+          <TextInput
+            value={email}
+            onChangeText={setEmail}
+            placeholder="Enter your email"
+            placeholderTextColor="#999"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            style={styles.input}
+          />
+        </View>
+
+        {/* PASSWORD */}
+
+        <Text style={styles.fieldLabel}>
+          PASSWORD
+        </Text>
+
+        <View style={styles.inputBox}>
+          <Ionicons
+            name="lock-closed-outline"
+            size={20}
+            color="#666"
+            style={{ marginRight: 12 }}
+          />
+
+          <TextInput
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Create password"
+            placeholderTextColor="#999"
+            secureTextEntry={!showPass}
+            style={styles.input}
+          />
+
+          <TouchableOpacity
+            onPress={() =>
+              setShowPass(!showPass)
+            }
+          >
+            <Ionicons
+              name={
+                showPass
+                  ? "eye-off-outline"
+                  : "eye-outline"
+              }
+              size={20}
+              color="#777"
+            />
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity
+          style={styles.primaryButton}
+          onPress={handleRegister}
+        >
+          {loading ? (
+            <ActivityIndicator color="#111" />
+          ) : (
+            <>
+              <Text style={styles.primaryText}>
+                CREATE ACCOUNT
+              </Text>
+
+              <Ionicons
+                name="arrow-forward"
+                size={18}
+                color="#111"
+                style={{ marginLeft: 8 }}
+              />
+            </>
+          )}
+        </TouchableOpacity>
+                {/* TERMS */}
+
+        <Text style={styles.termsText}>
+          By creating an account you agree to our{" "}
+          <Text style={styles.termsLink}>Terms of Service</Text>
+          {" "}and{" "}
+          <Text style={styles.termsLink}>Privacy Policy</Text>.
+        </Text>
+
+        {/* LOGIN */}
+
+        <View style={styles.footer}>
+          <Text style={styles.footerLabel}>
+            ALREADY HAVE AN ACCOUNT?
+          </Text>
+
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => router.push("/login")}
+            style={styles.secondaryButton}
+          >
+            <Text style={styles.secondaryText}>
+              SIGN IN
+            </Text>
+
+            <View style={styles.secondaryCircle}>
+              <Ionicons
+                name="arrow-forward"
+                size={18}
+                color="#111"
+              />
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* FOOTER */}
+
+        <View style={styles.brandFooter}>
+          <View style={styles.footerLine} />
+
+          <Text style={styles.brandFooterText}>
+            PREMIUM STREETWEAR • MINIMAL LUXURY
+          </Text>
+
+          <View style={styles.footerLine} />
+        </View>
+      </View>
+    </ScrollView>
+  </KeyboardAvoidingView>
+);
+
 }
 
 /* ================= STYLES ================= */
@@ -383,327 +437,428 @@ export default function Register() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#eef1f7",
+    backgroundColor: "#F8F8F8",
   },
+
+  content: {
+    paddingBottom: 40,
+    backgroundColor: "#F8F8F8",
+  },
+
+  /* ================= HERO ================= */
 
   hero: {
-
-  height: height * 0.42,
-
-  backgroundColor: "#FFF",
-
-  paddingTop:
-    Platform.OS === "ios"
-      ? 62
-      : 46,
-
-  paddingHorizontal: 24,
-
-},
-sheet: {
-
-  position: "absolute",
-
-  left: 0,
-
-  right: 0,
-
-  bottom: 0,
-
-  backgroundColor: "#FFF",
-
-  borderTopLeftRadius: 42,
-
-  borderTopRightRadius: 42,
-
-  paddingHorizontal: 28,
-
-  paddingTop: 36,
-
-  paddingBottom: 36,
-
-  shadowColor: "#000",
-
-  shadowOpacity: .08,
-
-  shadowRadius: 25,
-
-  shadowOffset: {
-    width: 0,
-    height: -8,
+    height: 420,
+    position: "relative",
+    overflow: "hidden",
+    backgroundColor: "#111",
   },
 
-},
+  heroImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: undefined,
+    height: undefined,
+    resizeMode: "cover",
+  },
 
-sheetTitle: {
+  heroTop: {
+    position: "absolute",
+    top: Platform.OS === "ios" ? 60 : 45,
+    left: 24,
+    right: 24,
 
-  fontSize: 34,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
 
-  fontWeight: "900",
+    zIndex: 100,
+  },
 
-  color: "#111",
+  backButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
 
-  letterSpacing: .5,
+    justifyContent: "center",
+    alignItems: "center",
 
-},
+    backgroundColor: "rgba(255,255,255,.12)",
 
-sheetSubtitle: {
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,.18)",
+  },
 
-  marginTop: 10,
+  loginLink: {
+    color: "#FFF",
+    fontWeight: "900",
+    fontSize: 12,
+    letterSpacing: 2,
+  },
 
-  marginBottom: 32,
+  heroContent: {
+    position: "absolute",
+    left: 28,
+    right: 28,
+    bottom: 42,
+  },
 
-  color: "#777",
+  collectionTag: {
+    alignSelf: "flex-start",
 
-  fontSize: 15,
+    flexDirection: "row",
+    alignItems: "center",
 
-  lineHeight: 23,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
 
-},
+    borderRadius: 50,
 
-fieldLabel: {
+    backgroundColor: "rgba(255,255,255,.15)",
 
-  color: "#999",
+    marginBottom: 24,
+  },
 
-  fontSize: 11,
+  collectionDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
 
-  fontWeight: "800",
+    backgroundColor: "#B6FF2E",
 
-  letterSpacing: 1.3,
+    marginRight: 8,
+  },
 
-  marginBottom: 10,
+  collectionText: {
+    color: "#FFF",
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 2,
+  },
 
-},
+  brand: {
+    color: "#FFF",
+    fontWeight: "900",
+    fontSize: 54,
+    letterSpacing: 4,
+  },
 
-inputBox: {
+  heroTitle: {
+    marginTop: 16,
 
-  height: 58,
+    color: "#FFF",
 
-  borderRadius: 18,
+    fontSize: 34,
+    fontWeight: "900",
 
-  backgroundColor: "#F8F8F8",
+    lineHeight: 40,
+  },
 
-  borderWidth: 1,
+  heroSubtitle: {
+    marginTop: 12,
 
-  borderColor: "#ECECEC",
+    color: "rgba(255,255,255,.75)",
 
-  flexDirection: "row",
+    fontSize: 16,
+    lineHeight: 25,
 
-  alignItems: "center",
+    width: "85%",
+  },
 
-  paddingHorizontal: 18,
+  sliderRow: {
+    flexDirection: "row",
+    marginTop: 24,
+  },
 
-  marginBottom: 20,
+  sliderDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
 
-},
+    marginRight: 8,
 
-input: {
+    backgroundColor: "rgba(255,255,255,.25)",
+  },
 
-  flex: 1,
+  sliderDotActive: {
+    width: 32,
+    backgroundColor: "#B6FF2E",
+  },
 
-  color: "#111",
+  /* ================= FORM CARD ================= */
 
-  fontSize: 16,
+  formCard: {
+    marginTop: -30,
 
-  fontWeight: "600",
+    backgroundColor: "#FFF",
 
-},
+    borderTopLeftRadius: 36,
+    borderTopRightRadius: 36,
 
-registerButton: {
+    paddingHorizontal: 26,
+    paddingTop: 20,
+    paddingBottom: 36,
 
-  marginTop: 14,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
+    shadowOffset: {
+      width: 0,
+      height: -6,
+    },
 
-  height: 60,
+    elevation: 10,
+  },
 
-  borderRadius: 18,
+  handle: {
+    alignSelf: "center",
 
-  backgroundColor: "#111",
+    width: 52,
+    height: 5,
 
-  justifyContent: "center",
+    borderRadius: 4,
 
-  alignItems: "center",
+    backgroundColor: "#DDD",
 
-},
+    marginBottom: 22,
+  },
 
-registerText: {
+  sheetEyebrow: {
+    color: "#888",
+    fontWeight: "800",
+    letterSpacing: 2,
+    fontSize: 11,
+  },
 
-  color: "#FFF",
+  sheetTitle: {
+    marginTop: 10,
 
-  fontSize: 16,
+    color: "#111",
 
-  fontWeight: "900",
+    fontSize: 38,
+    fontWeight: "900",
 
-  letterSpacing: 1,
+    lineHeight: 42,
+  },
 
-},
+  sheetSubtitle: {
+    marginTop: 12,
+    marginBottom: 34,
 
-bottomRow: {
+    color: "#777",
 
-  marginTop: 30,
+    fontSize: 15,
+    lineHeight: 24,
+  },
 
-  flexDirection: "row",
+  fieldLabel: {
+    color: "#999",
+    fontWeight: "800",
+    fontSize: 11,
+    letterSpacing: 1.5,
 
-  justifyContent: "center",
+    marginBottom: 10,
+  },
 
-  alignItems: "center",
+  inputBox: {
+    height: 60,
 
-},
+    flexDirection: "row",
+    alignItems: "center",
 
-bottomText: {
+    paddingHorizontal: 18,
 
-  color: "#777",
+    backgroundColor: "#FAFAFA",
 
-  fontSize: 14,
+    borderRadius: 18,
 
-},
+    borderWidth: 1,
+    borderColor: "#ECECEC",
 
-bottomLink: {
+    marginBottom: 20,
+  },
 
-  marginLeft: 8,
+  input: {
+    flex: 1,
 
-  color: "#111",
+    color: "#111",
 
-  fontWeight: "900",
+    fontSize: 16,
+    fontWeight: "600",
+  },
 
-  letterSpacing: .8,
+  primaryButton: {
+    height: 60,
 
-},
-heroTop: {
+    marginTop: 10,
 
-  flexDirection: "row",
+    borderRadius: 18,
 
-  justifyContent: "space-between",
+    backgroundColor: "#B6FF2E",
 
-  alignItems: "center",
+    flexDirection: "row",
 
-},
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
-backButton: {
+  primaryText: {
+    color: "#111",
+    fontWeight: "900",
+    fontSize: 15,
+    letterSpacing: 1.4,
+  },
+    /* ================= TERMS ================= */
 
-  width: 48,
+  termsText: {
+    marginTop: 20,
+    color: "#8A8A8A",
+    textAlign: "center",
+    fontSize: 12,
+    lineHeight: 20,
+    paddingHorizontal: 8,
+  },
 
-  height: 48,
+  termsLink: {
+    color: "#111",
+    fontWeight: "800",
+  },
 
-  borderRadius: 16,
+  /* ================= FOOTER ================= */
 
-  backgroundColor: "#F5F5F5",
+  footer: {
+    marginTop: 34,
+    alignItems: "center",
+  },
 
-  justifyContent: "center",
+  footerLabel: {
+    color: "#888",
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 1.6,
+    marginBottom: 18,
+  },
 
-  alignItems: "center",
+  secondaryButton: {
+    height: 60,
 
-},
+    backgroundColor: "#111",
 
-loginLink: {
+    borderRadius: 30,
 
-  fontSize: 12,
+    paddingLeft: 24,
+    paddingRight: 8,
 
-  fontWeight: "900",
+    flexDirection: "row",
+    alignItems: "center",
 
-  letterSpacing: 1.2,
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
 
-  color: "#111",
+    elevation: 6,
+  },
 
-},
+  secondaryText: {
+    color: "#FFF",
+    fontSize: 14,
+    fontWeight: "900",
+    letterSpacing: 1.5,
+    marginRight: 18,
+  },
 
-heroCenter: {
+  secondaryCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
 
-  marginTop: 48,
+    justifyContent: "center",
+    alignItems: "center",
 
-},
+    backgroundColor: "#B6FF2E",
+  },
 
-brand: {
+  /* ================= BRAND FOOTER ================= */
 
-  fontSize: 42,
+  brandFooter: {
+    marginTop: 34,
 
-  fontWeight: "900",
+    flexDirection: "row",
+    alignItems: "center",
+  },
 
-  color: "#111",
+  footerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#ECECEC",
+  },
 
-  letterSpacing: 2,
+  brandFooterText: {
+    marginHorizontal: 14,
 
-},
+    color: "#999",
 
-brandAccent: {
+    fontSize: 9,
+    fontWeight: "800",
 
-  width: 84,
+    letterSpacing: 2,
 
-  height: 5,
+    textAlign: "center",
+  },
 
-  borderRadius: 3,
+  /* ================= PREMIUM EXTRAS ================= */
 
-  backgroundColor: "#B6FF2E",
+  divider: {
+    height: 1,
+    backgroundColor: "#EFEFEF",
+    marginVertical: 26,
+  },
 
-  marginTop: 12,
+  caption: {
+    color: "#666",
+    fontSize: 13,
+    lineHeight: 22,
+  },
 
-  marginBottom: 26,
+  accent: {
+    color: "#B6FF2E",
+  },
 
-},
+  /* Legacy */
 
-heroTitle: {
+  bottomRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
-  fontSize: 30,
+  bottomText: {
+    color: "#777",
+    fontSize: 14,
+  },
 
-  fontWeight: "900",
+  bottomLink: {
+    marginLeft: 8,
+    color: "#111",
+    fontWeight: "900",
+    letterSpacing: 1,
+  },
 
-  color: "#111",
+  registerButton: {
+    height: 60,
+    borderRadius: 18,
+    backgroundColor: "#B6FF2E",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
-  letterSpacing: 1,
-
-},
-
-heroSubtitle: {
-
-  marginTop: 10,
-
-  fontSize: 16,
-
-  color: "#777",
-
-  lineHeight: 24,
-
-},
-
-heroCard: {
-
-  position: "absolute",
-
-  right: 26,
-
-  bottom: 12,
-
-  width: 132,
-
-  height: 132,
-
-  borderRadius: 34,
-
-  backgroundColor: "#F7F7F7",
-
-  borderWidth: 1,
-
-  borderColor: "#ECECEC",
-
-  justifyContent: "center",
-
-  alignItems: "center",
-
-},
-
-heroGlow: {
-
-  position: "absolute",
-
-  width: 62,
-
-  height: 62,
-
-  borderRadius: 31,
-
-  backgroundColor: "#B6FF2E",
-
-  opacity: .18,
-
-},
+  registerText: {
+    color: "#111",
+    fontSize: 15,
+    fontWeight: "900",
+    letterSpacing: 1.4,
+  },
 });
-

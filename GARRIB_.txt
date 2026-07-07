@@ -1,0 +1,148 @@
+GARRIB – Master Project Context
+
+Overview
+
+GARRIB is a premium fashion e-commerce mobile application built with: -
+React Native - Expo Router - TypeScript - React Context API - React
+Native Reanimated - Expo - Node.js + Express backend - MongoDB
+
+The app is NOT a generic shopping app. It should feel like a luxury
+streetwear brand.
+
+Design Inspiration
+
+-   Nike SNKRS
+-   Zara
+-   COS
+-   END Clothing
+-   Represent
+-   Fear of God Essentials
+
+Brand Personality
+
+-   Premium
+-   Editorial
+-   Minimal Luxury
+-   Modern Streetwear
+-   High-end
+-   Clean
+-   Confident
+
+Color System
+
+Primary: - #B6FF2E (Neon Lime)
+
+Secondary: - #111111 (Almost Black)
+
+Background: - #FFFFFF - #F8F8F8 - #F5F5F5
+
+Text: - #111111 - #777777 - #999999
+
+Never use: - Blue accents - Purple - Material Design colors - Bright
+gradients
+
+Use neon green only as an accent.
+
+Typography
+
+-   Large editorial headings
+-   Heavy font weights
+-   Uppercase labels
+-   Lots of whitespace
+-   Minimal text
+
+UI Principles
+
+Every screen should look like it belongs to one design system.
+
+Avoid: - Generic ecommerce layouts - Bootstrap style - Material Design -
+Crowded interfaces
+
+Prefer: - Large rounded cards - Editorial spacing - Smooth animations -
+Floating elements - Premium shadows - Soft borders
+
+Navigation
+
+Expo Router.
+
+Tabs: - Home - Wishlist - Bundle - Cart
+
+Profile lives on the Home screen instead of the bottom tab.
+
+Home Screen
+
+Contains: - Hero section - Search - Category chips - Product grid -
+Floating premium bottom navigation
+
+Future behaviour: - Search + categories become a floating animated
+header. - Bottom navigation hides on scroll down and returns on scroll
+up.
+
+Drawer
+
+Premium left drawer.
+
+Contains: - Home - New Drops - Categories - Collections - Build Bundle -
+Wishlist - Orders - Settings - Help - Login/Logout
+
+Profile card fixed at bottom.
+
+Rounded right corners. Black background. Smooth animation.
+
+Product Cards
+
+Large image. Rounded corners. Minimal overlay. Wishlist button.
+Editorial typography. Premium spacing. Large CTA arrow.
+
+Bundle
+
+Support bundle PLP and PDP.
+
+Need: - Sticky bottom price bar. - “What’s Included” section. - Drawer
+with included products. - Bundle savings card. - Premium animations.
+
+Context Architecture
+
+Providers: - AuthProvider - NotificationProvider - CartProvider -
+WishlistProvider - FilterProvider - UIProvider
+
+UIProvider owns: - drawerOpen - filterOpen - tabBarVisible
+
+FilterProvider owns only filter state.
+
+Animations
+
+Use Reanimated.
+
+Animations should be: - Spring - Smooth - Subtle
+
+No abrupt transitions.
+
+Login Screen
+
+Should follow the same premium language: - Editorial hero - Black &
+white design - Neon green accents - Minimal card - Premium inputs -
+Google login - OTP login
+
+Do NOT change authentication logic. Only redesign UI.
+
+Coding Rules
+
+-   Preserve business logic.
+-   Preserve API calls.
+-   Preserve routing.
+-   UI changes only unless requested.
+-   Modular components.
+-   Production-ready code.
+
+Code Delivery Rules
+
+When code is too large: 1. Split automatically into Part 1, Part 2, Part
+3… 2. Never summarize instead of code. 3. Continue sequentially. 4.
+Split at safe boundaries. 5. The pasted parts must form one valid file.
+
+Goal
+
+Build one of the best-looking premium fashion ecommerce apps using React
+Native with a cohesive luxury experience across Home, Login, Wishlist,
+Bundle, Cart, Checkout, Orders and Profile.

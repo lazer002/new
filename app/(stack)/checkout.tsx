@@ -63,20 +63,27 @@ export default function CheckoutScreen() {
 const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
 const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
 const [useSaved, setUseSaved] = useState(true);
+const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
 useEffect(() => {
   const fetchSaved = async () => {
     try {
       const res = await api.get("/api/address");
-      const list = res.data.addresses || [];
+   const list = res.data.addresses || [];
 
-      setSavedAddresses(list);
+setSavedAddresses(list);
 
-      const def = list.find((a: any) => a.isDefault);
-      if (def) {
-        setSelectedAddressId(def._id);
-        fillAddress(def);
-          setUseSaved(true); // 🔥 auto fill
-      }
+if (list.length === 0) {
+  setUseSaved(false);
+  setSelectedAddressId(null);
+  return;
+}
+
+const def =
+  list.find((a: any) => a.isDefault) || list[0];
+
+setSelectedAddressId(def._id);
+fillAddress(def);
+setUseSaved(true);
     } catch (err) {
       console.log(err);
     }
@@ -133,15 +140,32 @@ const emptyAddress: Address = {
   const [paymentMethod, setPaymentMethod] =
     useState<PaymentMethod>("cod");
   const [loading, setLoading] = useState<boolean>(false);
-
+const toggleExpanded = (id: string) => {
+  setExpandedItems((prev) => ({
+    ...prev,
+    [id]: !prev[id],
+  }));
+};
   /* ---------- PRICE ---------- */
 
-  const subtotal = useMemo<number>(() => {
-    return items.reduce((sum: number, it: any) => {
-      if (it.bundle) return sum + it.bundle.price * it.quantity;
-      return sum + it.product.price * it.quantity;
-    }, 0);
-  }, [items]);
+const subtotal = useMemo(() => {
+  return items.reduce((sum: number, it: any) => {
+
+    if (it.bundle?.price) {
+      return sum + Number(it.bundle.price) * (it.quantity || 1);
+    }
+
+    if (it.customBundle?.price) {
+      return sum + Number(it.customBundle.price) * (it.quantity || 1);
+    }
+
+    if (it.product?.price) {
+      return sum + Number(it.product.price) * (it.quantity || 1);
+    }
+
+    return sum;
+  }, 0);
+}, [items]);
 
   const shipping: number = subtotal > 1000 ? 0 : 100;
   const total: number = subtotal + shipping;
@@ -149,41 +173,71 @@ const emptyAddress: Address = {
 
   /* ---------- ORDER ITEMS ---------- */
 
-  const orderItems = useMemo<OrderItem[]>(() => {
-    return items.map((it: any) => {
-      if (it.bundle) {
+const orderItems = useMemo<OrderItem[]>(() => {
+  return items
+    .map((it: any) => {
+      // Bundle
+      if (it.bundle?._id) {
         return {
           bundleId: it.bundle._id,
           productId: null,
           title: it.bundle.title,
-          quantity: it.quantity,
-          price: it.bundle.price,
-          total: it.bundle.price * it.quantity,
+          quantity: it.quantity || 1,
+          price: Number(it.bundle.price),
+          total: Number(it.bundle.price) * (it.quantity || 1),
           mainImage: it.mainImage,
-          bundleProducts: it.bundleProducts.map((bp: any) => ({
-            productId: bp.product._id,
-            title: bp.product.title,
+          bundleProducts: (it.bundleProducts || []).map((bp: any) => ({
+            productId: bp.product?._id,
+            title: bp.product?.title,
             variant: `Size: ${bp.size}`,
             quantity: bp.quantity,
-            price: bp.product.price,
-            mainImage: bp.product.images?.[0] ?? "",
+            price: Number(bp.product?.price || 0),
+            mainImage: bp.product?.images?.[0] ?? "",
           })),
         };
       }
 
+      if (it.customBundle) {
+  return {
+    bundleId: null,
+    productId: null,
+    title: it.customBundle.title,
+    quantity: it.quantity,
+    price: it.customBundle.price,
+    total: it.customBundle.price * it.quantity,
+    mainImage: it.mainImage,
+    bundleProducts: it.bundleProducts.map((bp: any) => ({
+      productId: bp.product._id,
+      title: bp.product.title,
+      variant: `Size: ${bp.size}`,
+      quantity: bp.quantity,
+      price: bp.product.price,
+      mainImage: bp.product.images?.[0] ?? "",
+    })),
+  };
+}
+
+      // Product missing -> skip invalid item
+      if (!it.product?._id) {
+        console.log("Invalid cart item:", it);
+        return null;
+      }
+
+      // Product
       return {
         productId: it.product._id,
         bundleId: null,
         title: it.product.title,
         variant: `Size: ${it.size}`,
-        quantity: it.quantity,
+        quantity: it.quantity || 1,
         price: Number(it.product.price),
-        total: it.product.price * it.quantity,
+        total: Number(it.product.price) * (it.quantity || 1),
         mainImage: it.product.images?.[0] ?? "",
         bundleProducts: [],
       };
-    });
-  }, [items]);
+    })
+    .filter(Boolean) as OrderItem[];
+}, [items]);
   /* ---------- PLACE ORDER ---------- */
 
 const placeOrder = async (): Promise<void> => {
@@ -288,304 +342,827 @@ const placeOrder = async (): Promise<void> => {
   /* ================= UI ================= */
 
   return (
-    <SafeAreaView style={styles.root}>
-      <View style={styles.header}>
-        {/* BACK */}
-        <TouchableOpacity
-          style={styles.headerBtn}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={20} />
-        </TouchableOpacity>
+<SafeAreaView style={styles.root}>
+  <View style={styles.heroHeader}>
 
-        {/* TITLE */}
-        <Text style={styles.headerTitle}>Checkout</Text>
+    <TouchableOpacity
+      style={styles.circleBtn}
+      onPress={() => router.back()}
+    >
+      <Ionicons
+        name="chevron-back"
+        size={22}
+        color="#111"
+      />
+    </TouchableOpacity>
 
-        {/* PLP / SHOP */}
-        <TouchableOpacity
-          style={styles.headerBtn}
-          onPress={() => router.push("/")}
-        >
-          <Ionicons name="grid-outline" size={20} />
-        </TouchableOpacity>
-      </View>
+    <View style={{ flex: 1, marginLeft: 18 }}>
 
-      <ScrollView
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* ADDRESS */}
-    {/* 🔥 SAVED ADDRESS SECTION */}
-<Card title="Saved Address">
+      <Text style={styles.heroLabel}>
+        GARRIB
+      </Text>
 
-  {savedAddresses.length > 0 ? (
-    savedAddresses.map((a) => {
-      const active = selectedAddressId === a._id;
+      <Text style={styles.heroTitle}>
+        Checkout
+      </Text>
 
-      return (
-        <TouchableOpacity
-          key={a._id}
-          style={[
-            styles.savedCard,
-            active && styles.savedCardActive,
-          ]}
-          onPress={() => {
-            setUseSaved(true);
-            setSelectedAddressId(a._id);
-            fillAddress(a);
-          }}
-        >
-          <Text style={styles.savedName}>
-            {a.name} • {a.phone}
-          </Text>
+      <Text style={styles.heroSub}>
+        Secure checkout • Premium delivery
+      </Text>
 
-          <Text style={styles.savedAddr}>
-            {a.address}, {a.city}
-          </Text>
+    </View>
 
-          {a.isDefault && (
-            <Text style={styles.defaultBadge}>Default</Text>
-          )}
-        </TouchableOpacity>
-      );
-    })
-  ) : (
-    <Text style={{ color: "#888" }}>No saved addresses</Text>
-  )}
+    <TouchableOpacity
+      style={styles.circleBtn}
+      onPress={() => router.push("/")}
+    >
+      <Ionicons
+        name="bag-outline"
+        size={22}
+        color="#111"
+      />
+    </TouchableOpacity>
 
-  {/* 🔥 SWITCH TO FORM */}
-  <TouchableOpacity
-   onPress={() => {
-  setUseSaved(false);
-  setSelectedAddressId(null);
-  setAddress(emptyAddress); // 🔥 THIS FIXES YOUR BUG
-}}
-    style={{ marginTop: 10 }}
+  </View>
+
+  <ScrollView
+    showsVerticalScrollIndicator={false}
+    contentContainerStyle={styles.container}
   >
-    <Text style={{ color: "#007aff", fontWeight: "600" }}>
-      + Add New Address
-    </Text>
-  </TouchableOpacity>
 
-</Card>
+    {/* ================= ADDRESS ================= */}
 
+{savedAddresses.length > 0 && (
+  <>
+    <View style={styles.sectionHeader}>
+      <View style={styles.sectionAccent} />
 
-{!useSaved && (
-  <Card title="Delivery Address">
+      <Text style={styles.sectionTitle}>
+        DELIVERY ADDRESS
+      </Text>
+    </View>
 
-    {/* NAME */}
-    <Row>
-      <Input
-        placeholder="First Name*"
-        value={address.firstName}
-        onChange={(v: string) =>
-          setAddress({ ...address, firstName: v })
-        }
-      />
+    <View style={styles.card}>
+      {savedAddresses.map((a) => {
+        const active = selectedAddressId === a._id;
 
-      <Input
-        placeholder="Last Name"
-        value={address.lastName}
-        onChange={(v: string) =>
-          setAddress({ ...address, lastName: v })
-        }
-      />
-    </Row>
+        return (
+          <TouchableOpacity
+            key={a._id}
+            activeOpacity={0.9}
+            style={[
+              styles.addressCard,
+              active && styles.addressCardActive,
+            ]}
+            onPress={() => {
+              setUseSaved(true);
+              setSelectedAddressId(a._id);
+              fillAddress(a);
+            }}
+          >
+            <View style={styles.addressTop}>
+              <View style={styles.addressBadge}>
+                <Ionicons
+                  name="location"
+                  size={14}
+                  color="#111"
+                />
+              </View>
 
-    {/* PHONE */}
-    <Input
-      placeholder="Phone*"
-      keyboardType="phone-pad"
-      value={address.phone}
-      maxLength={10}
-      onChange={(v: string) => {
-        const cleaned = v.replace(/[^0-9]/g, "").slice(0, 10);
-        setAddress({ ...address, phone: cleaned });
-      }}
-    />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.savedName}>
+                  {a.name}
+                </Text>
 
-    {/* EMAIL */}
-    <Input
-      placeholder="Email"
-      value={email}
-      onChange={(v: string) => setEmail(v)}
-    />
+                <Text style={styles.savedAddr}>
+                  {a.address}
+                </Text>
 
-    {/* ADDRESS */}
-    <Input
-      placeholder="Address*"
-      value={address.address}
-      onChange={(v: string) =>
-        setAddress({ ...address, address: v })
-      }
-    />
+                <Text style={styles.savedAddr}>
+                  {a.city}, {a.state} • {a.zip}
+                </Text>
 
-    {/* APARTMENT */}
-    <Input
-      placeholder="Apartment (optional)"
-      value={address.apartment}
-      onChange={(v: string) =>
-        setAddress({ ...address, apartment: v })
-      }
-    />
-
-    {/* CITY + PINCODE */}
-    <Row>
-      <Input
-        placeholder="City"
-        value={address.city}
-        onChange={(v: string) =>
-          setAddress({ ...address, city: v })
-        }
-      />
-
-      <Input
-        placeholder="Pincode"
-        keyboardType="numeric"
-        value={address.zip}
-        onChange={async (v: string) => {
-          const cleaned = v.replace(/[^0-9]/g, "").slice(0, 6);
-
-          setAddress((prev) => ({ ...prev, zip: cleaned }));
-
-          if (cleaned.length === 6) {
-            const result = await getAddressFromPincode(cleaned);
-
-            if (result) {
-              setAddress((prev) => ({
-                ...prev,
-                city: result.city,
-                state: result.state,
-                country: result.country,
-              }));
-            } else {
-              Toast.show({
-                type: "error",
-                text1: "Invalid pincode",
-              });
-            }
-          }
-        }}
-      />
-    </Row>
-
-  </Card>
-)}
-
-
-
-        {/* ITEMS */}
-        <Card title="Order Items">
-          {items.map((it: any) => {
-            const isBundle = !!it.bundle;
-            const img = isBundle
-              ? it.mainImage
-              : it.product.images?.[0];
-
-            return (
-              <View key={it._id} style={styles.itemRow}>
-                <Image source={{ uri: img }} style={styles.itemImage} />
-
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.itemTitle}>
-                    {isBundle ? it.bundle.title : it.product.title}
-                  </Text>
-
-                  {isBundle &&
-                    it.bundleProducts.map((bp: any) => (
-                      <Text key={bp.product._id} style={styles.subItem}>
-                        • {bp.product.title} ({bp.size})
-                      </Text>
-                    ))}
-
-                  {!isBundle && (
-                    <Text style={styles.subItem}>
-                      Size: {it.size}
-                    </Text>
-                  )}
-                </View>
-
-                <Text style={styles.itemPrice}>
-                  ₹
-                  {(isBundle ? it.bundle.price : it.product.price) *
-                    it.quantity}
+                <Text style={styles.savedAddr}>
+                  {a.phone}
                 </Text>
               </View>
-            );
-          })}
-        </Card>
 
-        {/* PAYMENT */}
-        <Card title="Payment Method">
-          <PaymentOption
-            active={paymentMethod === "cod"}
-            label="Cash on Delivery"
-            icon="cash-outline"
-            onPress={() => setPaymentMethod("cod")}
+              {active && (
+                <View style={styles.selectedTick}>
+                  <Ionicons
+                    name="checkmark"
+                    size={18}
+                    color="#111"
+                  />
+                </View>
+              )}
+            </View>
+
+            {a.isDefault && (
+              <View style={styles.defaultChip}>
+                <Text style={styles.defaultText}>
+                  DEFAULT
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        );
+      })}
+
+      <TouchableOpacity
+        activeOpacity={0.9}
+        style={styles.addAddressBtn}
+        onPress={() => {
+          setUseSaved(false);
+          setSelectedAddressId(null);
+          setAddress(emptyAddress);
+          setEmail(user?.email ?? "");
+        }}
+      >
+        <Ionicons
+          name="add"
+          size={20}
+          color="#111"
+        />
+
+        <Text style={styles.addAddressText}>
+          ADD NEW ADDRESS
+        </Text>
+      </TouchableOpacity>
+    </View>
+  </>
+)}
+
+   {(!useSaved || savedAddresses.length === 0) && (
+      <>
+        <View
+          style={styles.sectionHeader}
+        >
+          <View
+            style={
+              styles.sectionAccent
+            }
           />
 
-          <PaymentOption
-            active={paymentMethod === "razorpay"}
-            label="Pay Online (Razorpay)"
-            icon="card-outline"
-            onPress={() => setPaymentMethod("razorpay")}
-          />
-        </Card>
-
-        {/* SUMMARY */}
-        <Card>
-          <SummaryRow label="Subtotal" value={`₹${subtotal.toFixed(2)}`} />
-          <SummaryRow label="Shipping" value={`₹${shipping.toFixed(2)}`} />
-          {shipping === 0 ? (
-            <Text style={styles.savingsText}>
-              🎉 Free Delivery Applied
-            </Text>
-          ) : (
-            <Text style={{ fontSize: 12, color: "#666" }}>
-              Add ₹{Math.max(0, 1000 - subtotal)} more for free delivery
-            </Text>
-          )}
-          <Divider />
-          <SummaryRow label="Total" value={`₹${total.toFixed(2)}`} bold />
-        </Card>
-
-
-      </ScrollView>
-      <View style={styles.bottomBar}>
-        <View>
-          <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.totalAmount}>₹{total.toFixed(2)}</Text>
+          <Text
+            style={
+              styles.sectionTitle
+            }
+          >
+            NEW ADDRESS
+          </Text>
         </View>
 
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={[styles.placeBtn, loading && { opacity: 0.6 }]}
-          disabled={loading}
-          onPress={placeOrder}
+        <View style={styles.card}>
+
+          <Row>
+            <Input
+              placeholder="First Name"
+              value={
+                address.firstName
+              }
+              onChange={(v) =>
+                setAddress({
+                  ...address,
+                  firstName: v,
+                })
+              }
+            />
+
+            <Input
+              placeholder="Last Name"
+              value={
+                address.lastName
+              }
+              onChange={(v) =>
+                setAddress({
+                  ...address,
+                  lastName: v,
+                })
+              }
+            />
+          </Row>
+
+          <Input
+            placeholder="Phone"
+            keyboardType="phone-pad"
+            value={address.phone}
+            maxLength={10}
+            onChange={(v) => {
+              const cleaned =
+                v
+                  .replace(
+                    /[^0-9]/g,
+                    ""
+                  )
+                  .slice(0, 10);
+
+              setAddress({
+                ...address,
+                phone: cleaned,
+              });
+            }}
+          />
+
+          <Input
+            placeholder="Email"
+            value={email}
+            onChange={setEmail}
+          />
+
+          <Input
+            placeholder="Address"
+            value={address.address}
+            onChange={(v) =>
+              setAddress({
+                ...address,
+                address: v,
+              })
+            }
+          />
+
+          <Input
+            placeholder="Apartment"
+            value={
+              address.apartment
+            }
+            onChange={(v) =>
+              setAddress({
+                ...address,
+                apartment: v,
+              })
+            }
+          />
+
+
+          <Row>
+
+            <Input
+              placeholder="City"
+              value={address.city}
+              onChange={(v: string) =>
+                setAddress({
+                  ...address,
+                  city: v,
+                })
+              }
+            />
+
+            <Input
+              placeholder="Pincode"
+              keyboardType="numeric"
+              maxLength={6}
+              value={address.zip}
+              onChange={async (v: string) => {
+                const cleaned = v
+                  .replace(/[^0-9]/g, "")
+                  .slice(0, 6);
+
+                setAddress((prev) => ({
+                  ...prev,
+                  zip: cleaned,
+                }));
+
+                if (cleaned.length === 6) {
+                  const result =
+                    await getAddressFromPincode(
+                      cleaned
+                    );
+
+                  if (result) {
+                    setAddress((prev) => ({
+                      ...prev,
+                      city: result.city,
+                      state: result.state,
+                      country: result.country,
+                    }));
+                  } else {
+                    Toast.show({
+                      type: "error",
+                      text1: "Invalid Pincode",
+                    });
+                  }
+                }
+              }}
+            />
+
+          </Row>
+
+          <Input
+            placeholder="State"
+            value={address.state}
+            editable={false}
+            onChange={() => {}}
+          />
+
+          <Input
+            placeholder="Country"
+            value={address.country}
+            editable={false}
+            onChange={() => {}}
+          />
+
+        </View>
+      </>
+    )}
+
+    {/* ================= ORDER ITEMS ================= */}
+
+    <View style={styles.sectionHeader}>
+      <View style={styles.sectionAccent} />
+
+      <Text style={styles.sectionTitle}>
+        ORDER SUMMARY
+      </Text>
+    </View>
+
+  <View style={styles.orderContainer}>
+
+  {items.map((it: any, index: number) => {
+
+const isCustomBundle = !!it.customBundle;
+const isBundle = !!it.bundle && !isCustomBundle;
+
+    const id = it._id || String(index);
+
+    const expanded = expandedItems[id];
+
+    const image =
+      isBundle || isCustomBundle
+        ? it.mainImage
+        : it.product?.images?.[0];
+
+    const title = isBundle
+      ? it.bundle.title
+      : isCustomBundle
+      ? it.customBundle.title
+      : it.product?.title;
+
+    const price = Number(
+      isBundle
+        ? it.bundle.price
+        : isCustomBundle
+        ? it.customBundle.price
+        : it.product?.price || 0
+    );
+
+    return (
+
+      <View
+        key={id}
+        style={styles.orderCard}
+      >
+
+        {/* ================= HEADER ================= */}
+
+<TouchableOpacity
+          activeOpacity={0.9}
+          style={styles.orderHeader}
+          onPress={() => {
+            if (isBundle || isCustomBundle) {
+              toggleExpanded(id);
+            }
+          }}
         >
-          <Text style={styles.placeBtnText}>
-            {loading ? "Placing..." : "Place Order"}
-          </Text>
-        </TouchableOpacity>
+
+          <Image
+            source={{ uri: image }}
+            style={styles.orderImage}
+          />
+
+<View style={styles.orderInfo}>
+
+  <View style={styles.topRow}>
+
+    <View style={{ flex: 1 }}>
+
+      <View style={styles.titleRow}>
+
+        <Text
+          numberOfLines={2}
+          style={styles.orderTitle}
+        >
+          {title}
+        </Text>
+
+      {(isBundle || isCustomBundle) && (() => {
+  const originalPrice = (it.bundleProducts || []).reduce(
+    (sum: number, bp: any) =>
+      sum +
+      Number(bp.product?.price || 0) *
+        (bp.quantity || 1),
+    0
+  );
+
+  const bundlePrice = Number(
+    isBundle
+      ? it.bundle?.price || 0
+      : it.customBundle?.price || 0
+  );
+
+  const saved = Math.max(
+    0,
+    originalPrice - bundlePrice
+  );
+
+  return (
+    <View style={styles.pricePill}>
+
+
+      {saved > 0 && (
+        <Text style={styles.pricePillSave}>
+          SAVE ₹{saved}
+        </Text>
+      )}
+
+    </View>
+  );
+})()}
+
       </View>
-    </SafeAreaView>
+
+      {(isBundle || isCustomBundle) ? (
+
+        <View style={styles.stackImages}>
+
+          {(it.bundleProducts || [])
+            .slice(0, 3)
+            .map((bp: any, i: number) => (
+              <Image
+                key={i}
+                source={{
+                  uri: bp.product?.images?.[0],
+                }}
+                style={[
+                  styles.stackImage,
+                  {
+                    marginLeft:
+                      i === 0 ? 0 : -12,
+                    zIndex: 20 - i,
+                  },
+                ]}
+              />
+            ))}
+
+        </View>
+
+      ) : (
+
+        <Text style={styles.orderMeta}>
+          Size {it.size}
+        </Text>
+
+      )}
+
+      <TouchableOpacity
+        activeOpacity={0.8}
+        style={styles.drawerPill}
+        onPress={() => toggleExpanded(id)}
+      >
+
+        <Text style={styles.drawerPillText}>
+          {expanded
+            ? "HIDE ITEMS"
+            : "VIEW INCLUDED ITEMS"}
+        </Text>
+
+        <Ionicons
+          name={
+            expanded
+              ? "chevron-up"
+              : "chevron-down"
+          }
+          size={16}
+          color="#111"
+        />
+
+      </TouchableOpacity>
+
+      <View style={styles.orderBottom}>
+
+        <Text style={styles.orderQty}>
+          Qty {it.quantity}
+        </Text>
+
+        <Text style={styles.orderPrice}>
+          ₹{price.toFixed(0)}
+        </Text>
+
+      </View>
+
+    </View>
+
+  </View>
+
+</View>
+   
+ </TouchableOpacity>
+
+ {(isBundle || isCustomBundle) && expanded && (
+
+<View style={styles.bundleDrawer}>
+
+  <View style={styles.drawerDivider} />
+
+  <Text style={styles.drawerTitle}>
+    {isBundle
+      ? "WHAT'S INCLUDED"
+      : "YOUR CUSTOM LOOK"}
+  </Text>
+
+  {(it.bundleProducts || []).map(
+    (bp: any, i: number) => (
+
+      <View
+        key={i}
+        style={styles.drawerItem}
+      >
+
+        <Image
+          source={{
+            uri:
+              bp.product?.images?.[0],
+          }}
+          style={styles.drawerImage}
+        />
+
+        <View
+          style={{
+            flex: 1,
+            marginHorizontal: 12,
+          }}
+        >
+
+          <Text
+            numberOfLines={2}
+            style={styles.drawerProductTitle}
+          >
+            {bp.product?.title}
+          </Text>
+
+          <Text style={styles.drawerMeta}>
+            Size {bp.size}
+            {"  •  "}
+            Qty {bp.quantity}
+          </Text>
+
+        </View>
+
+        <Text style={styles.drawerPrice}>
+          ₹{bp.product?.price}
+        </Text>
+
+      </View>
+
+    )
+  )}
+
+  <View style={styles.bundleFooter}>
+
+    <View style={styles.bundleGift}>
+      <Ionicons
+        name="gift-outline"
+        size={18}
+        color="#111"
+      />
+    </View>
+
+    <Text style={styles.bundleFooterText}>
+      Bundle Price
+    </Text>
+
+    <Text style={styles.bundleFooterPrice}>
+      ₹
+      {isBundle
+        ? it.bundle.price
+        : it.customBundle.price}
+    </Text>
+
+  </View>
+
+  <View style={styles.saveCard}>
+
+    <View style={styles.saveLeft}>
+
+      <View style={styles.saveIcon}>
+        <Ionicons
+          name="pricetag"
+          size={18}
+          color="#111"
+        />
+      </View>
+
+      <View>
+
+        <Text style={styles.saveTitle}>
+          YOU SAVE
+        </Text>
+
+        <Text style={styles.saveSubtitle}>
+          Exclusive bundle pricing
+        </Text>
+
+      </View>
+
+    </View>
+
+    <Text style={styles.saveAmount}>
+      ₹
+      {Math.max(
+        0,
+        (it.bundleProducts || []).reduce(
+          (sum: number, bp: any) =>
+            sum +
+            Number(bp.product?.price || 0) *
+              (bp.quantity || 1),
+          0
+        ) -
+          Number(
+            isBundle
+              ? it.bundle.price
+              : it.customBundle.price
+          )
+      )}
+    </Text>
+
+  </View>
+
+</View>
+
+)}
+      </View>
+
+    );
+
+  })}
+
+</View>
+
+    {/* ================= PAYMENT ================= */}
+
+    <View style={styles.sectionHeader}>
+      <View style={styles.sectionAccent} />
+
+      <Text style={styles.sectionTitle}>
+        PAYMENT
+      </Text>
+    </View>
+
+    <View style={styles.card}>
+
+      <PaymentOption
+        active={paymentMethod === "cod"}
+        label="Cash on Delivery"
+        icon="cash-outline"
+        onPress={() =>
+          setPaymentMethod("cod")
+        }
+      />
+
+      <PaymentOption
+        active={
+          paymentMethod === "razorpay"
+        }
+        label="Pay Online (Razorpay)"
+        icon="card-outline"
+        onPress={() =>
+          setPaymentMethod(
+            "razorpay"
+          )
+        }
+      />
+
+    </View>
+        {/* ================= PRICE DETAILS ================= */}
+
+    <View style={styles.sectionHeader}>
+      <View style={styles.sectionAccent} />
+
+      <Text style={styles.sectionTitle}>
+        PRICE DETAILS
+      </Text>
+    </View>
+
+    <View style={styles.card}>
+
+      <SummaryRow
+        label="Subtotal"
+        value={`₹${subtotal.toFixed(2)}`}
+      />
+
+      <SummaryRow
+        label="Shipping"
+        value={
+          shipping === 0
+            ? "FREE"
+            : `₹${shipping.toFixed(2)}`
+        }
+      />
+
+      {shipping === 0 ? (
+        <View style={styles.freeShippingBox}>
+
+          <Ionicons
+            name="checkmark-circle"
+            size={18}
+            color="#111"
+          />
+
+          <Text style={styles.freeShippingText}>
+            Free delivery applied
+          </Text>
+
+        </View>
+      ) : (
+        <View style={styles.shippingInfo}>
+
+          <Ionicons
+            name="bag-outline"
+            size={16}
+            color="#777"
+          />
+
+          <Text style={styles.shippingInfoText}>
+            Add ₹
+            {Math.max(
+              0,
+              1000 - subtotal
+            )}{" "}
+            more for FREE delivery
+          </Text>
+
+        </View>
+      )}
+
+      <View style={styles.divider} />
+
+      <SummaryRow
+        label="Total"
+        value={`₹${total.toFixed(2)}`}
+        bold
+      />
+
+    </View>
+
+    <View style={{ height: 60 }} />
+
+  </ScrollView>
+
+  {/* ================= FLOATING CTA ================= */}
+
+  <View style={styles.checkoutBar}>
+
+    <View>
+
+      <Text style={styles.checkoutLabel}>
+        TOTAL
+      </Text>
+
+      <Text style={styles.checkoutPrice}>
+        ₹{total.toFixed(2)}
+      </Text>
+
+    </View>
+
+    <TouchableOpacity
+      activeOpacity={0.9}
+      disabled={loading}
+      onPress={placeOrder}
+      style={[
+        styles.checkoutButton,
+        loading && {
+          opacity: 0.6,
+        },
+      ]}
+    >
+
+      <Text style={styles.checkoutButtonText}>
+        {loading
+          ? "PLACING..."
+          : "PLACE ORDER"}
+      </Text>
+
+      <View style={styles.checkoutArrow}>
+
+        <Ionicons
+          name="arrow-forward"
+          size={18}
+          color="#111"
+        />
+
+      </View>
+
+    </TouchableOpacity>
+
+  </View>
+
+</SafeAreaView>
   );
 }
 
 /* ================= SMALL COMPONENTS ================= */
 
-const Card = ({
-  title,
-  children,
-}: {
-  title?: string;
-  children: React.ReactNode;
-}) => (
-  <View style={styles.card}>
-    {title && <Text style={styles.cardTitle}>{title}</Text>}
-    {children}
-  </View>
-);
+
 
 const Row = ({ children }: { children: React.ReactNode }) => (
   <View style={styles.row}>{children}</View>
@@ -603,24 +1180,27 @@ const Input = ({
   onChange: (v: string) => void;
   keyboardType?: "default" | "numeric" | "phone-pad" | "email-address";
   editable?: boolean;
-  maxLength?: number; // 👈 ADD THIS
+  maxLength?: number;
 }) => (
   <TextInput
     placeholder={placeholder}
+    placeholderTextColor="#7A7A7A"
     value={value}
     keyboardType={keyboardType}
     editable={editable}
-    maxLength={maxLength} // 👈 PASS HERE
-    onChangeText={(v: string) => onChange(v)}
+    maxLength={maxLength}
+    onChangeText={onChange}
     style={[
       styles.input,
       !editable && {
-        backgroundColor: "#f1f1f1",
-        color: "#999",
+        backgroundColor: "#F1F1F1",
+        color: "#666",
       },
     ]}
   />
 );
+
+
 const PaymentOption = ({
   active,
   label,
@@ -671,168 +1251,862 @@ const SummaryRow = ({
 const Divider = () => <View style={styles.divider} />;
 
 /* ================= STYLES ================= */
-
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#f6f6f6" },
-  container: { padding: 16, paddingBottom: 120 },
+  /* ================= ROOT ================= */
 
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 18,
-    padding: 16,
-    marginBottom: 18,
-  },
-  cardTitle: { fontSize: 16, fontWeight: "700", marginBottom: 12 },
-
-  row: { flexDirection: "row", gap: 12 },
-
-  input: {
+  root: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: "#e5e5e5",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginBottom: 12,
-    backgroundColor: "#fafafa",
+    backgroundColor: "#F7F7F5",
   },
 
-  itemRow: {
+  container: {
+    paddingHorizontal: 18,
+    paddingBottom: 140,
+  },
+
+  /* ================= HEADER ================= */
+
+  heroHeader: {
     flexDirection: "row",
     alignItems: "center",
+
+    paddingHorizontal: 18,
+    paddingTop: 10,
+    paddingBottom: 24,
+
+    backgroundColor: "#FFF",
+  },
+
+  circleBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+
+    backgroundColor: "#F4F4F4",
+
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  heroLabel: {
+    color: "#777",
+    fontSize: 11,
+    fontWeight: "900",
+    letterSpacing: 2.5,
+  },
+
+  heroTitle: {
+    marginTop: 8,
+
+    color: "#111",
+
+    fontSize: 34,
+    fontWeight: "900",
+  },
+
+  heroSub: {
+    marginTop: 4,
+
+    color: "#777",
+
+    fontSize: 14,
+  },
+
+  /* ================= SECTION ================= */
+
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+
+    marginTop: 26,
     marginBottom: 14,
   },
-  itemImage: {
-    width: 56,
-    height: 56,
-    borderRadius: 10,
-    marginRight: 12,
-    backgroundColor: "#eee",
+
+  sectionAccent: {
+    width: 5,
+    height: 18,
+    borderRadius: 3,
+
+    backgroundColor: "#B6FF2E",
+
+    marginRight: 10,
   },
-  itemTitle: { fontWeight: "600", fontSize: 14 },
-  subItem: { fontSize: 12, color: "#666" },
-  itemPrice: { fontWeight: "700", marginLeft: 8 },
+
+  sectionTitle: {
+    color: "#111",
+
+    fontSize: 13,
+    fontWeight: "900",
+
+    letterSpacing: 2,
+  },
+
+  /* ================= CARD ================= */
+
+  card: {
+    backgroundColor: "#FFF",
+
+    borderRadius: 26,
+
+    padding: 18,
+
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 16,
+
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+
+    elevation: 4,
+
+    marginBottom: 18,
+  },
+
+  /* ================= ADDRESS ================= */
+
+  addressCard: {
+    borderWidth: 1,
+    borderColor: "#ECECEC",
+
+    borderRadius: 18,
+
+    padding: 16,
+
+    marginBottom: 12,
+  },
+
+  addressCardActive: {
+    borderColor: "#B6FF2E",
+
+    backgroundColor: "#F9FFE9",
+  },
+
+  addressTop: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+
+  addressBadge: {
+    width: 40,
+    height: 40,
+
+    borderRadius: 20,
+
+    backgroundColor: "#F5F5F5",
+
+    justifyContent: "center",
+    alignItems: "center",
+
+    marginRight: 14,
+  },
+
+  selectedTick: {
+    width: 32,
+    height: 32,
+
+    borderRadius: 16,
+
+    backgroundColor: "#B6FF2E",
+
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  savedName: {
+    color: "#111",
+
+    fontSize: 15,
+    fontWeight: "800",
+
+    marginBottom: 4,
+  },
+
+  savedAddr: {
+    color: "#777",
+
+    fontSize: 13,
+
+    lineHeight: 20,
+  },
+
+  defaultChip: {
+    alignSelf: "flex-start",
+
+    marginTop: 12,
+
+    backgroundColor: "#111",
+
+    borderRadius: 30,
+
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+
+  defaultText: {
+    color: "#FFF",
+
+    fontSize: 10,
+    fontWeight: "900",
+
+    letterSpacing: 1.5,
+  },
+
+  emptyText: {
+    color: "#888",
+    fontSize: 14,
+  },
+
+  addAddressBtn: {
+    marginTop: 8,
+
+    height: 54,
+
+    borderRadius: 16,
+
+    backgroundColor: "#F5F5F5",
+
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  addAddressText: {
+    marginLeft: 8,
+
+    color: "#111",
+
+    fontSize: 13,
+    fontWeight: "900",
+
+    letterSpacing: 1.2,
+  },
+
+  /* ================= INPUTS ================= */
+
+  row: {
+    flexDirection: "row",
+    gap: 12,
+  },
+
+input: {
+  flex: 1,
+
+  height: 58,
+
+  borderRadius: 18,
+
+  backgroundColor: "#FAFAFA",
+ 
+  borderWidth: 1,
+  borderColor: "#E8E8E8",
+
+  paddingHorizontal: 18,
+
+  color: "#111",
+
+  fontSize: 15,
+  fontWeight: "600",
+
+  marginBottom: 14,
+},
+
+  /* ================= PRODUCTS ================= */
+
+  productRow: {
+    flexDirection: "row",
+    alignItems: "center",
+
+    paddingVertical: 12,
+
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F3F3",
+  },
+
+  productImage: {
+    width: 72,
+    height: 72,
+
+    borderRadius: 16,
+
+    backgroundColor: "#EEE",
+  },
+
+  productTitle: {
+    color: "#111",
+
+    fontSize: 15,
+    fontWeight: "800",
+  },
+
+  productMeta: {
+    color: "#777",
+
+    fontSize: 12,
+
+    marginTop: 4,
+  },
+
+  productQty: {
+    marginTop: 6,
+
+    color: "#999",
+
+    fontSize: 12,
+
+    fontWeight: "700",
+  },
+
+  productPrice: {
+    color: "#111",
+
+    fontWeight: "900",
+
+    fontSize: 15,
+  },
+
+  /* ================= PAYMENT ================= */
 
   paymentRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
-    gap: 10,
+
+    paddingVertical: 16,
+
+    borderRadius: 16,
+
+    paddingHorizontal: 14,
+
+    marginBottom: 10,
+
+    backgroundColor: "#FAFAFA",
   },
-  paymentText: { fontSize: 14, fontWeight: "600" },
+
+  paymentActive: {
+    backgroundColor: "#F4FFD8",
+
+    borderWidth: 1,
+    borderColor: "#B6FF2E",
+  },
+orderContainer: {
+  gap: 18,
+},
+
+orderCard: {
+  backgroundColor: "#FFF",
+
+  borderRadius: 26,
+
+  overflow: "hidden",
+
+  shadowColor: "#000",
+  shadowOpacity: 0.05,
+  shadowRadius: 18,
+
+  shadowOffset: {
+    width: 0,
+    height: 8,
+  },
+
+  elevation: 4,
+},
+
+orderHeader: {
+  flexDirection: "row",
+
+  alignItems: "center",
+
+  padding: 18,
+},
+
+orderImage: {
+  width: 82,
+  height: 82,
+
+  borderRadius: 18,
+
+  backgroundColor: "#EEE",
+},
+
+orderInfo: {
+  flex: 1,
+
+  marginHorizontal: 16,
+},
+
+orderTitleRow: {
+  flexDirection: "row",
+
+  alignItems: "center",
+
+  flexWrap: "wrap",
+},
+
+orderTitle: {
+  flex: 1,
+  color: "#111",
+  fontSize: 18,
+  fontWeight: "900",
+  lineHeight: 24,
+  marginRight: 10,
+},
+bundleChip: {
+  marginLeft: 8,
+
+  backgroundColor: "#F2F8D5",
+
+  borderRadius: 30,
+
+  paddingHorizontal: 10,
+  paddingVertical: 5,
+},
+
+bundleChipText: {
+  color: "#7A8900",
+
+  fontSize: 10,
+
+  fontWeight: "900",
+
+  letterSpacing: 1,
+},
+
+orderMeta: {
+  marginTop: 10,
+
+  color: "#777",
+
+  fontSize: 13,
+},
+
+orderBottom:{
+  marginTop:16,
+
+  flexDirection:"row",
+
+  alignItems:"center",
+
+  justifyContent:"space-between",
+},
+topRow: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 14,
+},
+
+stackImages: {
+  flexDirection: "row",
+  alignItems: "center",
+},
+
+stackImage: {
+  width: 34,
+  height: 34,
+  borderRadius: 17,
+  borderWidth: 2,
+  borderColor: "#FFF",
+  backgroundColor: "#EEE",
+},
+
+itemsChip: {
+  alignSelf: "flex-start",
+  backgroundColor: "#111",
+  borderRadius: 20,
+  paddingHorizontal: 10,
+  paddingVertical: 5,
+},
+
+itemsChipText: {
+  color: "#FFF",
+  fontSize: 10,
+  fontWeight: "900",
+  letterSpacing: 1,
+},
+
+drawerPill: {
+  marginTop: 14,
+  alignSelf: "flex-start",
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#F4F4F4",
+  borderRadius: 30,
+  paddingHorizontal: 14,
+  paddingVertical: 10,
+},
+
+drawerPillText: {
+  color: "#111",
+  fontWeight: "800",
+  fontSize: 12,
+  marginRight: 8,
+},
+orderQty: {
+  color: "#888",
+
+  fontWeight: "700",
+},
+
+orderPrice: {
+  color: "#111",
+
+  fontWeight: "900",
+
+  fontSize: 18,
+},
+
+expandButton: {
+  width: 42,
+  height: 42,
+
+  borderRadius: 21,
+
+  backgroundColor: "#F6F6F6",
+
+  justifyContent: "center",
+  alignItems: "center",
+},
+  paymentText: {
+    marginLeft: 12,
+
+    color: "#111",
+
+    fontSize: 15,
+    fontWeight: "700",
+  },
+
+  /* ================= SUMMARY ================= */
 
   summaryRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginVertical: 6,
+
+    marginVertical: 8,
   },
-  summaryText: { fontSize: 14 },
-  bold: { fontWeight: "700" },
+
+  summaryText: {
+    color: "#666",
+
+    fontSize: 14,
+  },
+
+  bold: {
+    color: "#111",
+
+    fontWeight: "900",
+  },
+
   divider: {
     height: 1,
-    backgroundColor: "#eee",
-    marginVertical: 10,
+
+    backgroundColor: "#ECECEC",
+
+    marginVertical: 16,
   },
 
+  freeShippingBox: {
+    flexDirection: "row",
+    alignItems: "center",
 
-  header: {
-    height: 56,
+    marginTop: 10,
+  },
+
+  freeShippingText: {
+    marginLeft: 8,
+
+    color: "#111",
+
+    fontWeight: "700",
+  },
+
+  shippingInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+
+    marginTop: 10,
+  },
+
+  shippingInfoText: {
+    marginLeft: 8,
+
+    color: "#777",
+
+    fontSize: 13,
+  },
+
+  /* ================= FLOATING BAR ================= */
+
+  checkoutBar: {
+    position: "absolute",
+
+    left: 18,
+    right: 18,
+    bottom: 18,
+
+    height: 84,
+
+    backgroundColor: "#111",
+
+    borderRadius: 28,
+
+    paddingHorizontal: 22,
+
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    backgroundColor: "#f6f6f6",
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+
+    shadowColor: "#000",
+    shadowOpacity: 0.18,
+    shadowRadius: 18,
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+
+    elevation: 12,
   },
-savedCard: {
-  padding: 12,
-  borderRadius: 12,
-  borderWidth: 1,
-  borderColor: "#eee",
+
+  checkoutLabel: {
+    color: "#888",
+
+    fontSize: 11,
+
+    fontWeight: "800",
+
+    letterSpacing: 2,
+  },
+
+  checkoutPrice: {
+    marginTop: 6,
+
+    color: "#FFF",
+
+    fontSize: 24,
+
+    fontWeight: "900",
+  },
+
+  checkoutButton: {
+    height: 56,
+
+    backgroundColor: "#B6FF2E",
+
+    borderRadius: 28,
+
+    paddingLeft: 22,
+    paddingRight: 8,
+
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  checkoutButtonText: {
+    color: "#111",
+
+    fontWeight: "900",
+
+    fontSize: 14,
+
+    letterSpacing: 1.5,
+  },
+bundleDrawer: {
+  paddingHorizontal: 18,
+  paddingBottom: 18,
+  backgroundColor: "#FFF",
+},
+
+drawerDivider: {
+  height: 1,
+  backgroundColor: "#EFEFEF",
+  marginBottom: 18,
+},
+
+drawerTitle: {
+  color: "#111",
+  fontSize: 12,
+  fontWeight: "900",
+  letterSpacing: 2,
+  marginBottom: 16,
+},
+
+drawerItem: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: 16,
+},
+
+drawerImage: {
+  width: 58,
+  height: 58,
+  borderRadius: 14,
+  backgroundColor: "#F2F2F2",
+},
+
+drawerProductTitle: {
+  color: "#111",
+  fontSize: 14,
+  fontWeight: "700",
+},
+
+drawerMeta: {
+  marginTop: 6,
+  color: "#888",
+  fontSize: 12,
+},
+
+drawerPrice: {
+  color: "#111",
+  fontSize: 15,
+  fontWeight: "900",
+},
+
+bundleFooter: {
+  marginTop: 10,
+
+  borderTopWidth: 1,
+  borderTopColor: "#F0F0F0",
+
+  paddingTop: 18,
+
+  flexDirection: "row",
+  alignItems: "center",
+},
+
+bundleGift: {
+  width: 42,
+  height: 42,
+
+  borderRadius: 21,
+
+  backgroundColor: "#F6F6F6",
+
+  justifyContent: "center",
+  alignItems: "center",
+
+  marginRight: 14,
+},
+titleRow: {
+  flexDirection: "row",
+  alignItems: "flex-start",
+  justifyContent: "space-between",
+  gap: 10,
   marginBottom: 10,
 },
+bundleFooterText: {
+  flex: 1,
 
-savedCardActive: {
-  borderColor: "#111",
-  backgroundColor: "#fafafa",
+  color: "#555",
+
+  fontWeight: "700",
+
+  fontSize: 14,
 },
 
-savedName: {
-  fontWeight: "600",
+bundleFooterPrice: {
+  color: "#111",
+
+  fontSize: 20,
+
+  fontWeight: "900",
 },
 
-savedAddr: {
-  fontSize: 12,
-  color: "#666",
+/* ================= SAVE CARD ================= */
+
+saveCard:{
+  marginTop:14,
+
+  height:74,
+
+  backgroundColor:"#B6FF2E",
+
+  borderRadius:18,
+
+  paddingHorizontal:16,
+
+  flexDirection:"row",
+
+  alignItems:"center",
+
+  justifyContent:"space-between",
 },
 
-defaultBadge: {
-  marginTop: 4,
-  fontSize: 10,
-  color: "#fff",
-  backgroundColor: "#111",
-  paddingHorizontal: 6,
-  paddingVertical: 2,
+saveLeft: {
+  flexDirection: "row",
+  alignItems: "center",
+},
+
+saveIcon:{
+  width:36,
+  height:36,
+  borderRadius:18,
+
+  backgroundColor:"#FFF",
+
+  justifyContent:"center",
+  alignItems:"center",
+
+  marginRight:10,
+},
+
+saveTitle:{
+  fontSize:11,
+  fontWeight:"900",
+  letterSpacing:1,
+  color:"#111",
+},
+
+saveSubtitle:{
+  marginTop:2,
+  fontSize:11,
+  color:"#444",
+},
+pricePill: {
   alignSelf: "flex-start",
-  borderRadius: 4,
+
+  backgroundColor: "#B6FF2E",
+
+  borderRadius: 20,
+
+  paddingHorizontal: 12,
+  paddingVertical: 7,
+
+  alignItems: "center",
+
+  justifyContent: "center",
+
+  minWidth: 88,
 },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  savingsText: {
-    color: "green",
-    fontSize: 12,
-    marginTop: 4,
-  },
-  headerBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#fff",
+
+pricePillPrice: {
+  color: "#111",
+  fontSize: 16,
+  fontWeight: "900",
+},
+
+pricePillSave: {
+  marginTop: 2,
+  color: "#111",
+  fontSize: 10,
+  fontWeight: "800",
+  letterSpacing: 0.5,
+},
+saveAmount:{
+  fontSize:18,
+  fontWeight:"900",
+  color:"#111",
+},
+  checkoutArrow: {
+    width: 40,
+    height: 40,
+
+    borderRadius: 20,
+
+    marginLeft: 16,
+
+    backgroundColor: "#FFF",
+
     justifyContent: "center",
     alignItems: "center",
-  },
-  paymentActive: {
-    backgroundColor: "#f2fdf2",
-    borderRadius: 12,
-    // paddingHorizontal: 10,
-  },
-  bottomBar: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
-    paddingBottom: 24, // 👈 add this
-    backgroundColor: "#fff",
-    borderTopWidth: 1,
-    borderTopColor: "#eee",
-  },
-
-  totalLabel: {
-    fontSize: 12,
-    color: "#666",
-  },
-
-  totalAmount: {
-    fontSize: 18,
-    fontWeight: "700",
-  },
-
-  placeBtn: {
-    backgroundColor: "#111",
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderRadius: 30,
-  },
-
-  placeBtnText: {
-    color: "#fff",
-    fontWeight: "700",
   },
 });

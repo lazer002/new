@@ -1,23 +1,33 @@
 // src/screens/CartScreen.tsx
-import React, { useRef, useState } from "react";
-import { Animated, LayoutAnimation, Platform, UIManager } from "react-native";
+import React, { useState } from "react";
+
 import {
   View,
   Text,
   Image,
   TouchableOpacity,
-  TextInput,
   ScrollView,
   StyleSheet,
   Dimensions,
   useColorScheme,
-
 } from "react-native";
+
+import Animated, {
+  FadeIn,
+  FadeOut,
+  LinearTransition,
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  interpolate,
+  Extrapolation,
+} from "react-native-reanimated";
+
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Swipeable } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
-
+import BundleDrawer from "@/components/cart/BundleDrawer";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 
@@ -30,21 +40,12 @@ export default function CartScreen() {
   const router = useRouter();
   const theme = useColorScheme();
   const isDark = theme === "dark";
-  const animations = useRef<
-    Record<string, Animated.Value>
-  >({});
+
   const [coupon, setCoupon] = useState("");
   const [expandedBundle, setExpandedBundle] =
     useState<string | null>(null);
 
-  if (
-    Platform.OS === "android" &&
-    UIManager.setLayoutAnimationEnabledExperimental
-  ) {
-    UIManager.setLayoutAnimationEnabledExperimental(
-      true
-    );
-  }
+
   /* ---------- TOTALS ---------- */
   const subtotal = items.reduce((s, it) => {
 
@@ -217,17 +218,7 @@ export default function CartScreen() {
             const isExpanded =
               expandedBundle === itemId;
 
-            if (!animations.current[itemId]) {
-
-              animations.current[itemId] =
-
-                new Animated.Value(0);
-
-            }
-
-            const progress =
-
-              animations.current[itemId];
+     
             return (
 
               <Swipeable
@@ -258,315 +249,19 @@ export default function CartScreen() {
                       {isBundle &&
                         it.bundleProducts?.length > 0 && (
 
-                          <View style={styles.bundlePreview}>
-
-                            <View style={styles.bundlePreviewRow}>
-
-                              {it.bundleProducts.map((p: any, index: number) => {
-
-                                const rowOpacity = progress.interpolate({
-
-                                  inputRange: [0, .25, .6, 1],
-
-                                  outputRange: [1, .95, .4, 0],
-
-                                });
-
-                                const rowTranslate = progress.interpolate({
-
-                                  inputRange: [0, 1],
-
-                                  outputRange: [0, (index + 1) * 54],
-
-                                });
-
-                                return (
-
-                                  <Animated.View
-
-                                    key={p.product._id}
-
-                                    style={[
-
-                                      styles.previewBubble,
-
-                                      {
-
-                                        marginLeft: index === 0 ? 0 : -10,
-
-                                        opacity: progress.interpolate({
-
-                                          inputRange: [0, .35, .6, 1],
-
-                                          outputRange: [1, 1, .2, 0],
-
-                                        }),
-
-                                        transform: [
-
-                                          {
-
-                                            translateY: rowTranslate,
-
-                                          },
-
-                                          {
-
-                                            scale: progress.interpolate({
-
-                                              inputRange: [0, 1],
-
-                                              outputRange: [1, .85],
-
-                                            }),
-
-                                          },
-
-                                        ],
-
-                                      },
-
-                                    ]}
-
-                                  >
-
-                                    <Image
-
-                                      source={{
-
-                                        uri: p.product.images?.[0]
-
-                                      }}
-
-                                      style={styles.previewImageSmall}
-
-                                    />
-
-                                  </Animated.View>
-
-                                );
-
-                              })}
-
-                              <TouchableOpacity
-
-                                style={styles.bundleArrow}
-
-                                onPress={() => {
-
-                                  const opening = !isExpanded;
-
-                                  LayoutAnimation.configureNext(
-
-                                    LayoutAnimation.Presets.easeInEaseOut
-
-                                  );
-
-                                  Animated.timing(progress, {
-
-                                    toValue: opening ? 1 : 0,
-
-                                    duration: 350,
-
-                                    useNativeDriver: false,
-
-                                  }).start();
-
-                                  setExpandedBundle(
-
-                                    opening
-
-                                      ? itemId
-
-                                      : null
-
-                                  );
-
-                                }}
-
-                              >
-
-                                <Animated.View
-
-                                  style={{
-
-                                    transform: [
-
-                                      {
-
-                                        rotate: progress.interpolate({
-
-                                          inputRange: [0, 1],
-
-                                          outputRange: ["0deg", "180deg"],
-
-                                        }),
-
-                                      },
-
-                                    ],
-
-                                  }}
-
-                                >
-
-                                  <Ionicons
-
-                                    name="chevron-down"
-
-                                    size={18}
-
-                                    color="#111"
-
-                                  />
-
-                                </Animated.View>
-
-                              </TouchableOpacity>
-
-                            </View>
-
-                            <Animated.View
-
-                              style={[
-
-                                styles.bundleDetails,
-
-                                {
-
-                                  height: progress.interpolate({
-                                    inputRange: [0, 1],
-                                    outputRange: [
-                                      0,
-                                      it.bundleProducts.length * 58,
-                                    ],
-                                  }),
-
-                                  opacity:
-                                    isExpanded
-                                      ? progress
-                                      : 0,
-
-                                },
-
-                              ]}
-
-                            >
-
-                              {it.bundleProducts.map((p: any, index: number) => (
-
-                                <Animated.View
-
-                                  key={p.product._id}
-
-                                  style={[
-
-                                    styles.bundleItemRow,
-
-                                    {
-
-                                      opacity:
-
-                                        progress.interpolate({
-
-                                          inputRange: [0, .55, 1],
-
-                                          outputRange: [0, .2, 1],
-
-                                        }),
-                                      transform: [
-
-                                        {
-
-                                          translateX:
-
-                                            progress.interpolate({
-
-                                              inputRange: [0, 1],
-
-                                              outputRange: [70, 0],
-
-                                            })
-
-                                        },
-
-                                        {
-
-                                          scale:
-
-                                            progress.interpolate({
-
-                                              inputRange: [0, 1],
-
-                                              outputRange: [.92, 1],
-
-                                            })
-
-                                        }
-
-                                      ],
-
-                                    },
-
-                                  ]}
-
-                                >
-
-                                  <Image
-
-                                    source={{
-
-                                      uri: p.product.images?.[0]
-
-                                    }}
-
-                                    style={styles.bundleItemImage}
-
-                                  />
-
-                                  <View
-
-                                    style={{
-
-                                 flex: 1,
-    marginLeft: 12,
-    minWidth: 0,
-
-                                    }}
-
-                                  >
-
-                                    <Text
-
-                                      numberOfLines={1}
-
-                                      style={styles.bundleName}
-
-                                    >
-
-                                      {p.product.title}
-
-                                    </Text>
-
-                                    <Text
-
-                                      style={styles.bundleSize}
-
-                                    >
-
-                                      Size {p.size}
-
-                                    </Text>
-
-                                  </View>
-
-                                </Animated.View>
-
-                              ))}
-
-                            </Animated.View>
-
-                          </View>
+                          <BundleDrawer
+                            expanded={isExpanded}
+                            bundleProducts={it.bundleProducts}
+                            onToggle={() => {
+
+                              setExpandedBundle(prev =>
+                                prev === itemId
+                                  ? null
+                                  : itemId
+                              );
+
+                            }}
+                          />
 
                         )}
 
@@ -1446,16 +1141,16 @@ const styles = StyleSheet.create({
 
   bundlePreview: {
 
-  marginTop: 12,
-  width: "100%",
-  alignItems: "flex-start",
+    marginTop: 12,
+    width: "100%",
+    alignItems: "flex-start",
 
   },
 
   bundlePreviewRow: {
 
-  flexDirection: "row",
-  alignItems: "center",
+    flexDirection: "row",
+    alignItems: "center",
 
   },
 
@@ -1502,13 +1197,13 @@ const styles = StyleSheet.create({
 
   bundleItemRow: {
 
-  flexDirection:"row",
+    flexDirection: "row",
 
-  alignItems:"center",
+    alignItems: "center",
 
-  minHeight:58,
+    minHeight: 58,
 
-  paddingVertical:8,
+    paddingVertical: 8,
 
   },
 
@@ -1526,11 +1221,13 @@ const styles = StyleSheet.create({
 
   bundleDetails: {
 
-    marginTop: 14,
-  width: 220, // or width: "100%"
-
-  //   width: "100%",
-  // overflow: "hidden",
+    width: 220, // or width: "100%"
+    marginTop: 6,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#F3F3F3",
+    //   width: "100%",
+    // overflow: "hidden",
 
   },
 

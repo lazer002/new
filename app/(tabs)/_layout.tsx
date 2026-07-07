@@ -50,6 +50,9 @@ function CustomTabBar({
     tabBarVisible,
   } = useUI();
 
+const isCartScreen =
+  state.routes[state.index]?.name === "cart";
+
   const tabCount =
     state.routes.length;
 
@@ -137,7 +140,8 @@ const toValue =
     const visible =
       !drawerOpen &&
       !isFilterOpen &&
-      tabBarVisible;
+      tabBarVisible &&
+    !isCartScreen;
 
     Animated.parallel([
 
@@ -166,6 +170,7 @@ const toValue =
     drawerOpen,
     isFilterOpen,
     tabBarVisible,
+    isCartScreen,
   ]);
 
   if (isFilterOpen)
