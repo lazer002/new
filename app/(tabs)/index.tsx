@@ -267,7 +267,7 @@ function ProductCard({ item }: { item: any }) {
 
   </View>
 
-  <Pressable style={styles.arrowBtn}>
+  <Pressable style={styles.arrowBtn} onPress={onOpenPDP}>
 
     <Ionicons
       name="arrow-forward"

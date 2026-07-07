@@ -1,86 +1,89 @@
-  // src/screens/CartScreen.tsx
-import React, { useState } from "react";
-import { LayoutAnimation, Platform, UIManager } from "react-native";
-  import {
-    View,
-    Text,
-    Image,
-    TouchableOpacity,
-    TextInput,
-    ScrollView,
-    StyleSheet,
-    Dimensions,
-    useColorScheme,
-   
-  } from "react-native";
-  import { Ionicons } from "@expo/vector-icons";
-  import { SafeAreaView } from "react-native-safe-area-context";
-  import { Swipeable } from "react-native-gesture-handler";
-  import { useRouter } from "expo-router";
+// src/screens/CartScreen.tsx
+import React, { useRef, useState } from "react";
+import { Animated, LayoutAnimation, Platform, UIManager } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  StyleSheet,
+  Dimensions,
+  useColorScheme,
 
-  import { useCart } from "@/context/CartContext";
-  import { useAuth } from "@/context/AuthContext";
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Swipeable } from "react-native-gesture-handler";
+import { useRouter } from "expo-router";
 
-  const { width, height } = Dimensions.get("window");
-  const SUMMARY_HEIGHT = height * 0.35;
+import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 
-  export default function CartScreen() {
-    const { user } = useAuth();
-    const { items, update, remove } = useCart();
-    const router = useRouter();
-    const theme = useColorScheme();
-    const isDark = theme === "dark";
-    const [coupon, setCoupon] = useState("");
-const [expandedBundle, setExpandedBundle] =
-  useState<string | null>(null);
+const { width, height } = Dimensions.get("window");
+const SUMMARY_HEIGHT = height * 0.35;
 
-if (
-  Platform.OS === "android" &&
-  UIManager.setLayoutAnimationEnabledExperimental
-) {
-  UIManager.setLayoutAnimationEnabledExperimental(
-    true
-  );
-}
-    /* ---------- TOTALS ---------- */
-const subtotal = items.reduce((s, it) => {
+export default function CartScreen() {
+  const { user } = useAuth();
+  const { items, update, remove } = useCart();
+  const router = useRouter();
+  const theme = useColorScheme();
+  const isDark = theme === "dark";
+  const animations = useRef<
+    Record<string, Animated.Value>
+  >({});
+  const [coupon, setCoupon] = useState("");
+  const [expandedBundle, setExpandedBundle] =
+    useState<string | null>(null);
 
-  const price =
-    it.product?.price ??
-    it.bundle?.price ??
-    it.customBundle?.price ??
-    0;
+  if (
+    Platform.OS === "android" &&
+    UIManager.setLayoutAnimationEnabledExperimental
+  ) {
+    UIManager.setLayoutAnimationEnabledExperimental(
+      true
+    );
+  }
+  /* ---------- TOTALS ---------- */
+  const subtotal = items.reduce((s, it) => {
 
-  return s + price * it.quantity;
+    const price =
+      it.product?.price ??
+      it.bundle?.price ??
+      it.customBundle?.price ??
+      0;
 
-}, 0);
+    return s + price * it.quantity;
 
-    // const tax = subtotal * 0.05;
-    const deliveryFee = subtotal > 1000 ? 0 : 100;
-    const discount = 0;
-    const total = subtotal + deliveryFee - discount;
-    // const total = subtotal + tax + deliveryFee - discount;
+  }, 0);
 
-    /* ---------- EMPTY CART ---------- */
-    if (items.length === 0) {
-      return (
-        <SafeAreaView style={styles.emptyRoot}>
-          <Ionicons name="bag-outline" size={90} color="#111" />
-          <Text style={styles.emptyTitle}>YOUR BAG IS EMPTY</Text>
-          <Text style={styles.emptySubtitle}>
-            Looks like you haven’t added anything yet.
-          </Text>
-          <TouchableOpacity
-            style={styles.shopBtn}
-            onPress={() => router.push("/")}
-          >
-            <Text style={styles.shopBtnText}>SHOP NOW</Text>
-          </TouchableOpacity>
-        </SafeAreaView>
-      );
-    }
+  // const tax = subtotal * 0.05;
+  const deliveryFee = subtotal > 1000 ? 0 : 100;
+  const discount = 0;
+  const total = subtotal + deliveryFee - discount;
+  // const total = subtotal + tax + deliveryFee - discount;
 
-    /* ---------- DELETE BACKGROUND ---------- */
+  /* ---------- EMPTY CART ---------- */
+  if (items.length === 0) {
+    return (
+      <SafeAreaView style={styles.emptyRoot}>
+        <Ionicons name="bag-outline" size={90} color="#111" />
+        <Text style={styles.emptyTitle}>YOUR BAG IS EMPTY</Text>
+        <Text style={styles.emptySubtitle}>
+          Looks like you haven’t added anything yet.
+        </Text>
+        <TouchableOpacity
+          style={styles.shopBtn}
+          onPress={() => router.push("/")}
+        >
+          <Text style={styles.shopBtnText}>SHOP NOW</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
+  /* ---------- DELETE BACKGROUND ---------- */
   const renderDelete = (item: any) => {
 
     const isBundle = !!item.bundle;
@@ -91,8 +94,8 @@ const subtotal = items.reduce((s, it) => {
       item.bundle?._id ??
       item.customBundle?._id;
 
-      const isExpanded =
-  expandedBundle === itemId;
+    const isExpanded =
+      expandedBundle === itemId;
 
     return (
       <TouchableOpacity
@@ -116,1114 +119,1438 @@ const subtotal = items.reduce((s, it) => {
     );
   };
 
-    return (
-   <SafeAreaView
-  style={styles.root}
->
-
-<View
-  style={styles.header}
->
-
-  <View>
-
-    <Text
-      style={styles.smallLabel}
-    >
-      YOUR BAG
-    </Text>
-
-    <Text
-      style={styles.headerTitle}
-    >
-      Shopping Cart
-    </Text>
-
-  </View>
-
-  <View
-    style={styles.headerRight}
-  >
-
-    <TouchableOpacity
-      style={styles.iconButton}
-      onPress={() =>
-        router.back()
-      }
+  return (
+    <SafeAreaView
+      style={styles.root}
     >
 
-      <Ionicons
-        name="chevron-back"
-        size={22}
-        color="#111"
-      />
-
-    </TouchableOpacity>
-
-    <TouchableOpacity
-      style={[
-        styles.itemCount,
-        {
-          backgroundColor:
-            "#B6FF2E",
-        },
-      ]}
-    >
-
-      <Text
-        style={
-          styles.itemCountText
-        }
+      <View
+        style={styles.header}
       >
 
-        {items.length}
+        <View>
 
-      </Text>
+          <Text
+            style={styles.smallLabel}
+          >
+            YOUR BAG
+          </Text>
 
-    </TouchableOpacity>
+          <Text
+            style={styles.headerTitle}
+          >
+            Shopping Cart
+          </Text>
 
-  </View>
+        </View>
 
-</View>
+        <View
+          style={styles.headerRight}
+        >
 
-<View
-  style={styles.divider}
-/>
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={() =>
+              router.back()
+            }
+          >
 
+            <Ionicons
+              name="chevron-back"
+              size={22}
+              color="#111"
+            />
 
-        {/* ITEMS */}
-        <ScrollView style={styles.itemsScroll} showsVerticalScrollIndicator={false}>
-          <View style={styles.itemsContainer}>
-       {items.map((it) => {
+          </TouchableOpacity>
 
-  const itemId =
-    it.product?._id ??
-    it.bundle?._id ??
-    it.customBundle?._id;
+          <TouchableOpacity
+            style={[
+              styles.itemCount,
+              {
+                backgroundColor:
+                  "#B6FF2E",
+              },
+            ]}
+          >
 
-  const isBundle =
-    !!it.bundle ||
-    !!it.customBundle;
-
-  const isExpanded =
-    expandedBundle === itemId;
-
-  return (
-
-    <Swipeable
-      key={it._id}
-      renderRightActions={() =>
-        renderDelete(it)
-      }
-    >
-
-      <View>
-
-        {/* CARD */}
-
-        <View style={styles.cartCard}>
-
-          <Image
-            source={{
-              uri:
-                it.mainImage ??
-                it.product?.images?.[0] ??
-                it.bundleProducts?.[0]?.product?.images?.[0],
-            }}
-            style={styles.productImage}
-          />
-
-          <View style={styles.productInfo}>
-
-            {/* TITLE */}
-
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-              }}
+            <Text
+              style={
+                styles.itemCountText
+              }
             >
 
-              <Text
-                numberOfLines={2}
-                style={[
-                  styles.productName,
-                  { flex: 1 },
-                ]}
-              >
-
-                {it.customBundle?.title ||
-                  it.bundle?.title ||
-                  it.product?.title}
-
-              </Text>
-
-              {isBundle && (
-
-                <TouchableOpacity
-                  onPress={() => {
-
-                    LayoutAnimation.configureNext(
-                      LayoutAnimation.Presets.easeInEaseOut
-                    );
-
-                    setExpandedBundle(
-                      isExpanded
-                        ? null
-                        : itemId
-                    );
-
-                  }}
-                >
-
-                  <Ionicons
-                    name={
-                      isExpanded
-                        ? "chevron-up"
-                        : "chevron-down"
-                    }
-                    size={22}
-                    color="#111"
-                  />
-
-                </TouchableOpacity>
-
-              )}
-
-            </View>
-
-            {/* SIZE */}
-
-            <Text style={styles.productMeta}>
-
-              Size {it.size || "OS"}
+              {items.length}
 
             </Text>
 
-            {/* PRICE */}
+          </TouchableOpacity>
 
-            <Text style={styles.productPrice}>
+        </View>
 
-              ₹
-              {(
-                it.customBundle?.price ??
-                it.bundle?.price ??
-                it.product?.price ??
-                0
-              ).toLocaleString()}
+      </View>
 
+      <View
+        style={styles.divider}
+      />
+
+
+      {/* ITEMS */}
+      <ScrollView
+        style={styles.itemsScroll}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: 380,
+        }}
+      >
+        <View style={styles.itemsContainer}>
+          {items.map((it) => {
+
+            const itemId =
+              it.product?._id ??
+              it.bundle?._id ??
+              it.customBundle?._id;
+
+            const isBundle =
+              !!it.bundle ||
+              !!it.customBundle;
+
+            const isExpanded =
+              expandedBundle === itemId;
+
+            if (!animations.current[itemId]) {
+
+              animations.current[itemId] =
+
+                new Animated.Value(0);
+
+            }
+
+            const progress =
+
+              animations.current[itemId];
+            return (
+
+              <Swipeable
+                key={it._id}
+                renderRightActions={() =>
+                  renderDelete(it)
+                }
+              >
+
+                <View>
+
+                  {/* CARD */}
+
+                  <View style={styles.cartCard}>
+
+                    <View style={styles.leftColumn}>
+
+                      <Image
+                        source={{
+                          uri:
+                            it.mainImage ??
+                            it.product?.images?.[0] ??
+                            it.bundleProducts?.[0]?.product?.images?.[0],
+                        }}
+                        style={styles.productImage}
+                      />
+
+                      {isBundle &&
+                        it.bundleProducts?.length > 0 && (
+
+                          <View style={styles.bundlePreview}>
+
+                            <View style={styles.bundlePreviewRow}>
+
+                              {it.bundleProducts.map((p: any, index: number) => {
+
+                                const rowOpacity = progress.interpolate({
+
+                                  inputRange: [0, .25, .6, 1],
+
+                                  outputRange: [1, .95, .4, 0],
+
+                                });
+
+                                const rowTranslate = progress.interpolate({
+
+                                  inputRange: [0, 1],
+
+                                  outputRange: [0, (index + 1) * 54],
+
+                                });
+
+                                return (
+
+                                  <Animated.View
+
+                                    key={p.product._id}
+
+                                    style={[
+
+                                      styles.previewBubble,
+
+                                      {
+
+                                        marginLeft: index === 0 ? 0 : -10,
+
+                                        opacity: progress.interpolate({
+
+                                          inputRange: [0, .35, .6, 1],
+
+                                          outputRange: [1, 1, .2, 0],
+
+                                        }),
+
+                                        transform: [
+
+                                          {
+
+                                            translateY: rowTranslate,
+
+                                          },
+
+                                          {
+
+                                            scale: progress.interpolate({
+
+                                              inputRange: [0, 1],
+
+                                              outputRange: [1, .85],
+
+                                            }),
+
+                                          },
+
+                                        ],
+
+                                      },
+
+                                    ]}
+
+                                  >
+
+                                    <Image
+
+                                      source={{
+
+                                        uri: p.product.images?.[0]
+
+                                      }}
+
+                                      style={styles.previewImageSmall}
+
+                                    />
+
+                                  </Animated.View>
+
+                                );
+
+                              })}
+
+                              <TouchableOpacity
+
+                                style={styles.bundleArrow}
+
+                                onPress={() => {
+
+                                  const opening = !isExpanded;
+
+                                  LayoutAnimation.configureNext(
+
+                                    LayoutAnimation.Presets.easeInEaseOut
+
+                                  );
+
+                                  Animated.timing(progress, {
+
+                                    toValue: opening ? 1 : 0,
+
+                                    duration: 350,
+
+                                    useNativeDriver: false,
+
+                                  }).start();
+
+                                  setExpandedBundle(
+
+                                    opening
+
+                                      ? itemId
+
+                                      : null
+
+                                  );
+
+                                }}
+
+                              >
+
+                                <Animated.View
+
+                                  style={{
+
+                                    transform: [
+
+                                      {
+
+                                        rotate: progress.interpolate({
+
+                                          inputRange: [0, 1],
+
+                                          outputRange: ["0deg", "180deg"],
+
+                                        }),
+
+                                      },
+
+                                    ],
+
+                                  }}
+
+                                >
+
+                                  <Ionicons
+
+                                    name="chevron-down"
+
+                                    size={18}
+
+                                    color="#111"
+
+                                  />
+
+                                </Animated.View>
+
+                              </TouchableOpacity>
+
+                            </View>
+
+                            <Animated.View
+
+                              style={[
+
+                                styles.bundleDetails,
+
+                                {
+
+                                  height: progress.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: [
+                                      0,
+                                      it.bundleProducts.length * 58,
+                                    ],
+                                  }),
+
+                                  opacity:
+                                    isExpanded
+                                      ? progress
+                                      : 0,
+
+                                },
+
+                              ]}
+
+                            >
+
+                              {it.bundleProducts.map((p: any, index: number) => (
+
+                                <Animated.View
+
+                                  key={p.product._id}
+
+                                  style={[
+
+                                    styles.bundleItemRow,
+
+                                    {
+
+                                      opacity:
+
+                                        progress.interpolate({
+
+                                          inputRange: [0, .55, 1],
+
+                                          outputRange: [0, .2, 1],
+
+                                        }),
+                                      transform: [
+
+                                        {
+
+                                          translateX:
+
+                                            progress.interpolate({
+
+                                              inputRange: [0, 1],
+
+                                              outputRange: [70, 0],
+
+                                            })
+
+                                        },
+
+                                        {
+
+                                          scale:
+
+                                            progress.interpolate({
+
+                                              inputRange: [0, 1],
+
+                                              outputRange: [.92, 1],
+
+                                            })
+
+                                        }
+
+                                      ],
+
+                                    },
+
+                                  ]}
+
+                                >
+
+                                  <Image
+
+                                    source={{
+
+                                      uri: p.product.images?.[0]
+
+                                    }}
+
+                                    style={styles.bundleItemImage}
+
+                                  />
+
+                                  <View
+
+                                    style={{
+
+                                 flex: 1,
+    marginLeft: 12,
+    minWidth: 0,
+
+                                    }}
+
+                                  >
+
+                                    <Text
+
+                                      numberOfLines={1}
+
+                                      style={styles.bundleName}
+
+                                    >
+
+                                      {p.product.title}
+
+                                    </Text>
+
+                                    <Text
+
+                                      style={styles.bundleSize}
+
+                                    >
+
+                                      Size {p.size}
+
+                                    </Text>
+
+                                  </View>
+
+                                </Animated.View>
+
+                              ))}
+
+                            </Animated.View>
+
+                          </View>
+
+                        )}
+
+                    </View>
+
+                    <View style={styles.productInfo}>
+
+                      {/* TITLE */}
+
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                        }}
+                      >
+
+                        <Text
+                          numberOfLines={2}
+                          style={[
+                            styles.productName,
+                            { flex: 1 },
+                          ]}
+                        >
+
+                          {it.customBundle?.title ||
+                            it.bundle?.title ||
+                            it.product?.title}
+
+                        </Text>
+
+
+                      </View>
+
+                      {/* SIZE */}
+
+                      <Text style={styles.productMeta}>
+
+                        Size {it.size || "OS"}
+
+                      </Text>
+
+                      {/* PRICE */}
+
+                      <Text style={styles.productPrice}>
+
+                        ₹
+                        {(
+                          it.customBundle?.price ??
+                          it.bundle?.price ??
+                          it.product?.price ??
+                          0
+                        ).toLocaleString()}
+
+                      </Text>
+
+                      {/* INCLUDED PRODUCTS */}
+
+
+
+                    </View>
+
+                    {/* RIGHT SIDE */}
+
+                    <View style={styles.rightSide}>
+
+                      <TouchableOpacity
+                        onPress={() =>
+                          remove(
+                            itemId,
+                            it.size,
+                            isBundle
+                          )
+                        }
+                      >
+
+                        <Ionicons
+                          name="trash-outline"
+                          size={21}
+                          color="#999"
+                        />
+
+                      </TouchableOpacity>
+
+                      <View style={styles.qtyBox}>
+
+                        <TouchableOpacity
+                          style={styles.qtyBtn}
+                          onPress={() =>
+                            update(
+                              itemId,
+                              it.quantity - 1,
+                              it.size,
+                              isBundle
+                            )
+                          }
+                        >
+
+                          <Ionicons
+                            name="remove"
+                            size={16}
+                            color="#111"
+                          />
+
+                        </TouchableOpacity>
+
+                        <Text style={styles.qty}>
+                          {it.quantity}
+                        </Text>
+
+                        <TouchableOpacity
+                          style={styles.qtyBtn}
+                          onPress={() =>
+                            update(
+                              itemId,
+                              it.quantity + 1,
+                              it.size,
+                              isBundle
+                            )
+                          }
+                        >
+
+                          <Ionicons
+                            name="add"
+                            size={16}
+                            color="#111"
+                          />
+
+                        </TouchableOpacity>
+
+                      </View>
+
+                    </View>
+
+                  </View>
+
+                  {/* BUNDLE DRAWER */}
+
+                </View>
+
+              </Swipeable>
+
+            );
+
+          })}
+        </View>
+      </ScrollView>
+
+      {/* SUMMARY */}
+      <View style={styles.checkoutContainer}>
+
+        <View style={styles.summaryCard}>
+
+          <View style={styles.summaryRow}>
+
+            <Text style={styles.summaryLabel}>
+              Subtotal
+            </Text>
+
+            <Text style={styles.summaryValue}>
+              ₹{subtotal.toLocaleString()}
             </Text>
 
           </View>
 
-          {/* RIGHT SIDE */}
+          <View style={styles.summaryRow}>
 
-          <View style={styles.rightSide}>
+            <Text style={styles.summaryLabel}>
+              Shipping
+            </Text>
 
-            <TouchableOpacity
-              onPress={() =>
-                remove(
-                  itemId,
-                  it.size,
-                  isBundle
-                )
-              }
-            >
+            <Text style={styles.freeText}>
+              FREE
+            </Text>
 
-              <Ionicons
-                name="trash-outline"
-                size={21}
-                color="#999"
-              />
+          </View>
 
-            </TouchableOpacity>
+          <View style={styles.summaryDivider} />
 
-            <View style={styles.qtyBox}>
+          <View style={styles.summaryRow}>
 
-              <TouchableOpacity
-                style={styles.qtyBtn}
-                onPress={() =>
-                  update(
-                    itemId,
-                    it.quantity - 1,
-                    it.size,
-                    isBundle
-                  )
-                }
-              >
+            <Text style={styles.totalLabel}>
+              Total
+            </Text>
 
-                <Ionicons
-                  name="remove"
-                  size={16}
-                  color="#111"
-                />
-
-              </TouchableOpacity>
-
-              <Text style={styles.qty}>
-                {it.quantity}
-              </Text>
-
-              <TouchableOpacity
-                style={styles.qtyBtn}
-                onPress={() =>
-                  update(
-                    itemId,
-                    it.quantity + 1,
-                    it.size,
-                    isBundle
-                  )
-                }
-              >
-
-                <Ionicons
-                  name="add"
-                  size={16}
-                  color="#111"
-                />
-
-              </TouchableOpacity>
-
-            </View>
+            <Text style={styles.totalValue}>
+              ₹{subtotal.toLocaleString()}
+            </Text>
 
           </View>
 
         </View>
 
-        {/* BUNDLE DRAWER */}
+        <TouchableOpacity
+          style={styles.checkoutButton}
+          onPress={() =>
+            router.push("/checkout")
+          }
+        >
 
-        {isBundle &&
-          isExpanded &&
-          it.bundleProducts && (
+          <Text style={styles.checkoutText}>
+            PROCEED TO CHECKOUT
+          </Text>
 
-            <View style={styles.bundleDrawer}>
+          <Ionicons
+            name="arrow-forward"
+            size={20}
+            color="#111"
+          />
 
-              <Text style={styles.bundleTitle}>
-                Included Products
-              </Text>
-
-              <View style={styles.stackRow}>
-
-                {it.bundleProducts
-                  .slice(0, 3)
-                  .map(
-                    (
-                      p: any,
-                      i: number
-                    ) => (
-
-                      <Image
-                        key={i}
-                        source={{
-                          uri:
-                            p.product?.images?.[0],
-                        }}
-                        style={[
-                          styles.stackImage,
-                          {
-                            marginLeft:
-                              i === 0
-                                ? 0
-                                : -18,
-                          },
-                        ]}
-                      />
-
-                    )
-                  )}
-
-              </View>
-
-              {it.bundleProducts.map(
-                (p: any) => (
-
-                  <View
-                    key={p.product._id}
-                    style={styles.bundleItem}
-                  >
-
-                    <Text
-                      style={
-                        styles.bundleItemName
-                      }
-                    >
-                      {p.product.title}
-                    </Text>
-
-                    <Text
-                      style={
-                        styles.bundleItemSize
-                      }
-                    >
-                      {p.size}
-                    </Text>
-
-                  </View>
-
-                )
-              )}
-
-              <View style={styles.saveBadge}>
-
-                <Text style={styles.saveText}>
-                  YOU SAVED ₹1200
-                </Text>
-
-              </View>
-
-            </View>
-
-          )}
+        </TouchableOpacity>
 
       </View>
-
-    </Swipeable>
-
+    </SafeAreaView>
   );
+}
 
-})}
-          </View>
-        </ScrollView>
-
-        {/* SUMMARY */}
-     <View style={styles.checkoutContainer}>
-
-  <View style={styles.summaryCard}>
-
-    <View style={styles.summaryRow}>
-
-      <Text style={styles.summaryLabel}>
-        Subtotal
-      </Text>
-
-      <Text style={styles.summaryValue}>
-        ₹{subtotal.toLocaleString()}
-      </Text>
-
-    </View>
-
-    <View style={styles.summaryRow}>
-
-      <Text style={styles.summaryLabel}>
-        Shipping
-      </Text>
-
-      <Text style={styles.freeText}>
-        FREE
-      </Text>
-
-    </View>
-
-    <View style={styles.summaryDivider} />
-
-    <View style={styles.summaryRow}>
-
-      <Text style={styles.totalLabel}>
-        Total
-      </Text>
-
-      <Text style={styles.totalValue}>
-        ₹{subtotal.toLocaleString()}
-      </Text>
-
-    </View>
-
+/* ---------- SUMMARY ROW ---------- */
+const SummaryRow = ({
+  label,
+  value,
+  bold,
+}: {
+  label: string;
+  value: string;
+  bold?: boolean;
+}) => (
+  <View style={styles.summaryRow}>
+    <Text style={[styles.summaryText, bold && styles.bold]}>{label}</Text>
+    <Text style={[styles.summaryText, bold && styles.bold]}>{value}</Text>
   </View>
+);
 
-  <TouchableOpacity
-    style={styles.checkoutButton}
-    onPress={() =>
-      router.push("/checkout")
-    }
-  >
+/* ---------- STYLES ---------- */
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: "#FFFFFF" },
 
-    <Text style={styles.checkoutText}>
-      PROCEED TO CHECKOUT
-    </Text>
+  header: {
 
-    <Ionicons
-      name="arrow-forward"
-      size={20}
-      color="#111"
-    />
+    paddingHorizontal: 24,
 
-  </TouchableOpacity>
+    paddingTop: 18,
 
-</View>
-      </SafeAreaView>
-    );
-  }
+    paddingBottom: 22,
 
-  /* ---------- SUMMARY ROW ---------- */
-  const SummaryRow = ({
-    label,
-    value,
-    bold,
-  }: {
-    label: string;
-    value: string;
-    bold?: boolean;
-  }) => (
-    <View style={styles.summaryRow}>
-      <Text style={[styles.summaryText, bold && styles.bold]}>{label}</Text>
-      <Text style={[styles.summaryText, bold && styles.bold]}>{value}</Text>
-    </View>
-  );
+    flexDirection: "row",
 
-  /* ---------- STYLES ---------- */
-  const styles = StyleSheet.create({
-    root: { flex: 1, backgroundColor: "#FFFFFF" },
+    justifyContent: "space-between",
 
-header:{
+    alignItems: "center",
 
-  paddingHorizontal:24,
+  },
 
-  paddingTop:18,
+  smallLabel: {
 
-  paddingBottom:22,
+    color: "#999",
 
-  flexDirection:"row",
+    fontSize: 11,
 
-  justifyContent:"space-between",
+    letterSpacing: 2,
 
-  alignItems:"center",
+    fontWeight: "800",
 
-},
+  },
 
-smallLabel:{
+  headerTitle: {
 
-  color:"#999",
+    marginTop: 6,
 
-  fontSize:11,
+    color: "#111",
 
-  letterSpacing:2,
+    fontSize: 34,
 
-  fontWeight:"800",
+    fontWeight: "900",
 
-},
+    letterSpacing: .4,
 
-headerTitle:{
+  },
 
-  marginTop:6,
+  headerRight: {
 
-  color:"#111",
+    flexDirection: "row",
 
-  fontSize:34,
+    alignItems: "center",
 
-  fontWeight:"900",
+  },
 
-  letterSpacing:.4,
+  iconButton: {
 
-},
+    width: 52,
 
-headerRight:{
+    height: 52,
 
-  flexDirection:"row",
+    borderRadius: 18,
 
-  alignItems:"center",
+    backgroundColor: "#F7F7F7",
 
-},
+    justifyContent: "center",
 
-iconButton:{
+    alignItems: "center",
 
-  width:52,
+    borderWidth: 1,
 
-  height:52,
+    borderColor: "#ECECEC",
 
-  borderRadius:18,
+  },
 
-  backgroundColor:"#F7F7F7",
+  itemCount: {
 
-  justifyContent:"center",
+    width: 46,
 
-  alignItems:"center",
+    height: 46,
 
-  borderWidth:1,
+    borderRadius: 23,
 
-  borderColor:"#ECECEC",
+    marginLeft: 14,
 
-},
+    justifyContent: "center",
 
-itemCount:{
+    alignItems: "center",
 
-  width:46,
+  },
 
-  height:46,
+  itemCountText: {
 
-  borderRadius:23,
+    color: "#111",
 
-  marginLeft:14,
+    fontSize: 16,
 
-  justifyContent:"center",
+    fontWeight: "900",
 
-  alignItems:"center",
+  },
 
-},
+  divider: {
 
-itemCountText:{
+    height: 1,
 
-  color:"#111",
+    backgroundColor: "#F1F1F1",
 
-  fontSize:16,
+    marginHorizontal: 24,
 
-  fontWeight:"900",
+  },
+  cartCard: {
 
-},
+    flexDirection: "row",
 
-divider:{
+    alignItems: "flex-start",
 
-  height:1,
+    padding: 18,
 
-  backgroundColor:"#F1F1F1",
+    marginHorizontal: 20,
 
-  marginHorizontal:24,
+    marginBottom: 18,
 
-},
-cartCard:{
+    backgroundColor: "#FFF",
 
-  flexDirection:"row",
+    borderRadius: 24,
 
-  padding:18,
+    borderWidth: 1,
 
-  marginHorizontal:20,
+    borderColor: "#EFEFEF",
 
-  marginBottom:18,
+  },
 
-  backgroundColor:"#FFF",
+  productImage: {
+    width: 108,
 
-  borderRadius:24,
+    height: 150,
 
-  borderWidth:1,
+    borderRadius: 18,
 
-  borderColor:"#EFEFEF",
+    backgroundColor: "#F5F5F5",
+  },
 
-},
+  productInfo: {
 
-productImage:{
+    flex: 1,
 
-  width:112,
+    marginLeft: 16,
 
-  height:142,
+    paddingVertical: 6,
 
-  borderRadius:18,
+  },
 
-  backgroundColor:"#F5F5F5",
+  productName: {
 
-},
+    fontSize: 18,
 
-productInfo:{
+    color: "#111",
 
-  flex:1,
+    fontWeight: "900",
 
-  marginLeft:18,
+    lineHeight: 24,
 
-  justifyContent:"space-between",
+  },
 
-},
+  productMeta: {
 
-productName:{
+    marginTop: 8,
 
-  fontSize:18,
+    color: "#888",
 
-  color:"#111",
+    fontSize: 13,
 
-  fontWeight:"900",
+    letterSpacing: .5,
 
-  lineHeight:24,
+  },
 
-},
+  productPrice: {
 
-productMeta:{
 
-  marginTop:8,
+    marginTop: 14,
 
-  color:"#888",
+    marginBottom: 18,
 
-  fontSize:13,
+    fontSize: 22,
 
-  letterSpacing:.5,
+    fontWeight: "900",
 
-},
+  },
 
-productPrice:{
+  rightSide: {
 
-  marginTop:14,
+    height: 150,
 
-  fontSize:24,
+    justifyContent: "space-between",
 
-  fontWeight:"900",
+    alignItems: "center",
 
-  color:"#111",
+    marginLeft: 8,
 
-},
+  },
 
-rightSide:{
+  qtyBox: {
 
-  justifyContent:"space-between",
+    width: 54,
 
-  alignItems:"flex-end",
+    height: 118,
 
-},
+    backgroundColor: "#B6FF2E",
 
-qtyBox:{
+    borderRadius: 18,
 
-  backgroundColor:"#B6FF2E",
+    justifyContent: "space-evenly",
 
-  borderRadius:16,
+    alignItems: "center",
 
-  paddingVertical:6,
+    paddingVertical: 6,
 
-  paddingHorizontal:8,
+  },
 
-  alignItems:"center",
+  qtyBtn: {
 
-},
+    width: 32,
 
-qtyBtn:{
+    height: 32,
 
-  width:32,
+    justifyContent: "center",
 
-  height:32,
+    alignItems: "center",
 
-  justifyContent:"center",
+  },
 
-  alignItems:"center",
+  qty: {
 
-},
+    fontSize: 17,
 
-qty:{
+    fontWeight: "900",
 
-  fontSize:17,
+    color: "#111",
 
-  fontWeight:"900",
+    marginVertical: 4,
 
-  color:"#111",
+  },
+  /* Items */
+  itemsScroll: { flex: 1 },
+  itemsContainer: {
 
-  marginVertical:4,
 
-},
-    /* Items */
-    itemsScroll: { flex: 1 },
-    itemsContainer: { padding: 16, paddingBottom: 20 },
 
-    itemCard: {
-      flexDirection: "row",
-      backgroundColor: "#fff",
-      borderRadius: 16,
-      padding: 12,
-      marginBottom: 14,
-      elevation: 3,
+    paddingTop: 20,
+
+    paddingBottom: 380,
+
+  },
+
+  itemCard: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 14,
+    elevation: 3,
+  },
+  itemImage: {
+    width: 72,
+    height: 72,
+    borderRadius: 12,
+    backgroundColor: "#eee",
+  },
+  itemInfo: { flex: 1, marginLeft: 12 },
+  itemHeader: { marginBottom: 4 },
+  itemTitle: { fontWeight: "700", fontSize: 15, maxWidth: width - 160 },
+  variant: { fontSize: 12, color: "#666" },
+
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 6,
+  },
+  price: { fontWeight: "700", fontSize: 15 },
+
+  /* Qty */
+  qtyControls: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f2f2f2",
+    borderRadius: 18,
+    paddingHorizontal: 6,
+    height: 36,
+  },
+
+  qtyAdd: { backgroundColor: "#7CFC6A" },
+  qtyBtnText: {
+    fontSize: 18,
+    fontWeight: "700",
+    lineHeight: 18,
+  },
+  qtyValue: {
+    width: 26,
+    textAlign: "center",
+    fontWeight: "600",
+  },
+
+  /* Delete */
+  deleteBox: {
+    width: 80,
+    backgroundColor: "#dc2626",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 16,
+    // marginVertical: 8,
+    marginBottom: height * 0.02,
+    marginLeft: width * 0.02,
+  },
+
+  /* Summary */
+  summaryContainer: {
+    height: SUMMARY_HEIGHT,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 16,
+    elevation: 10,
+  },
+  summaryTitle: { fontSize: 16, fontWeight: "700", marginBottom: 12 },
+
+  summaryText: { fontSize: 14 },
+  bold: { fontWeight: "700" },
+
+  /* Coupon */
+  couponRow: {
+    flexDirection: "row",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 12,
+    padding: 6,
+    marginTop: 14,
+  },
+  couponInput: { flex: 1, paddingHorizontal: 10 },
+  applyBtn: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    justifyContent: "center",
+  },
+
+  /* Checkout */
+  checkoutBtn: {
+    backgroundColor: "#7CFC6A",
+    paddingVertical: 16,
+    borderRadius: 30,
+    marginTop: 20,
+  },
+
+  /* Empty */
+  emptyRoot: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  emptyTitle: { fontSize: 18, fontWeight: "700", marginTop: 12 },
+  emptySubtitle: {
+    textAlign: "center",
+    color: "#666",
+    marginVertical: 12,
+  },
+  shopBtn: {
+    backgroundColor: "#111",
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    borderRadius: 30,
+    marginTop: 10,
+  },
+  shopBtnText: { color: "#fff", fontWeight: "600" },
+  checkoutContainer: {
+
+    position: "absolute",
+
+    left: 0,
+
+    right: 0,
+
+    bottom: 0,
+
+    paddingHorizontal: 22,
+
+    paddingTop: 20,
+
+    paddingBottom: 34,
+
+    backgroundColor: "#FFF",
+
+    borderTopLeftRadius: 34,
+
+    borderTopRightRadius: 34,
+
+    borderTopWidth: 1,
+
+    borderColor: "#ECECEC",
+
+  },
+
+  summaryCard: {
+
+    backgroundColor: "#FAFAFA",
+
+    borderRadius: 22,
+
+    padding: 20,
+
+    borderWidth: 1,
+
+    borderColor: "#EFEFEF",
+
+  },
+
+  summaryRow: {
+
+    flexDirection: "row",
+
+    justifyContent: "space-between",
+
+    alignItems: "center",
+
+    marginBottom: 14,
+
+  },
+
+  summaryLabel: {
+
+    color: "#777",
+
+    fontSize: 14,
+
+  },
+
+  summaryValue: {
+
+    color: "#111",
+
+    fontWeight: "700",
+
+    fontSize: 15,
+
+  },
+
+  freeText: {
+
+    color: "#4CAF50",
+
+    fontWeight: "900",
+
+    fontSize: 15,
+
+  },
+
+  summaryDivider: {
+
+    height: 1,
+
+    backgroundColor: "#ECECEC",
+
+    marginVertical: 6,
+
+  },
+
+  totalLabel: {
+
+    fontSize: 18,
+
+    color: "#111",
+
+    fontWeight: "900",
+
+  },
+
+  totalValue: {
+
+    fontSize: 26,
+
+    color: "#111",
+
+    fontWeight: "900",
+
+  },
+
+  checkoutButton: {
+
+    marginTop: 20,
+
+    height: 62,
+
+    borderRadius: 18,
+
+    backgroundColor: "#B6FF2E",
+
+    flexDirection: "row",
+
+    justifyContent: "center",
+
+    alignItems: "center",
+
+  },
+
+  checkoutText: {
+
+    color: "#111",
+
+    fontWeight: "900",
+
+    fontSize: 15,
+
+    letterSpacing: .8,
+
+    marginRight: 10,
+
+  },
+
+
+  moreCircle: {
+
+    width: 44,
+
+    height: 44,
+
+    borderRadius: 22,
+
+    backgroundColor: "#111",
+
+    justifyContent: "center",
+
+    alignItems: "center",
+
+    marginLeft: -18,
+
+  },
+
+  moreText: {
+
+    color: "#FFF",
+
+    fontWeight: "900",
+
+    fontSize: 12,
+
+  },
+  includeSection: {
+
+    marginTop: 0,
+
+    paddingTop: 14,
+
+    borderTopWidth: 1,
+
+    borderColor: "#F2F2F2",
+
+  },
+
+  includeHeader: {
+
+    flexDirection: "row",
+
+    justifyContent: "space-between",
+
+    alignItems: "center",
+
+    marginBottom: 14,
+
+  },
+
+  includeTitle: {
+
+    fontSize: 12,
+
+    fontWeight: "900",
+
+    letterSpacing: 1,
+
+    color: "#777",
+
+    textTransform: "uppercase",
+
+  },
+
+  previewRow: {
+
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    marginTop: 10,
+
+    height: 44,
+
+  },
+
+  previewBubble: {
+
+    width: 42,
+
+    height: 42,
+
+    borderRadius: 21,
+
+    backgroundColor: "#FFF",
+
+    borderWidth: 2,
+
+    borderColor: "#FFF",
+
+    overflow: "hidden",
+
+    shadowColor: "#000",
+
+    shadowOpacity: .08,
+
+    shadowRadius: 8,
+
+    shadowOffset: {
+
+      width: 0,
+
+      height: 3,
+
     },
-    itemImage: {
-      width: 72,
-      height: 72,
-      borderRadius: 12,
-      backgroundColor: "#eee",
-    },
-    itemInfo: { flex: 1, marginLeft: 12 },
-    itemHeader: { marginBottom: 4 },
-    itemTitle: { fontWeight: "700", fontSize: 15, maxWidth: width - 160 },
-    variant: { fontSize: 12, color: "#666" },
 
-    row: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginTop: 6,
-    },
-    price: { fontWeight: "700", fontSize: 15 },
+    elevation: 3,
 
-    /* Qty */
-    qtyControls: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: "#f2f2f2",
-      borderRadius: 18,
-      paddingHorizontal: 6,
-      height: 36,
-    },
+  },
 
-    qtyAdd: { backgroundColor: "#7CFC6A" },
-    qtyBtnText: {
-      fontSize: 18,
-      fontWeight: "700",
-      lineHeight: 18,
-    },
-    qtyValue: {
-      width: 26,
-      textAlign: "center",
-      fontWeight: "600",
-    },
+  previewImage: {
 
-    /* Delete */
-    deleteBox: {
-      width: 80,
-      backgroundColor: "#dc2626",
-      justifyContent: "center",
-      alignItems: "center",
-      borderRadius: 16,
-      // marginVertical: 8,
-      marginBottom: height * 0.02,
-      marginLeft: width * 0.02,
-    },
+    width: "100%",
 
-    /* Summary */
-    summaryContainer: {
-      height: SUMMARY_HEIGHT,
-      backgroundColor: "#fff",
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
-      padding: 16,
-      elevation: 10,
-    },
-    summaryTitle: { fontSize: 16, fontWeight: "700", marginBottom: 12 },
+    height: "100%",
 
-    summaryText: { fontSize: 14 },
-    bold: { fontWeight: "700" },
+  },
 
-    /* Coupon */
-    couponRow: {
-      flexDirection: "row",
-      backgroundColor: "#f5f5f5",
-      borderRadius: 12,
-      padding: 6,
-      marginTop: 14,
-    },
-    couponInput: { flex: 1, paddingHorizontal: 10 },
-    applyBtn: {
-      backgroundColor: "#fff",
-      borderRadius: 10,
-      paddingHorizontal: 14,
-      justifyContent: "center",
-    },
+  leftColumn: {
 
-    /* Checkout */
-    checkoutBtn: {
-      backgroundColor: "#7CFC6A",
-      paddingVertical: 16,
-      borderRadius: 30,
-      marginTop: 20,
-    },
+    width: 110,
 
-    /* Empty */
-    emptyRoot: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      padding: 24,
-    },
-    emptyTitle: { fontSize: 18, fontWeight: "700", marginTop: 12 },
-    emptySubtitle: {
-      textAlign: "center",
-      color: "#666",
-      marginVertical: 12,
-    },
-    shopBtn: {
-      backgroundColor: "#111",
-      paddingVertical: 14,
-      paddingHorizontal: 40,
-      borderRadius: 30,
-      marginTop: 10,
-    },
-    shopBtnText: { color: "#fff", fontWeight: "600" },
-    checkoutContainer:{
+    alignItems: "flex-start",
 
-  position:"absolute",
+  },
 
-  left:0,
+  bundlePreview: {
 
-  right:0,
+  marginTop: 12,
+  width: "100%",
+  alignItems: "flex-start",
 
-  bottom:0,
+  },
 
-  paddingHorizontal:22,
-
-  paddingTop:20,
-
-  paddingBottom:34,
-
-  backgroundColor:"#FFF",
-
-  borderTopLeftRadius:34,
-
-  borderTopRightRadius:34,
-
-  borderTopWidth:1,
-
-  borderColor:"#ECECEC",
-
-},
-
-summaryCard:{
-
-  backgroundColor:"#FAFAFA",
-
-  borderRadius:22,
-
-  padding:20,
-
-  borderWidth:1,
-
-  borderColor:"#EFEFEF",
-
-},
-
-summaryRow:{
-
-  flexDirection:"row",
-
-  justifyContent:"space-between",
-
-  alignItems:"center",
-
-  marginBottom:14,
-
-},
-
-summaryLabel:{
-
-  color:"#777",
-
-  fontSize:14,
-
-},
-
-summaryValue:{
-
-  color:"#111",
-
-  fontWeight:"700",
-
-  fontSize:15,
-
-},
-
-freeText:{
-
-  color:"#4CAF50",
-
-  fontWeight:"900",
-
-  fontSize:15,
-
-},
-
-summaryDivider:{
-
-  height:1,
-
-  backgroundColor:"#ECECEC",
-
-  marginVertical:6,
-
-},
-
-totalLabel:{
-
-  fontSize:18,
-
-  color:"#111",
-
-  fontWeight:"900",
-
-},
-
-totalValue:{
-
-  fontSize:26,
-
-  color:"#111",
-
-  fontWeight:"900",
-
-},
-
-checkoutButton:{
-
-  marginTop:20,
-
-  height:62,
-
-  borderRadius:18,
-
-  backgroundColor:"#B6FF2E",
-
-  flexDirection:"row",
-
-  justifyContent:"center",
-
-  alignItems:"center",
-
-},
-
-checkoutText:{
-
-  color:"#111",
-
-  fontWeight:"900",
-
-  fontSize:15,
-
-  letterSpacing:.8,
-
-  marginRight:10,
-
-},
-bundleDrawer: {
-
-  marginHorizontal: 20,
-
-  marginTop: -8,
-
-  marginBottom: 18,
-
-  padding: 18,
-
-  borderBottomLeftRadius: 24,
-
-  borderBottomRightRadius: 24,
-
-  backgroundColor: "#FAFAFA",
-
-  borderWidth: 1,
-
-  borderTopWidth: 0,
-
-  borderColor: "#EFEFEF",
-
-},
-
-bundleTitle: {
-
-  fontSize: 12,
-
-  fontWeight: "900",
-
-  letterSpacing: 1.2,
-
-  color: "#999",
-
-  marginBottom: 16,
-
-},
-
-stackRow: {
+  bundlePreviewRow: {
 
   flexDirection: "row",
-
   alignItems: "center",
 
-  marginBottom: 20,
+  },
 
-},
+  previewImageSmall: {
 
-stackImage: {
+    width: 34,
 
-  width: 44,
+    height: 34,
 
-  height: 44,
+    borderRadius: 17,
 
-  borderRadius: 22,
+    borderWidth: 2,
 
-  borderWidth: 2,
+    borderColor: "#FFF",
 
-  borderColor: "#FFF",
+    backgroundColor: "#F5F5F5",
 
-  backgroundColor: "#F5F5F5",
+  },
 
-},
+  bundleArrow: {
 
-moreCircle: {
+    marginLeft: 12,
 
-  width: 44,
+    width: 28,
 
-  height: 44,
+    height: 28,
 
-  borderRadius: 22,
+    borderRadius: 14,
 
-  backgroundColor: "#111",
+    justifyContent: "center",
 
-  justifyContent: "center",
+    alignItems: "center",
 
-  alignItems: "center",
+  },
 
-  marginLeft: -18,
 
-},
+  bundleRow: {
 
-moreText: {
+    marginBottom: 18,
 
-  color: "#FFF",
+    paddingLeft: 12,
 
-  fontWeight: "900",
+  },
 
-  fontSize: 12,
+  bundleItemRow: {
 
-},
+  flexDirection:"row",
 
-bundleItem: {
+  alignItems:"center",
 
-  flexDirection: "row",
+  minHeight:58,
 
-  justifyContent: "space-between",
+  paddingVertical:8,
 
-  alignItems: "center",
+  },
 
-  paddingVertical: 12,
+  bundleItemImage: {
 
-  borderBottomWidth: 1,
+    width: 42,
 
-  borderBottomColor: "#ECECEC",
+    height: 42,
 
-},
+    borderRadius: 12,
 
-bundleItemName: {
+    backgroundColor: "#F5F5F5",
 
-  flex: 1,
+  },
 
-  fontSize: 15,
+  bundleDetails: {
 
-  color: "#111",
+    marginTop: 14,
+  width: 220, // or width: "100%"
 
-  fontWeight: "700",
+  //   width: "100%",
+  // overflow: "hidden",
 
-},
+  },
 
-bundleItemSize: {
+  bundleName: {
 
-  color: "#888",
+    fontSize: 14,
 
-  fontSize: 13,
+    fontWeight: "800",
 
-  fontWeight: "600",
+    color: "#111",
 
-},
+  },
 
-saveBadge: {
+  bundleSize: {
 
-  alignSelf: "flex-start",
+    marginTop: 3,
 
-  marginTop: 18,
+    fontSize: 12,
 
-  backgroundColor: "#B6FF2E",
+    color: "#777",
 
-  borderRadius: 14,
-
-  paddingHorizontal: 14,
-
-  paddingVertical: 8,
-
-},
-
-saveText: {
-
-  color: "#111",
-
-  fontWeight: "900",
-
-  fontSize: 12,
-
-  letterSpacing: .8,
-
-},
-  });
+  },
+});
