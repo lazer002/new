@@ -346,6 +346,7 @@ const sizes =
     product?.inventory || {}
   );
 
+
 if (!product) {
 
   return (
@@ -394,7 +395,7 @@ return (
       showsVerticalScrollIndicator={false}
 
       contentContainerStyle={{
-        paddingBottom: 170,
+        paddingBottom: 100,
       }}
 
     >
@@ -403,14 +404,31 @@ return (
 
   {/* ---------------- REAL HERO ---------------- */}
 
-  <View
-    style={[
-      StyleSheet.absoluteFillObject,
-      {
-        opacity: showRealHero ? 1 : 0,
+ <Pressable
+  style={[
+    StyleSheet.absoluteFillObject,
+    {
+      opacity: showRealHero ? 1 : 0,
+    },
+  ]}
+  onPress={() => {
+
+    router.push({
+
+      pathname: "/product/viewer",
+
+      params: {
+
+        images: JSON.stringify(images),
+
+        index: activeIndex,
+
       },
-    ]}
-  >
+
+    });
+
+  }}
+>
 
     <FlatList
       ref={sliderRef}
@@ -445,7 +463,7 @@ return (
       }}
     />
 
-  </View>
+  </Pressable>
 
   {/* ---------------- FLYING IMAGE ---------------- */}
 
@@ -493,61 +511,52 @@ return (
       onPress={() => router.back()}
     >
 
-      <BlurView
-        intensity={90}
-        tint="light"
-        style={styles.glassButton}
-      >
+      <View style={styles.glassButton}>
+     
+      
 
         <Ionicons
           name="chevron-back"
           size={22}
-          color="#111"
+          color="#ffffff"
         />
-
-      </BlurView>
-
-    </Pressable>
-
-    <View style={styles.rightButtons}>
-
-      <Pressable
-        onPress={() =>
-          isInWishlist(product._id)
-            ? removeFromWishlist(product._id)
-            : addToWishlist(product._id)
-        }
-      >
-
-      
-          <Ionicons
-            name={
-              isInWishlist(product._id)
-                ? "heart"
-                : "heart-outline"
-            }
-            size={20}
-            color={
-              isInWishlist(product._id)
-                ? "#000000"
-                : "#111"
-            }
-          />
-
-      
-      </Pressable>
-
-      <View
-        style={{
-          marginLeft: 12,
-        }}
-      >
-
-        <CartIcon />
 
       </View>
 
-    </View>
+    </Pressable>
+
+  <View style={styles.rightButtons}>
+
+  <View style={styles.cartWrapper}>
+    <CartIcon />
+  </View>
+
+  <Pressable
+    style={styles.wishlistButton}
+    onPress={() =>
+      isInWishlist(product._id)
+        ? removeFromWishlist(product._id)
+        : addToWishlist(product._id)
+    }
+  >
+
+    <Ionicons
+      name={
+        isInWishlist(product._id)
+          ? "heart"
+          : "heart-outline"
+      }
+      size={24}
+      color={
+        isInWishlist(product._id)
+          ? "#111"
+          : "#666"
+      }
+    />
+
+  </Pressable>
+
+</View>
 
   </View>
 
@@ -660,7 +669,7 @@ return (
         {/* ---------- PRICE ---------- */}
 
         <View style={styles.priceRow}>
-<View>
+<View style={{ flexDirection: "row", alignItems: "center" }}>
   <Text style={styles.price}>
     ₹{product.price}
   </Text>
@@ -758,13 +767,6 @@ return (
               Select Size
             </Text>
 
-            <Pressable>
-
-              <Text style={styles.sizeGuide}>
-                Size Guide
-              </Text>
-
-            </Pressable>
 
           </View>
 
@@ -968,9 +970,10 @@ return (
             </Text>
 
             <Pressable
-              onPress={() =>
-                router.push("/shop")
-              }
+              onPress={() =>{
+              console.log("View All Pressed",product.category);
+                router.push({pathname:"/plpcategory",  params: { category: product.category }})
+               } }
             >
 
               <Text style={styles.viewAll}>
@@ -1100,6 +1103,9 @@ return (
       </View>
 
     </Animated.ScrollView>
+
+
+{/* floating header */}
 
 <Animated.View
   style={[
@@ -1285,10 +1291,50 @@ heroSlide: {
     alignItems: "center",
   },
 
-  rightButtons: {
-    flexDirection: "row",
-    alignItems: "center",
+rightButtons: {
+
+  position: "absolute",
+
+  right: 0,
+
+  top: 0,
+
+  alignItems: "center",
+
+},cartWrapper: {
+
+  zIndex: 2,
+
+},wishlistButton: {
+
+  width: 50,
+
+  height: 50,
+
+  marginTop: 14,
+
+  borderRadius: 18,
+
+  backgroundColor: "#B6FF2E",
+
+  justifyContent: "center",
+
+  alignItems: "center",
+
+  shadowColor: "#B6FF2E",
+
+  shadowOpacity: 0.35,
+
+  shadowRadius: 14,
+
+  shadowOffset: {
+    width: 0,
+    height: 8,
   },
+
+  elevation: 10,
+
+},
 
   glassButton: {
     width: 54,
@@ -1299,6 +1345,7 @@ heroSlide: {
     alignItems: "center",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,.25)",
+    backgroundColor:"#000000"
   },
 
   counter: {
@@ -1377,7 +1424,7 @@ heroSlide: {
   },
 
   cartButton: {
-    width: 210,
+    width: 180,
     height: 58,
     borderRadius: 30,
     backgroundColor: "#B6FF2E",
@@ -1464,23 +1511,26 @@ heroSlide: {
 
  oldPriceContainer: {
   position: "relative",
-  alignSelf: "flex-start",
-  marginTop: 2,
+  alignSelf: "center",
+  justifyContent: "center",
+  paddingLeft: 8, // Adjust to match the left padding of the old price text
 },
 
 oldPrice: {
   color: "#9A9A9A",
-  fontSize: 18,
-  lineHeight: 18,
+  fontSize: 26,
+  lineHeight: 26,
+  includeFontPadding: false, // Android
+  textAlignVertical: "center",
 },
 
 oldPriceStrike: {
   position: "absolute",
-  left: -1,
+  left: 8,
   right: -1,
-  top: 11, // Adjust to 8-10 if needed
-  height: 1,
-  backgroundColor: "#B6FF2E",
+  top: 10, // Adjust to 8-10 if needed
+  height: 2,
+  backgroundColor: "#9A9A9A",
   borderRadius: 2,
 },
 

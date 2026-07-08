@@ -103,9 +103,9 @@ badge:{
 
   alignItems:"center",
 
-  borderWidth:2,
+  // borderWidth:2,
 
-  borderColor:"#111",
+  // borderColor:"#111",
 
 },
 
