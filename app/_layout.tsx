@@ -15,74 +15,74 @@ import { pillToastConfig } from "@/components/PillToast";
 import { NotificationProvider } from "@/context/NotificationContext";
 import { UIProvider } from "@/context/UIContext";
 export default function RootLayout() {
-const [fontsLoaded] = useFonts({
-  "RobotoCondensed-Thin": require("../assets/font/RobotoCondensed-Thin.ttf"),
-  "RobotoCondensed-ThinItalic": require("../assets/font/RobotoCondensed-ThinItalic.ttf"),
+  const [fontsLoaded] = useFonts({
+    "RobotoCondensed-Thin": require("../assets/font/RobotoCondensed-Thin.ttf"),
+    "RobotoCondensed-ThinItalic": require("../assets/font/RobotoCondensed-ThinItalic.ttf"),
 
-  "RobotoCondensed-ExtraLight": require("../assets/font/RobotoCondensed-ExtraLight.ttf"),
-  "RobotoCondensed-ExtraLightItalic": require("../assets/font/RobotoCondensed-ExtraLightItalic.ttf"),
+    "RobotoCondensed-ExtraLight": require("../assets/font/RobotoCondensed-ExtraLight.ttf"),
+    "RobotoCondensed-ExtraLightItalic": require("../assets/font/RobotoCondensed-ExtraLightItalic.ttf"),
 
-  "RobotoCondensed-Light": require("../assets/font/RobotoCondensed-Light.ttf"),
-  "RobotoCondensed-LightItalic": require("../assets/font/RobotoCondensed-LightItalic.ttf"),
+    "RobotoCondensed-Light": require("../assets/font/RobotoCondensed-Light.ttf"),
+    "RobotoCondensed-LightItalic": require("../assets/font/RobotoCondensed-LightItalic.ttf"),
 
-  "RobotoCondensed-Regular": require("../assets/font/RobotoCondensed-Regular.ttf"),
-  "RobotoCondensed-Italic": require("../assets/font/RobotoCondensed-Italic.ttf"),
+    "RobotoCondensed-Regular": require("../assets/font/RobotoCondensed-Regular.ttf"),
+    "RobotoCondensed-Italic": require("../assets/font/RobotoCondensed-Italic.ttf"),
 
-  "RobotoCondensed-Medium": require("../assets/font/RobotoCondensed-Medium.ttf"),
-  "RobotoCondensed-MediumItalic": require("../assets/font/RobotoCondensed-MediumItalic.ttf"),
+    "RobotoCondensed-Medium": require("../assets/font/RobotoCondensed-Medium.ttf"),
+    "RobotoCondensed-MediumItalic": require("../assets/font/RobotoCondensed-MediumItalic.ttf"),
 
-  "RobotoCondensed-SemiBold": require("../assets/font/RobotoCondensed-SemiBold.ttf"),
-  "RobotoCondensed-SemiBoldItalic": require("../assets/font/RobotoCondensed-SemiBoldItalic.ttf"),
+    "RobotoCondensed-SemiBold": require("../assets/font/RobotoCondensed-SemiBold.ttf"),
+    "RobotoCondensed-SemiBoldItalic": require("../assets/font/RobotoCondensed-SemiBoldItalic.ttf"),
 
-  "RobotoCondensed-Bold": require("../assets/font/RobotoCondensed-Bold.ttf"),
-  "RobotoCondensed-BoldItalic": require("../assets/font/RobotoCondensed-BoldItalic.ttf"),
+    "RobotoCondensed-Bold": require("../assets/font/RobotoCondensed-Bold.ttf"),
+    "RobotoCondensed-BoldItalic": require("../assets/font/RobotoCondensed-BoldItalic.ttf"),
 
-  "RobotoCondensed-ExtraBold": require("../assets/font/RobotoCondensed-ExtraBold.ttf"),
-  "RobotoCondensed-ExtraBoldItalic": require("../assets/font/RobotoCondensed-ExtraBoldItalic.ttf"),
+    "RobotoCondensed-ExtraBold": require("../assets/font/RobotoCondensed-ExtraBold.ttf"),
+    "RobotoCondensed-ExtraBoldItalic": require("../assets/font/RobotoCondensed-ExtraBoldItalic.ttf"),
 
-  "RobotoCondensed-Black": require("../assets/font/RobotoCondensed-Black.ttf"),
-  "RobotoCondensed-BlackItalic": require("../assets/font/RobotoCondensed-BlackItalic.ttf"),
-});
+    "RobotoCondensed-Black": require("../assets/font/RobotoCondensed-Black.ttf"),
+    "RobotoCondensed-BlackItalic": require("../assets/font/RobotoCondensed-BlackItalic.ttf"),
+  });
 
 
   if (!fontsLoaded) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-  <SafeAreaProvider>
-    <AuthProvider>
- <NotificationProvider>
-      <CartProvider>
-        <WishlistProvider>
-    <FilterProvider>
+      <SafeAreaProvider>
+        <AuthProvider>
+          <NotificationProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <FilterProvider>
 
-  <UIProvider>
+                  <UIProvider>
 
-    <View style={styles.container}>
+                    <View style={styles.container}>
 
-      <View style={styles.darkBg} />
+                      <View style={styles.darkBg} />
 
-      <AnimatedBackground />
+                      <AnimatedBackground />
 
-      <Slot />
+                      <Slot />
 
-      <Toast
-        config={pillToastConfig}
-        position="bottom"
-        topOffset={50}
-      />
+                      <Toast
+                        config={pillToastConfig}
+                        position="bottom"
+                       bottomOffset={110}
+                      />
 
-    </View>
+                    </View>
 
-  </UIProvider>
+                  </UIProvider>
 
-</FilterProvider>
-        </WishlistProvider>
-      </CartProvider>
-      </NotificationProvider>
-    </AuthProvider>
-  </SafeAreaProvider>
-</GestureHandlerRootView>
+                </FilterProvider>
+              </WishlistProvider>
+            </CartProvider>
+          </NotificationProvider>
+        </AuthProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 

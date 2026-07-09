@@ -9,6 +9,7 @@ import {
   Dimensions,
   Text,
   Animated,
+  ActivityIndicator
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Screen from "@/components/Screen";
@@ -19,7 +20,9 @@ import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 48) / 2;
-
+const HERO_HEIGHT = 280;
+const AnimatedFlatList =
+  Animated.FlatList
 /* 🔥 META */
 const getProductMeta = (id: string) => {
   let hash = 0;
@@ -95,9 +98,8 @@ function ProductCard({ item }: { item: any }) {
 
       {/* Wishlist */}
 
-      <BlurView
-        intensity={80}
-        tint="light"
+      <View
+   
         style={styles.favoriteGlass}
       >
 
@@ -118,14 +120,14 @@ function ProductCard({ item }: { item: any }) {
             size={19}
             color={
               isFav
-                ? "#d00000"
+                ? "#000000"
                 : "#111"
             }
           />
 
         </Pressable>
 
-      </BlurView>
+      </View>
 
       {/* NEW */}
 
@@ -202,194 +204,384 @@ function ProductCard({ item }: { item: any }) {
 /* 🔥 MAIN PLP */
 export default function PLP() {
   const { category } = useLocalSearchParams();
-  const [products, setProducts] = useState<any[]>([]);
+
   const router = useRouter();
-  const [index, setIndex] = useState(0);
-const fadeAnim = useRef(new Animated.Value(1)).current;
-  useEffect(() => {
-    api.get("/api/products").then((res) => {
-      const items = res.data.items || [];
 
-      const filtered = items.filter((p: any) => {
-        const catId =
-          typeof p.category === "string"
-            ? p.category
-            : p.category?._id;
+  const [products, setProducts] =
+    useState<any[]>([]);
 
-        return !category || catId === category;
-      });
+  const [loading, setLoading] =
+    useState(true);
+  const [heroLoaded, setHeroLoaded] =
+    useState(false);
 
-      setProducts(filtered);
+
+
+  const scrollY =
+    useRef(
+      new Animated.Value(0)
+    ).current;
+
+  const stickyOpacity =
+    scrollY.interpolate({
+      inputRange: [
+        HERO_HEIGHT - 90,
+        HERO_HEIGHT - 20,
+      ],
+      outputRange: [0, 1],
+      extrapolate: "clamp",
     });
-  }, [category]);
-useEffect(() => {
-  if (!products.length) return;
 
-  const interval = setInterval(() => {
-    // fade out
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
-      // change image
-      setIndex((prev) => (prev + 1) % products.length);
-
-      // fade in
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
+  const heroTranslate =
+    scrollY.interpolate({
+      inputRange: [0, HERO_HEIGHT],
+      outputRange: [0, -80],
+      extrapolate: "clamp",
     });
-  }, 2500);
 
-  return () => clearInterval(interval);
-}, [products]);
-  return (
-    <Screen style={styles.screen}>
-<View style={styles.heroContainer}>
+  const heroFade =
+    scrollY.interpolate({
+      inputRange: [0, HERO_HEIGHT - 60],
+      outputRange: [1, 0],
+      extrapolate: "clamp",
+    });
 
-  <Animated.Image
-    source={{
-      uri: products?.[index]?.images?.[0],
-    }}
-    style={[
-      styles.heroImage,
-      {
-        opacity: fadeAnim,
-      },
-    ]}
-  />
 
-  <View style={styles.heroOverlay} />
 
-  {/* TOP BAR */}
-
-  <View style={styles.heroTop}>
-
-    <BlurView
-      intensity={70}
-      tint="light"
-      style={styles.glassBtn}
-    >
-
-      <Pressable
-        style={styles.glassInner}
-        onPress={() => router.back()}
-      >
-
-        <Ionicons
-          name="chevron-back"
-          size={22}
-          color="#111"
-        />
-
-      </Pressable>
-
-    </BlurView>
-
-    <BlurView
-      intensity={70}
-      tint="light"
-      style={styles.glassBtn}
-    >
-
-      <Pressable style={styles.glassInner}>
-
-        <Ionicons
-          name="options-outline"
-          size={21}
-          color="#111"
-        />
-
-      </Pressable>
-
-    </BlurView>
-
-  </View>
-
-  {/* HERO CONTENT */}
-
-  <View style={styles.heroContent}>
-
-    <View style={styles.heroPill}>
-
-      <Text style={styles.heroPillText}>
-        CURATED COLLECTION
-      </Text>
-
-    </View>
-
-    <Text style={styles.heroTitle}>
-
-      {products?.[0]?.category?.name || "COLLECTION"}
-
-    </Text>
-
-    <Text style={styles.heroSubtitle}>
-
-      {products.length} Premium Pieces
-
-    </Text>
-
-    <View style={styles.heroBottom}>
-
-      <View style={styles.heroStat}>
-
-        <Text style={styles.heroStatNumber}>
-          {products.length}
-        </Text>
-
-        <Text style={styles.heroStatLabel}>
-          PRODUCTS
-        </Text>
-
-      </View>
-
-      <View style={styles.heroArrow}>
-
-        <Ionicons
-          name="arrow-down"
-          size={20}
-          color="#111"
-        />
-
-      </View>
-
-    </View>
-
-  </View>
-
-</View>
-<FlatList
-  data={products}
-  keyExtractor={(item) => item._id}
-  numColumns={2}
-  showsVerticalScrollIndicator={false}
-  contentContainerStyle={styles.listContent}
-  columnWrapperStyle={styles.columnWrapper}
-  renderItem={({ item, index }) => (
+const Header = () => (
+  <View>
 
     <Animated.View
       style={[
-        styles.cardWrapper,
+        styles.heroContainer,
         {
-          marginTop: index % 2 ? 40 : 0,
-           marginRight: index % 2 === 0 ? 12 : 0,
-          
+          opacity: heroFade,
         },
       ]}
     >
 
-      <ProductCard item={item} />
+      {loading || !heroLoaded ? (
+
+        <View style={styles.heroSkeleton}>
+
+          <ActivityIndicator
+            size="large"
+            color="#B6FF2E"
+          />
+
+        </View>
+
+      ) : (
+
+        <Image
+          source={{
+            uri: products?.[0]?.images?.[0],
+          }}
+          style={styles.heroImage}
+          resizeMode="cover"
+        />
+
+      )}
+
+      <View style={styles.heroOverlay} />
+
+      <View style={styles.heroTop}>
+
+        <BlurView
+          intensity={70}
+          tint="light"
+          style={styles.glassBtn}
+        >
+          <Pressable
+            style={styles.glassInner}
+            onPress={() => router.back()}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={22}
+              color="#111"
+            />
+          </Pressable>
+        </BlurView>
+
+        <BlurView
+          intensity={70}
+          tint="light"
+          style={styles.glassBtn}
+        >
+          <Pressable style={styles.glassInner}>
+            <Ionicons
+              name="options-outline"
+              size={21}
+              color="#111"
+            />
+          </Pressable>
+        </BlurView>
+
+      </View>
+
+      <View style={styles.heroContent}>
+
+        <View style={styles.heroPill}>
+          <Text style={styles.heroPillText}>
+            NEW ARRIVALS
+          </Text>
+        </View>
+
+        <Text style={styles.heroTitle}>
+          {products?.[0]?.category?.name ??
+            "COLLECTION"}
+        </Text>
+
+        <Text style={styles.heroSubtitle}>
+          {products.length} PRODUCTS
+        </Text>
+
+      </View>
 
     </Animated.View>
 
-  )}
+    <View style={styles.collectionBar}>
 
-  ListFooterComponent={<View style={{ height: 120 }} />}
-/>
+      <View style={{ flex: 1 }}>
+
+        <Text style={styles.collectionEyebrow}>
+          CURATED
+        </Text>
+
+        <Text style={styles.collectionTitle}>
+          {products.length} PRODUCTS
+        </Text>
+
+      </View>
+
+      <Pressable style={styles.filterButton}>
+
+        <Ionicons
+          name="options-outline"
+          size={20}
+          color="#111"
+        />
+
+      </Pressable>
+
+    </View>
+
+  </View>
+);
+
+
+
+  useEffect(() => {
+
+    let mounted = true;
+
+    const load = async () => {
+
+      setLoading(true);
+
+      try {
+
+        const res =
+          await api.get(
+            "/api/products"
+          );
+
+        const items =
+          res.data.items || [];
+
+        const filtered =
+          items.filter(
+            (p: any) => {
+
+              const catId =
+                typeof p.category ===
+                  "string"
+                  ? p.category
+                  : p.category?._id;
+
+              return (
+                !category ||
+                catId === category
+              );
+
+            }
+          );
+
+        if (!mounted) return;
+
+        setProducts(filtered);
+
+        const first =
+          filtered?.[0]?.images?.[0];
+
+        if (first) {
+          Image.prefetch(first).then(() => {
+            setHeroLoaded(true);
+          });
+        }
+      } finally {
+
+        if (mounted) {
+          setLoading(false);
+        }
+
+      }
+
+    };
+
+    load();
+
+    return () => {
+      mounted = false;
+    };
+
+  }, [category]);
+
+
+
+      if (loading) {
+
+return (
+
+      <Screen style={styles.screen}>
+
+        <View style={styles.heroSkeleton}>
+
+          <ActivityIndicator
+            size="large"
+            color="#B6FF2E"
+          />
+
+        </View>
+
+        <View
+          style={styles.skeletonGrid}
+        >
+
+          {Array.from({
+            length: 6,
+          }).map((_, i) => (
+            <View
+              key={i}
+              style={[
+                styles.skeletonCard,
+                i % 2 === 1 && {
+                  marginTop: 18,
+                },
+              ]}
+            />
+          ))}
+
+        </View>
+
+      </Screen>
+
+      );
+
+}
+
+  return (
+    <Screen style={styles.screen}>
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.stickyHeader,
+          {
+            opacity:
+              stickyOpacity,
+          },
+        ]}
+      >
+
+        <Pressable
+          style={styles.stickyBack}
+          onPress={() =>
+            router.back()
+          }
+        >
+
+          <Ionicons
+            name="chevron-back"
+            size={22}
+            color="#111"
+          />
+
+        </Pressable>
+
+        <Text
+          style={
+            styles.stickyTitle
+          }
+        >
+
+          {
+            products.length
+          } PRODUCTS
+
+        </Text>
+
+        <Pressable
+          style={
+            styles.filterButton
+          }
+        >
+
+          <Ionicons
+            name="options-outline"
+            size={20}
+            color="#111"
+          />
+
+        </Pressable>
+
+      </Animated.View>
+
+
+
+      <AnimatedFlatList
+        data={products}
+        keyExtractor={(item: any) => item._id}
+        numColumns={2}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
+        columnWrapperStyle={styles.columnWrapper}
+  onScroll={Animated.event(
+[
+{
+nativeEvent:{
+contentOffset:{
+y:scrollY,
+},
+},
+},
+],
+{
+useNativeDriver:false,
+}
+)}
+        scrollEventThrottle={16}
+        renderItem={({ item, index }) => (
+
+          <Animated.View
+            style={[
+              styles.cardWrapper,
+              {
+                marginTop: index % 2 ? 18 : 0,
+                marginRight: index % 2 === 0 ? 12 : 0,
+
+              },
+            ]}
+          >
+
+            <ProductCard item={item} />
+
+          </Animated.View>
+
+        )}
+        ListHeaderComponent={Header}
+        ListFooterComponent={<View style={{ height: 120 }} />}
+      />
     </Screen>
   );
 }
@@ -397,399 +589,406 @@ useEffect(() => {
 /* 🎨 STYLES (SAME AS HOME) */
 
 const styles = StyleSheet.create({
-screen:{
-  flex:1,
+  screen: {
+    flex: 1,
 
-  backgroundColor:"#F8F8F8",
-},
-heroContainer:{
-  width:"100%",
+    backgroundColor: "#fff",
+  },
+  heroContainer: {
+    width: "100%",
+    height: HERO_HEIGHT,
 
-  height:340,
+    overflow: "hidden",
 
-  borderBottomLeftRadius:34,
+    borderBottomLeftRadius: 34,
+    borderBottomRightRadius: 34,
 
-  borderBottomRightRadius:34,
+    backgroundColor: "#111",
 
-  overflow:"hidden",
+    marginBottom: 0,
+  },
+  card: {
+    width: CARD_WIDTH,
 
-  marginBottom:16,
+    height: CARD_WIDTH * 1.58,
 
-  backgroundColor:"#111",
-},
-card: {
-  width: CARD_WIDTH,
+    borderRadius: 28,
 
-  height: CARD_WIDTH * 1.58,
+    overflow: "hidden",
 
-  borderRadius: 28,
+    marginBottom: 24,
 
-  overflow: "hidden",
+    backgroundColor: "#111",
 
-  marginBottom: 24,
+    shadowColor: "#000",
 
-  backgroundColor: "#111",
+    shadowOpacity: .18,
 
-  shadowColor: "#000",
+    shadowRadius: 18,
 
-  shadowOpacity: .18,
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
 
-  shadowRadius: 18,
-
-  shadowOffset: {
-    width: 0,
-    height: 10,
+    elevation: 10,
   },
 
-  elevation: 10,
-},
+  image: {
+    width: "100%",
 
-image: {
-  width: "100%",
-
-  height: "100%",
-},
-
-cardGradient: {
-  ...StyleSheet.absoluteFillObject,
-},
-
-favoriteGlass: {
-  position: "absolute",
-
-  top: 14,
-  right: 14,
-
-  width: 42,
-  height: 42,
-
-  borderRadius: 21,
-
-  overflow: "hidden",
-
-  justifyContent: "center",
-
-  alignItems: "center",
-
-  borderWidth: 1,
-
-  borderColor: "rgba(255,255,255,.35)",
-},
-
-newBadge: {
-  position: "absolute",
-
-  top: 14,
-  left: 14,
-
-  backgroundColor: "#B6FF2E",
-
-  borderRadius: 16,
-
-  paddingHorizontal: 12,
-
-  paddingVertical: 6,
-},
-
-newBadgeText: {
-  color: "#111",
-
-  fontWeight: "900",
-
-  fontSize: 11,
-
-  letterSpacing: 1,
-},
-
-cardContent: {
-  position: "absolute",
-
-  left: 18,
-  right: 18,
-  bottom: 18,
-},
-
-ratingRow: {
-  flexDirection: "row",
-
-  alignItems: "center",
-},
-
-rating: {
-  color: "#FFF",
-
-  fontWeight: "700",
-
-  marginLeft: 5,
-
-  fontSize: 14,
-},
-
-buyCount: {
-  color: "#CFCFCF",
-
-  marginLeft: 4,
-
-  fontSize: 12,
-},
-
-productTitle: {
-  color: "#FFF",
-
-  fontSize: 22,
-
-  fontWeight: "900",
-
-  marginTop: 10,
-
-  lineHeight: 28,
-},
-
-bottomRow: {
-  marginTop: 18,
-
-  flexDirection: "row",
-
-  justifyContent: "space-between",
-
-  alignItems: "center",
-},
-
-price: {
-  color: "#FFF",
-
-  fontSize: 28,
-
-  fontWeight: "900",
-},
-
-oldPrice: {
-  color: "#AFAFAF",
-
-  marginTop: 3,
-
-  textDecorationLine: "line-through",
-
-  fontSize: 15,
-},
-
-arrowCircle: {
-  width: 52,
-  height: 52,
-
-  borderRadius: 26,
-
-  backgroundColor: "#B6FF2E",
-
-  justifyContent: "center",
-
-  alignItems: "center",
-
-  shadowColor: "#B6FF2E",
-
-  shadowOpacity: .45,
-
-  shadowRadius: 12,
-
-  shadowOffset: {
-    width: 0,
-    height: 6,
+    height: "100%",
   },
 
-  elevation: 10,
-},
-heroImage:{
-  width:"100%",
+  cardGradient: {
+    ...StyleSheet.absoluteFillObject,
+  },
 
-  height:"100%",
+  favoriteGlass: {
+    position: "absolute",
 
-  position:"absolute",
-},
-heroOverlay:{
-  ...StyleSheet.absoluteFillObject,
+    top: 14,
+    right: 14,
 
-  backgroundColor:"rgba(0,0,0,.30)",
-},
-heroTop:{
-  position:"absolute",
+    width: 42,
+    height: 42,
 
-  top:28,
+    borderRadius: 21,
 
-  left:20,
+    overflow: "hidden",
 
-  right:20,
+    justifyContent: "center",
 
-  flexDirection:"row",
+    alignItems: "center",
 
-  justifyContent:"space-between",
-},
+    // borderWidth: 1,
 
-glassBtn:{
-  width:54,
+    // borderColor: "rgba(255,255,255,.35)",
+  },
 
-  height:54,
+  newBadge: {
+    position: "absolute",
 
-  borderRadius:27,
+    top: 14,
+    left: 14,
 
-  overflow:"hidden",
+    backgroundColor: "#000000",
 
-  borderWidth:1,
+    borderRadius: 16,
 
-  borderColor:"rgba(255,255,255,.35)",
-},
+    paddingHorizontal: 12,
 
-glassInner:{
-  flex:1,
+    paddingVertical: 6,
+  },
 
-  justifyContent:"center",
+  newBadgeText: {
+    color: "#ffffff",
 
-  alignItems:"center",
-},
+    fontWeight: "900",
 
-heroPill:{
-  alignSelf:"flex-start",
+    fontSize: 11,
 
-  backgroundColor:"#B6FF2E",
+    letterSpacing: 1,
+  },
 
-  borderRadius:18,
+  cardContent: {
+    position: "absolute",
 
-  paddingHorizontal:14,
+    left: 18,
+    right: 18,
+    bottom: 18,
+  },
 
-  paddingVertical:7,
-},
+  ratingRow: {
+    flexDirection: "row",
 
-heroPillText:{
-  color:"#111",
+    alignItems: "center",
+  },
 
-  fontWeight:"900",
+  rating: {
+    color: "#FFF",
 
-  fontSize:11,
+    fontWeight: "700",
 
-  letterSpacing:1.5,
-},
+    marginLeft: 5,
 
-heroSubtitle:{
-  marginTop:12,
+    fontSize: 14,
+  },
 
-  color:"#DDD",
+  buyCount: {
+    color: "#CFCFCF",
 
-  fontSize:17,
-},
+    marginLeft: 4,
 
-heroBottom:{
-  marginTop:30,
+    fontSize: 12,
+  },
 
-  flexDirection:"row",
+  productTitle: {
+    color: "#FFF",
 
-  justifyContent:"space-between",
+    fontSize: 22,
 
-  alignItems:"center",
-},
+    fontWeight: "900",
 
-heroStat:{
-  alignItems:"flex-start",
-},
+    marginTop: 10,
 
-heroStatNumber:{
-  color:"#FFF",
+    lineHeight: 28,
+  },
 
-  fontSize:36,
+  bottomRow: {
+    marginTop: 18,
 
-  fontWeight:"900",
-},
+    flexDirection: "row",
 
-heroStatLabel:{
-  color:"#AAA",
+    justifyContent: "space-between",
 
-  letterSpacing:2,
+    alignItems: "center",
+  },
 
-  fontWeight:"700",
-},
+  price: {
+    color: "#FFF",
 
-heroArrow:{
-  width:58,
+    fontSize: 28,
 
-  height:58,
+    fontWeight: "900",
+  },
 
-  borderRadius:29,
+  oldPrice: {
+    color: "#AFAFAF",
 
-  backgroundColor:"#B6FF2E",
+    marginTop: 3,
 
-  justifyContent:"center",
+    textDecorationLine: "line-through",
 
-  alignItems:"center",
-},
+    fontSize: 15,
+  },
+
+  arrowCircle: {
+    width: 52,
+    height: 52,
+
+    borderRadius: 26,
+
+    backgroundColor: "#B6FF2E",
+
+    justifyContent: "center",
+
+    alignItems: "center",
+
+    shadowColor: "#B6FF2E",
+
+    shadowOpacity: .45,
+
+    shadowRadius: 12,
+
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+
+    elevation: 10,
+  },
+  heroImage: {
+    width: "100%",
+
+    height: "100%",
+
+    position: "absolute",
+  },
+  heroOverlay: {
+    ...StyleSheet.absoluteFillObject,
+
+    backgroundColor: "rgba(0,0,0,.42)",
+  },
+  heroTop: {
+    position: "absolute",
+
+    top: 28,
+
+    left: 20,
+
+    right: 20,
+
+    flexDirection: "row",
+
+    justifyContent: "space-between",
+  },
+
+  glassBtn: {
+    width: 54,
+
+    height: 54,
+
+    borderRadius: 27,
+
+    overflow: "hidden",
+
+    borderWidth: 1,
+
+    borderColor: "rgba(255,255,255,.35)",
+  },
+
+  glassInner: {
+    flex: 1,
+
+    justifyContent: "center",
+
+    alignItems: "center",
+  },
+
+  heroPill: {
+    alignSelf: "flex-start",
+
+    backgroundColor: "#B6FF2E",
+
+    borderRadius: 18,
+
+    paddingHorizontal: 14,
+
+    paddingVertical: 7,
+  },
+
+  heroPillText: {
+    color: "#111",
+
+    fontWeight: "900",
+
+    fontSize: 11,
+
+    letterSpacing: 1.5,
+  },
+
+  heroSubtitle: {
+    marginTop: 8,
+
+    color: "#DDD",
+
+    fontSize: 15,
+
+    letterSpacing: 1.2,
+
+    fontWeight: "600",
+  },
+
+  heroBottom: {
+    marginTop: 30,
+
+    flexDirection: "row",
+
+    justifyContent: "space-between",
+
+    alignItems: "center",
+  },
+
+  heroStat: {
+    alignItems: "flex-start",
+  },
+
+  heroStatNumber: {
+    color: "#FFF",
+
+    fontSize: 36,
+
+    fontWeight: "900",
+  },
+
+  heroStatLabel: {
+    color: "#AAA",
+
+    letterSpacing: 2,
+
+    fontWeight: "700",
+  },
+
+  heroArrow: {
+    width: 58,
+
+    height: 58,
+
+    borderRadius: 29,
+
+    backgroundColor: "#B6FF2E",
+
+    justifyContent: "center",
+
+    alignItems: "center",
+  },
 
 
 
-backBtn: {
-  position: "absolute",
-  top: width > 600 ? 30 : 20,
-  left: 16,
-  width: 56,
-  height: 56,
-  borderRadius: 99,
-//   borderWidth: 1,
-//   borderColor: "#000000",
-  justifyContent: "center",
-  alignItems: "center",
-  elevation: 55,
-  backgroundColor: "#fff",
-},
-heroContent:{
-  position:"absolute",
+  backBtn: {
+    position: "absolute",
+    top: width > 600 ? 30 : 20,
+    left: 16,
+    width: 56,
+    height: 56,
+    borderRadius: 99,
+    //   borderWidth: 1,
+    //   borderColor: "#000000",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 55,
+    backgroundColor: "#fff",
+  },
+  heroContent: {
+    position: "absolute",
 
-  left:22,
-  right:22,
-  bottom:28,
+    left: 24,
+    right: 24,
+    bottom: 26,
+  },
+  heroTitle: {
+    marginTop: 12,
 
-  zIndex:10,
-},
-heroTitle:{
-  marginTop:14,
+    color: "#FFF",
 
-  color:"#FFF",
+    fontSize: 34,
 
-  fontSize:48,
+    fontWeight: "900",
 
-  lineHeight:50,
+    letterSpacing: -1,
 
-  fontWeight:"900",
-
-  letterSpacing:-1,
-},
-filterTopBtn: {
-  position: "absolute",
-  top: width > 600 ? 30 : 20,
-  right: 16,
-  width: 56,
-  height: 56,
-  borderRadius: 99,
-//   borderWidth: 1,
-//   borderColor: "#000000",
-  justifyContent: "center",
-  alignItems: "center",
+    lineHeight: 38,
+  },
+  filterTopBtn: {
+    position: "absolute",
+    top: width > 600 ? 30 : 20,
+    right: 16,
+    width: 56,
+    height: 56,
+    borderRadius: 99,
+    //   borderWidth: 1,
+    //   borderColor: "#000000",
+    justifyContent: "center",
+    alignItems: "center",
     elevation: 111,
-  backgroundColor: "#fff",
+    backgroundColor: "#fff",
 
-},
+  },
 
 
-listContent:{
-  paddingHorizontal:2,
+  listContent: {
+    paddingHorizontal: 6,
 
-  paddingTop:24,
+    paddingBottom: 120,
 
-  paddingBottom:120,
-},
+    paddingTop: 6,
+  },
+  columnWrapper: {
+    justifyContent: "space-between",
+  },
+  heroSkeleton: {
+    flex: 1,
 
-columnWrapper:{
-  justifyContent:"space-between",
-},
+    justifyContent: "center",
 
-cardWrapper:{
-  marginBottom:8,
-},
+    alignItems: "center",
+
+    backgroundColor: "#EEE",
+  },
+  cardWrapper: {
+    marginBottom: 10,
+  },
 
   ratingText: {
     marginLeft: 4,
@@ -803,10 +1002,157 @@ cardWrapper:{
   },
 
 
+skeletonGrid:{
+paddingHorizontal:6,
 
+flexDirection:"row",
+
+flexWrap:"wrap",
+
+justifyContent:"space-between",
+
+paddingTop:18,
+},
+
+skeletonCard:{
+width:CARD_WIDTH,
+
+height:CARD_WIDTH*1.58,
+
+borderRadius:28,
+
+backgroundColor:"#ECECEC",
+
+marginBottom:20,
+},
+
+  collectionBar: {
+    marginHorizontal: 18,
+
+    marginTop: -26,
+
+    marginBottom: 18,
+
+    height: 78,
+
+    borderRadius: 26,
+
+    backgroundColor: "#FFF",
+
+    paddingHorizontal: 22,
+
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    shadowColor: "#000",
+
+    shadowOpacity: .08,
+
+    shadowRadius: 14,
+
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+
+    elevation: 10,
+  }, collectionTitle: {
+    marginTop: 2,
+
+    color: "#111",
+
+    fontSize: 22,
+
+    fontWeight: "900",
+  }, collectionEyebrow: {
+    color: "#999",
+
+    fontSize: 11,
+
+    letterSpacing: 2,
+  }, stickyHeader: {
+    position: "absolute",
+
+    top: 0,
+
+    left: 0,
+
+    right: 0,
+
+    zIndex: 100,
+
+    height: 92,
+
+    paddingTop: 42,
+
+    paddingHorizontal: 18,
+
+    backgroundColor: "#FFF",
+
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    shadowColor: "#000",
+
+    shadowOpacity: .08,
+
+    shadowRadius: 12,
+
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+
+    elevation: 14,
+  }, 
   
+  filterButton: {
+  width: 46,
 
+  height: 46,
 
+  borderRadius: 23,
+
+  backgroundColor: "#B6FF2E",
+
+  justifyContent: "center",
+
+  alignItems: "center",
+
+  shadowColor: "#B6FF2E",
+
+  shadowOpacity: 0.28,
+
+  shadowRadius: 10,
+
+  shadowOffset: {
+    width: 0,
+    height: 4,
+  },
+
+  elevation: 8,
+},
+  stickyBack: {
+    width: 44,
+
+    height: 44,
+
+    justifyContent: "center",
+
+    alignItems: "center",
+  }, stickyTitle: {
+    flex: 1,
+
+    textAlign: "center",
+
+    color: "#111",
+
+    fontSize: 18,
+
+    fontWeight: "900",
+  },
 
 
 

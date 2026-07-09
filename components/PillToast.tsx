@@ -2,10 +2,21 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-const BasePill = ({ icon, bg, text }: any) => (
+const BasePill = ({ icon, bg, text, color = "#111" }: any) => (
   <View style={[styles.container, { backgroundColor: bg }]}>
-    <Ionicons name={icon} size={16} color="#fff" />
-    <Text style={styles.text}>{text}</Text>
+    <Ionicons
+      name={icon}
+      size={16}
+      color={color}
+    />
+    <Text
+      style={[
+        styles.text,
+        { color },
+      ]}
+    >
+      {text}
+    </Text>
   </View>
 );
 
@@ -13,7 +24,8 @@ export const pillToastConfig = {
   success: ({ text1 }: any) => (
     <BasePill
       icon="checkmark-circle"
-      bg="#16a34a"      // green
+      bg="#B6FF2E"
+      color="#111"
       text={text1}
     />
   ),
@@ -21,7 +33,17 @@ export const pillToastConfig = {
   error: ({ text1 }: any) => (
     <BasePill
       icon="close-circle"
-      bg="#dc2626"      // red
+      bg="#111111"
+      color="#FF5A5F"
+      text={text1}
+    />
+  ),
+
+  warning: ({ text1 }: any) => (
+    <BasePill
+      icon="warning"
+      bg="#111111"
+      color="#FFC83D"
       text={text1}
     />
   ),
@@ -29,7 +51,8 @@ export const pillToastConfig = {
   info: ({ text1 }: any) => (
     <BasePill
       icon="information-circle"
-      bg="#111"         // black
+      bg="#111111"
+      color="#FFFFFF"
       text={text1}
     />
   ),
@@ -40,17 +63,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+
     paddingHorizontal: 14,
     paddingVertical: 10,
+
     borderRadius: 999,
+
     shadowColor: "#000",
     shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 10,
   },
+
   text: {
-    color: "#fff",
     fontSize: 13,
-    fontWeight: "600",
+    fontFamily: "RobotoCondensed-Bold",
   },
 });
