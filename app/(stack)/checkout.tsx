@@ -35,8 +35,9 @@ type Address = {
 };
 
 type OrderItem = {
-  productId: string | null;
-  bundleId: string | null;
+  productId?: string | null;
+  bundleId?: string | null;
+  customBundle?: boolean;
   title: string;
   variant?: string;
   quantity: number;
@@ -173,71 +174,69 @@ const subtotal = useMemo(() => {
 
   /* ---------- ORDER ITEMS ---------- */
 
-const orderItems = useMemo<OrderItem[]>(() => {
-  return items
-    .map((it: any) => {
-      // Bundle
-      if (it.bundle?._id) {
+  const orderItems = useMemo<OrderItem[]>(() => {
+    return items
+      .map((it: any) => {
+        // Bundle
+        if (it.bundle?._id) {
+          return {
+            customBundle: false,
+            bundleId: it.bundle._id,
+            title: it.bundle.title,
+            quantity: it.quantity || 1,
+            price: Number(it.bundle.price),
+            total: Number(it.bundle.price) * (it.quantity || 1),
+            mainImage: it.mainImage,
+            bundleProducts: (it.bundleProducts || []).map((bp: any) => ({
+              productId: bp.product?._id,
+              title: bp.product?.title,
+              variant: bp.size,
+              quantity: bp.quantity,
+              price: Number(bp.product?.price || 0),
+              mainImage: bp.product?.images?.[0] ?? "",
+            })),
+          };
+        }
+
+        if (it.customBundle) {
+          return {
+            customBundle: true,
+            title: it.customBundle.title,
+            quantity: it.quantity,
+            price: it.customBundle.price,
+            total: it.customBundle.price * it.quantity,
+            mainImage: it.mainImage,
+            bundleProducts: it.bundleProducts.map((bp: any) => ({
+              productId: bp.product._id,
+              title: bp.product.title,
+              variant: bp.size,
+              quantity: bp.quantity,
+              price: bp.product.price,
+              mainImage: bp.product.images?.[0] ?? "",
+            })),
+          };
+        }
+
+        // Product missing -> skip invalid item
+        if (!it.product?._id) {
+          console.log("Invalid cart item:", it);
+          return null;
+        }
+
+        // Product
         return {
-          bundleId: it.bundle._id,
-          productId: null,
-          title: it.bundle.title,
+          productId: it.product._id,
+          title: it.product.title,
+          variant: it.size,
           quantity: it.quantity || 1,
-          price: Number(it.bundle.price),
-          total: Number(it.bundle.price) * (it.quantity || 1),
-          mainImage: it.mainImage,
-          bundleProducts: (it.bundleProducts || []).map((bp: any) => ({
-            productId: bp.product?._id,
-            title: bp.product?.title,
-            variant: `Size: ${bp.size}`,
-            quantity: bp.quantity,
-            price: Number(bp.product?.price || 0),
-            mainImage: bp.product?.images?.[0] ?? "",
-          })),
+          price: Number(it.product.price),
+          total: Number(it.product.price) * (it.quantity || 1),
+          mainImage: it.product.images?.[0] ?? "",
+
         };
-      }
-
-      if (it.customBundle) {
-  return {
-    bundleId: null,
-    productId: null,
-    title: it.customBundle.title,
-    quantity: it.quantity,
-    price: it.customBundle.price,
-    total: it.customBundle.price * it.quantity,
-    mainImage: it.mainImage,
-    bundleProducts: it.bundleProducts.map((bp: any) => ({
-      productId: bp.product._id,
-      title: bp.product.title,
-      variant: `Size: ${bp.size}`,
-      quantity: bp.quantity,
-      price: bp.product.price,
-      mainImage: bp.product.images?.[0] ?? "",
-    })),
-  };
-}
-
-      // Product missing -> skip invalid item
-      if (!it.product?._id) {
-        console.log("Invalid cart item:", it);
-        return null;
-      }
-
-      // Product
-      return {
-        productId: it.product._id,
-        bundleId: null,
-        title: it.product.title,
-        variant: `Size: ${it.size}`,
-        quantity: it.quantity || 1,
-        price: Number(it.product.price),
-        total: Number(it.product.price) * (it.quantity || 1),
-        mainImage: it.product.images?.[0] ?? "",
-        bundleProducts: [],
-      };
-    })
-    .filter(Boolean) as OrderItem[];
-}, [items]);
+      })
+      .filter(Boolean) as OrderItem[];
+  }, [items]);
   /* ---------- PLACE ORDER ---------- */
 
 const placeOrder = async (): Promise<void> => {
@@ -814,29 +813,29 @@ const isBundle = !!it.bundle && !isCustomBundle;
 
       )}
 
-      <TouchableOpacity
-        activeOpacity={0.8}
-        style={styles.drawerPill}
-        onPress={() => toggleExpanded(id)}
-      >
+    {(isBundle || isCustomBundle) && (
+  <TouchableOpacity
+    activeOpacity={0.8}
+    style={styles.drawerPill}
+    onPress={() => toggleExpanded(id)}
+  >
+    <Text style={styles.drawerPillText}>
+      {expanded
+        ? "HIDE ITEMS"
+        : "VIEW INCLUDED ITEMS"}
+    </Text>
 
-        <Text style={styles.drawerPillText}>
-          {expanded
-            ? "HIDE ITEMS"
-            : "VIEW INCLUDED ITEMS"}
-        </Text>
-
-        <Ionicons
-          name={
-            expanded
-              ? "chevron-up"
-              : "chevron-down"
-          }
-          size={16}
-          color="#111"
-        />
-
-      </TouchableOpacity>
+    <Ionicons
+      name={
+        expanded
+          ? "chevron-up"
+          : "chevron-down"
+      }
+      size={16}
+      color="#111"
+    />
+  </TouchableOpacity>
+)}
 
       <View style={styles.orderBottom}>
 

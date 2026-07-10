@@ -40,7 +40,7 @@ export default function Screen({ children, style }: ScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: 6,
     backgroundColor: "transparent",
      position: "relative",
   },

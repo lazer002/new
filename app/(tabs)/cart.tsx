@@ -743,7 +743,7 @@ const styles = StyleSheet.create({
 
     paddingTop: 20,
 
-    paddingBottom: 380,
+    // paddingBottom: 80,
 
   },
 

@@ -8,7 +8,7 @@ import {
   Text,
 } from "react-native";
 import { useEffect, useRef } from "react";
-
+import { useCart } from "@/context/CartContext";
 import Octicons from "@expo/vector-icons/Octicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
@@ -44,7 +44,7 @@ function CustomTabBar({
 
   const { isFilterOpen } =
     useFilter();
-
+const { items } = useCart();
   const {
     drawerOpen,
     tabBarVisible,
@@ -308,13 +308,19 @@ const toValue =
 
               label = "Cart";
 
-              icon = (
-                <MaterialIcons
-                  name="shopping-bag"
-              size={isFocused ? 26 : 21}
-                  color={iconColor}
-                />
-              );
+            icon = (
+    <View>
+
+      <MaterialIcons
+        name="shopping-bag"
+        size={isFocused ? 26 : 21}
+        color={iconColor}
+      />
+
+      <Badge count={items.length} />
+
+    </View>
+  );
 
               break;
 

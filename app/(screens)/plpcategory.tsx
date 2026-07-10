@@ -11,8 +11,9 @@ import {
   Animated,
   ActivityIndicator
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, Octicons } from "@expo/vector-icons";
 import Screen from "@/components/Screen";
+import { useFilter } from "@/context/FilterContext";
 import api from "@/utils/config";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useWishlist } from "@/context/WishlistContext";
@@ -99,7 +100,7 @@ function ProductCard({ item }: { item: any }) {
       {/* Wishlist */}
 
       <View
-   
+
         style={styles.favoriteGlass}
       >
 
@@ -204,8 +205,11 @@ function ProductCard({ item }: { item: any }) {
 /* 🔥 MAIN PLP */
 export default function PLP() {
   const { category } = useLocalSearchParams();
-
+  const { filters, setFilters, isFilterOpen, setIsFilterOpen, activeCount } = useFilter();
   const router = useRouter();
+
+  const [allProducts, setAllProducts] =
+    useState<any[]>([]);
 
   const [products, setProducts] =
     useState<any[]>([]);
@@ -248,127 +252,154 @@ export default function PLP() {
 
 
 
-const Header = () => (
-  <View>
+  const Header = () => (
+    <View>
 
-    <Animated.View
-      style={[
-        styles.heroContainer,
-        {
-          opacity: heroFade,
-        },
-      ]}
-    >
+      <Animated.View
+        style={[
+          styles.heroContainer,
+          {
+            opacity: heroFade,
+          },
+        ]}
+      >
 
-      {loading || !heroLoaded ? (
+        {loading || !heroLoaded ? (
 
-        <View style={styles.heroSkeleton}>
+          <View style={styles.heroSkeleton}>
 
-          <ActivityIndicator
-            size="large"
-            color="#B6FF2E"
+            <ActivityIndicator
+              size="large"
+              color="#B6FF2E"
+            />
+
+          </View>
+
+        ) : (
+
+          <Image
+            source={{
+              uri: products?.[0]?.images?.[0],
+            }}
+            style={styles.heroImage}
+            resizeMode="cover"
           />
 
-        </View>
+        )}
 
-      ) : (
+        <View style={styles.heroOverlay} />
 
-        <Image
-          source={{
-            uri: products?.[0]?.images?.[0],
-          }}
-          style={styles.heroImage}
-          resizeMode="cover"
-        />
+        <View style={styles.heroTop}>
 
-      )}
-
-      <View style={styles.heroOverlay} />
-
-      <View style={styles.heroTop}>
-
-        <BlurView
-          intensity={70}
-          tint="light"
-          style={styles.glassBtn}
-        >
-          <Pressable
-            style={styles.glassInner}
-            onPress={() => router.back()}
+          <BlurView
+            intensity={70}
+            tint="light"
+            style={styles.glassBtn}
           >
-            <Ionicons
-              name="chevron-back"
-              size={22}
-              color="#111"
-            />
-          </Pressable>
-        </BlurView>
+            <Pressable
+              style={styles.glassInner}
+              onPress={() => router.back()}
+            >
+              <Ionicons
+                name="chevron-back"
+                size={22}
+                color="#111"
+              />
+            </Pressable>
+          </BlurView>
 
-        <BlurView
-          intensity={70}
-          tint="light"
-          style={styles.glassBtn}
-        >
-          <Pressable style={styles.glassInner}>
-            <Ionicons
-              name="options-outline"
-              size={21}
-              color="#111"
-            />
-          </Pressable>
-        </BlurView>
-
-      </View>
-
-      <View style={styles.heroContent}>
-
-        <View style={styles.heroPill}>
-          <Text style={styles.heroPillText}>
-            NEW ARRIVALS
-          </Text>
-        </View>
-
-        <Text style={styles.heroTitle}>
-          {products?.[0]?.category?.name ??
-            "COLLECTION"}
-        </Text>
-
-        <Text style={styles.heroSubtitle}>
-          {products.length} PRODUCTS
-        </Text>
-
-      </View>
-
-    </Animated.View>
-
-    <View style={styles.collectionBar}>
-
-      <View style={{ flex: 1 }}>
-
-        <Text style={styles.collectionEyebrow}>
-          CURATED
-        </Text>
-
-        <Text style={styles.collectionTitle}>
-          {products.length} PRODUCTS
-        </Text>
-
-      </View>
-
-      <Pressable style={styles.filterButton}>
-
-        <Ionicons
-          name="options-outline"
+          <BlurView
+            intensity={70}
+            tint="light"
+            style={styles.glassBtn}
+          >
+            <Pressable style={styles.glassInner}  onPress={() => router.replace("/(tabs)")}>
+            <Octicons
+          name="home-fill"
           size={20}
           color="#111"
         />
+            </Pressable>
+          </BlurView>
 
-      </Pressable>
+        </View>
+
+        <View style={styles.heroContent}>
+
+          <View style={styles.heroPill}>
+            <Text style={styles.heroPillText}>
+              NEW ARRIVALS
+            </Text>
+          </View>
+
+          <Text style={styles.heroTitle}>
+            {products?.[0]?.category?.name ??
+              "COLLECTION"}
+          </Text>
+
+          <Text style={styles.heroSubtitle}>
+            {products.length} PRODUCTS
+          </Text>
+
+        </View>
+
+      </Animated.View>
+
+      <View style={styles.collectionBar}>
+
+        <View style={{ flex: 1 }}>
+
+          <Text style={styles.collectionEyebrow}>
+            CURATED
+          </Text>
+
+          <Text style={styles.collectionTitle}>
+            {products.length} PRODUCTS
+          </Text>
+
+        </View>
+
+        <Pressable
+          style={styles.filterButton}
+          onPress={() =>
+            setIsFilterOpen(true)
+          }
+        >
+
+          <View>
+
+            <Ionicons
+              name="options-outline"
+              size={20}
+              color="#111"
+            />
+
+            {activeCount > 0 && (
+
+              <View
+                style={styles.filterBadge}
+              >
+
+                <Text
+                  style={
+                    styles.filterBadgeText
+                  }
+                >
+                  {activeCount}
+                </Text>
+
+              </View>
+
+            )}
+
+          </View>
+
+        </Pressable>
+
+      </View>
 
     </View>
-
-  </View>
-);
+  );
 
 
 
@@ -410,6 +441,8 @@ const Header = () => (
 
         if (!mounted) return;
 
+        setAllProducts(filtered);
+
         setProducts(filtered);
 
         const first =
@@ -438,11 +471,86 @@ const Header = () => (
 
   }, [category]);
 
+  useEffect(() => {
 
+    let result = [...allProducts];
 
-      if (loading) {
+    if (filters.category) {
 
-return (
+      result = result.filter(
+        p =>
+          (typeof p.category === "string"
+            ? p.category
+            : p.category?._id) ===
+          filters.category
+      );
+
+    }
+
+    if (filters.sizes.length) {
+
+      result = result.filter(p =>
+        p.sizes?.some((size: any) =>
+          filters.sizes.includes(size)
+        )
+      );
+
+    }
+
+    if (filters.colors.length) {
+
+      result = result.filter(p =>
+        p.colors?.some((color: any) =>
+          filters.colors.includes(color)
+        )
+      );
+
+    }
+
+    if (filters.price) {
+
+      result = result.filter(
+        p =>
+          p.price >= filters.price!.min &&
+          p.price <= filters.price!.max
+      );
+
+    }
+
+    if (filters.inStockOnly) {
+
+      result = result.filter(
+        p => p.stock > 0
+      );
+
+    }
+
+    if (filters.onSale) {
+
+      result = result.filter(
+        p => p.discount > 0
+      );
+
+    }
+
+    if (filters.isNewProduct) {
+
+      result = result.filter(
+        p => p.isNew
+      );
+
+    }
+
+    setProducts(result);
+
+  }, [
+    allProducts,
+    filters,
+  ]);
+
+  if (loading) {
+
+    return (
 
       <Screen style={styles.screen}>
 
@@ -477,9 +585,9 @@ return (
 
       </Screen>
 
-      );
+    );
 
-}
+  }
 
   return (
     <Screen style={styles.screen}>
@@ -521,11 +629,10 @@ return (
 
         </Text>
 
-        <Pressable
-          style={
-            styles.filterButton
-          }
-        >
+
+        <Pressable style={styles.filterButton}>
+
+
 
           <Ionicons
             name="options-outline"
@@ -546,20 +653,20 @@ return (
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         columnWrapperStyle={styles.columnWrapper}
-  onScroll={Animated.event(
-[
-{
-nativeEvent:{
-contentOffset:{
-y:scrollY,
-},
-},
-},
-],
-{
-useNativeDriver:false,
-}
-)}
+        onScroll={Animated.event(
+          [
+            {
+              nativeEvent: {
+                contentOffset: {
+                  y: scrollY,
+                },
+              },
+            },
+          ],
+          {
+            useNativeDriver: false,
+          }
+        )}
         scrollEventThrottle={16}
         renderItem={({ item, index }) => (
 
@@ -1002,29 +1109,29 @@ const styles = StyleSheet.create({
   },
 
 
-skeletonGrid:{
-paddingHorizontal:6,
+  skeletonGrid: {
+    paddingHorizontal: 6,
 
-flexDirection:"row",
+    flexDirection: "row",
 
-flexWrap:"wrap",
+    flexWrap: "wrap",
 
-justifyContent:"space-between",
+    justifyContent: "space-between",
 
-paddingTop:18,
-},
+    paddingTop: 18,
+  },
 
-skeletonCard:{
-width:CARD_WIDTH,
+  skeletonCard: {
+    width: CARD_WIDTH,
 
-height:CARD_WIDTH*1.58,
+    height: CARD_WIDTH * 1.58,
 
-borderRadius:28,
+    borderRadius: 28,
 
-backgroundColor:"#ECECEC",
+    backgroundColor: "#ECECEC",
 
-marginBottom:20,
-},
+    marginBottom: 20,
+  },
 
   collectionBar: {
     marginHorizontal: 18,
@@ -1106,34 +1213,60 @@ marginBottom:20,
     },
 
     elevation: 14,
-  }, 
-  
-  filterButton: {
-  width: 46,
+  },
+  filterBadge: {
+    position: "absolute",
 
-  height: 46,
+    top: -6,
 
-  borderRadius: 23,
+    right: -8,
 
-  backgroundColor: "#B6FF2E",
+    width: 18,
 
-  justifyContent: "center",
+    height: 18,
 
-  alignItems: "center",
+    borderRadius: 9,
 
-  shadowColor: "#B6FF2E",
+    backgroundColor: "#111",
 
-  shadowOpacity: 0.28,
+    justifyContent: "center",
 
-  shadowRadius: 10,
-
-  shadowOffset: {
-    width: 0,
-    height: 4,
+    alignItems: "center",
   },
 
-  elevation: 8,
-},
+  filterBadgeText: {
+    color: "#B6FF2E",
+
+    fontSize: 10,
+
+    fontWeight: "900",
+  },
+  filterButton: {
+    width: 46,
+
+    height: 46,
+
+    borderRadius: 23,
+
+    backgroundColor: "#B6FF2E",
+
+    justifyContent: "center",
+
+    alignItems: "center",
+
+    shadowColor: "#B6FF2E",
+
+    shadowOpacity: 0.28,
+
+    shadowRadius: 10,
+
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+
+    elevation: 8,
+  },
   stickyBack: {
     width: 44,
 
