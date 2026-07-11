@@ -104,6 +104,7 @@ export default function OrderSuccessScreen() {
         );
 
         setOrder(res.data.order);
+        console.log("Order fetched:", JSON.stringify(res.data.order, null, 2));
       } catch (e) {
         console.log("Order fetch error:", e);
       }
@@ -153,6 +154,7 @@ export default function OrderSuccessScreen() {
 
   }, []);
 
+
   if (!order) {
     return (
       <SafeAreaView style={styles.container}>
@@ -181,11 +183,146 @@ export default function OrderSuccessScreen() {
     );
   }
 
+
+
+
+  const isCOD =
+    order.paymentMethod?.toLowerCase() === "cod";
+
+  const bannerIcon =
+    isCOD
+      ? "cash-outline"
+      : "shield-checkmark";
+
+  const bannerText =
+    isCOD
+      ? "Cash on Delivery selected"
+      : "Payment verified successfully";
+
   const status = getStatus(order);
+
+
+  const timelineSteps = isCOD
+    ? [
+      {
+        key: "placed",
+        title: "Order Placed",
+        icon: "bag-check-outline",
+      },
+      {
+        key: "confirmed",
+        title: "Order Confirmed",
+        icon: "checkmark-circle-outline",
+      },
+      {
+        key: "packed",
+        title: "Packed",
+        icon: "cube-outline",
+      },
+      {
+        key: "shipped",
+        title: "Shipped",
+        icon: "car-outline",
+      },
+      {
+        key: "out_for_delivery",
+        title: "Out for Delivery",
+        icon: "bicycle-outline",
+      },
+      {
+        key: "delivered",
+        title: "Delivered",
+        icon: "home-outline",
+      },
+    ]
+    : [
+      {
+        key: "placed",
+        title: "Order Placed",
+        icon: "bag-check-outline",
+      },
+      {
+        key: "paid",
+        title: "Payment Successful",
+        icon: "card-outline",
+      },
+      {
+        key: "confirmed",
+        title: "Order Confirmed",
+        icon: "checkmark-circle-outline",
+      },
+      {
+        key: "packed",
+        title: "Packed",
+        icon: "cube-outline",
+      },
+      {
+        key: "shipped",
+        title: "Shipped",
+        icon: "car-outline",
+      },
+      {
+        key: "out_for_delivery",
+        title: "Out for Delivery",
+        icon: "bicycle-outline",
+      },
+      {
+        key: "delivered",
+        title: "Delivered",
+        icon: "home-outline",
+      },
+    ];
+
+
+  const activeSteps = new Set<string>();
+
+  activeSteps.add("placed");
+
+  if (!isCOD) {
+    activeSteps.add("paid");
+  }
+
+  switch (status) {
+
+    case "confirmed":
+      activeSteps.add("confirmed");
+      break;
+
+    case "packed":
+      activeSteps.add("confirmed");
+      activeSteps.add("packed");
+      break;
+
+    case "shipped":
+      activeSteps.add("confirmed");
+      activeSteps.add("packed");
+      activeSteps.add("shipped");
+      break;
+
+    case "out_for_delivery":
+      activeSteps.add("confirmed");
+      activeSteps.add("packed");
+      activeSteps.add("shipped");
+      activeSteps.add("out_for_delivery");
+      break;
+
+    case "delivered":
+      activeSteps.add("confirmed");
+      activeSteps.add("packed");
+      activeSteps.add("shipped");
+      activeSteps.add("out_for_delivery");
+      activeSteps.add("delivered");
+      break;
+
+  }
+
+
+
+
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
         <View style={styles.content}>
 
           {/* ICON */}
@@ -281,21 +418,13 @@ export default function OrderSuccessScreen() {
               >
 
                 <Ionicons
-
-                  name="shield-checkmark"
-
+                  name={bannerIcon}
                   size={18}
-
                   color="#111"
-
                 />
 
-                <Text
-                  style={styles.successBannerText}
-                >
-
-                  Payment verified successfully
-
+                <Text style={styles.successBannerText}>
+                  {bannerText}
                 </Text>
 
               </View>
@@ -385,9 +514,11 @@ export default function OrderSuccessScreen() {
                     style={styles.summaryValue}
                   >
 
-                    {new Date(
-                      order.createdAt
-                    ).toLocaleDateString()}
+                {new Date(order.createdAt).toLocaleDateString("en-GB", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "2-digit",
+})}
 
                   </Text>
 
@@ -409,7 +540,7 @@ export default function OrderSuccessScreen() {
                     style={styles.summaryValue}
                   >
 
-                    {order.paymentMethod}
+                    {order.paymentMethod.toUpperCase()}
 
                   </Text>
 
@@ -480,8 +611,9 @@ export default function OrderSuccessScreen() {
 
             {order.items.map((item: any, index: number) => {
 
-              const isBundle =
-                !!item.bundleProducts;
+             const isBundle =
+  Array.isArray(item.bundleProducts) &&
+  item.bundleProducts.length > 0;
 
               const expanded =
                 expandedBundle === index;
@@ -551,13 +683,13 @@ export default function OrderSuccessScreen() {
                         style={styles.metaChip}
                       >
 
-                        <Text
-                          style={styles.metaChipText}
-                        >
+                  <Text style={styles.metaChipText}>
 
-                          {item.variant}
+    {isBundle
+      ? `${item.bundleProducts.length} Products`
+      : `Size ${item.variant || "OS"}`}
 
-                        </Text>
+  </Text>
 
                       </View>
 
@@ -671,13 +803,13 @@ export default function OrderSuccessScreen() {
 
                                 </Text>
 
-                                <Text
-                                  style={styles.subMeta}
-                                >
+                         <Text
+  style={styles.subMeta}
+>
 
-                                  {sub.size}
+  Size {sub.variant || "OS"}
 
-                                </Text>
+</Text>
 
                               </View>
 
@@ -795,71 +927,119 @@ export default function OrderSuccessScreen() {
               PAYMENT SUMMARY
 
             </Text>
-            <View
-              style={styles.timeline}
-            >
+            <View style={styles.timelineCard}>
 
-              <View
-                style={styles.timelineItem}
-              >
+              {timelineSteps.map((step, index) => {
 
-                <View
-                  style={styles.timelineDotActive}
-                />
+                const active =
+                  activeSteps.has(step.key);
 
-                <Text
-                  style={styles.timelineText}
-                >
+                const isLast =
+                  index === timelineSteps.length - 1;
 
-                  Placed
+                return (
 
-                </Text>
+                  <View
+                    key={step.key}
+                    style={styles.timelineRow}
+                  >
 
-              </View>
+                    <View
+                      style={styles.timelineLeft}
+                    >
 
-              <View
-                style={styles.timelineLineActive}
-              />
+                      <View
 
-              <View
-                style={styles.timelineItem}
-              >
+                        style={[
 
-                <View
-                  style={styles.timelineDotActive}
-                />
+                          styles.timelineCircle,
 
-                <Text
-                  style={styles.timelineText}
-                >
+                          active &&
+                          styles.timelineCircleActive,
 
-                  Paid
+                        ]}
 
-                </Text>
+                      >
 
-              </View>
+                        <Ionicons
 
-              <View
-                style={styles.timelineLine}
-              />
+                          name={step.icon as any}
 
-              <View
-                style={styles.timelineItem}
-              >
+                          size={15}
 
-                <View
-                  style={styles.timelineDot}
-                />
+                          color={
+                            active
+                              ? "#111"
+                              : "#999"
+                          }
 
-                <Text
-                  style={styles.timelineText}
-                >
+                        />
 
-                  Delivered
+                      </View>
 
-                </Text>
+                      {!isLast && (
 
-              </View>
+                        <View
+
+                          style={[
+
+                            styles.timelineLine,
+
+                            active &&
+                            styles.timelineLineActive,
+
+                          ]}
+
+                        />
+
+                      )}
+
+                    </View>
+
+                    <View
+                      style={styles.timelineRight}
+                    >
+
+                      <Text
+
+                        style={[
+
+                          styles.timelineTitle,
+
+                          active &&
+                          styles.timelineTitleActive,
+
+                        ]}
+
+                      >
+
+                        {step.title}
+
+                      </Text>
+
+                      <Text
+                        style={styles.timelineSubtitle}
+                      >
+
+                        {
+
+                          active
+
+                            ? "Completed"
+
+                            : "Waiting"
+
+                        }
+
+                      </Text>
+
+                    </View>
+
+                  </View>
+
+                );
+
+              })}
 
             </View>
             <Animated.View
@@ -1078,7 +1258,7 @@ export default function OrderSuccessScreen() {
               style={styles.etaDate}
             >
 
-              3–5 Business Days
+              5-7 Business Days
 
             </Text>
 
@@ -1418,47 +1598,45 @@ const styles = StyleSheet.create({
 
 productCard:{
 
-width:"100%",
+  width:"100%",
 
-backgroundColor:"#FFF",
+  flexDirection:"row",
 
-borderRadius:CARD_RADIUS,
+  alignItems:"flex-start",
 
-overflow:"hidden",
+  backgroundColor:"#FFF",
 
-marginBottom:22,
+  borderRadius:22,
 
-shadowColor:"#000",
+  padding:14,
 
-shadowOpacity:.08,
+  marginBottom:14,
 
-shadowRadius:22,
+  borderWidth:1,
 
-shadowOffset:{
-
-width:0,
-
-height:12,
+  borderColor:"#EFEFEF",
 
 },
 
-elevation:12,
+productImage:{
+
+  width:88,
+
+  height: height * 0.12,
+
+  borderRadius:18,
+
+  backgroundColor:"#F5F5F5",
 
 },
-
-  productImage: {
-
-    width: "100%",
-
-    height: width * 0.72,
-
-    backgroundColor: "#F5F5F5",
-
-  },
 
   productContent: {
 
-    padding: 20,
+      flex:1,
+
+  marginLeft:16,
+
+  paddingVertical:2,
 
   },
 
@@ -1496,41 +1674,37 @@ elevation:12,
 
   },
 
-  productTitle: {
+productTitle:{
 
-    flex: 1,
+  fontSize:17,
 
-    fontSize: 22,
+  fontWeight:"900",
 
-    fontWeight: "900",
+  color:"#111",
 
-    lineHeight: 30,
+  lineHeight:22,
 
-    color: "#111",
-
-    paddingRight: 10,
-
-  },
+},
 
   metaRow: {
 
     flexDirection: "row",
 
-    marginTop: 16,
+    marginTop: 10,
 
   },
 
   metaChip: {
 
-    backgroundColor: "#F5F5F5",
+  paddingHorizontal:10,
 
-    paddingHorizontal: 12,
+  paddingVertical:5,
 
-    paddingVertical: 8,
+  borderRadius:12,
 
-    borderRadius: 16,
+  backgroundColor:"#F6F6F6",
 
-    marginRight: 10,
+  marginRight:8,
 
   },
 
@@ -1546,7 +1720,7 @@ elevation:12,
 
   priceRow: {
 
-    marginTop: 22,
+    marginTop: 12,
 
     flexDirection: "row",
 
@@ -1558,7 +1732,7 @@ elevation:12,
 
   productPrice: {
 
-    fontSize: 30,
+    fontSize: 22,
 
     fontWeight: "900",
 
@@ -1568,11 +1742,11 @@ elevation:12,
 
   expandButton: {
 
-    width: 44,
+    width:34,
 
-    height: 44,
+  height:34,
 
-    borderRadius: 22,
+    borderRadius: 17,
 
     backgroundColor: "#B6FF2E",
 
@@ -1584,11 +1758,11 @@ elevation:12,
 
   bundleDrawer: {
 
-    marginTop: 20,
+  marginTop:14,
 
-    paddingTop: 20,
+  paddingTop:14,
 
-    borderTopWidth: 1,
+  borderTopWidth:1,
 
     borderColor: "#EFEFEF",
 
@@ -1606,11 +1780,11 @@ elevation:12,
 
   subImage: {
 
-    width: 56,
+  width:44,
 
-    height: 56,
+  height:44,
 
-    borderRadius: 14,
+  borderRadius:12,
 
     marginRight: 14,
 
@@ -1618,7 +1792,7 @@ elevation:12,
 
   subTitle: {
 
-    fontSize: 15,
+    fontSize: 13,
 
     fontWeight: "700",
 
@@ -1628,9 +1802,9 @@ elevation:12,
 
   subMeta: {
 
-    marginTop: 4,
+  marginTop:2,
 
-    fontSize: 12,
+  fontSize:11,
 
     color: "#888",
 
@@ -1680,7 +1854,7 @@ elevation:12,
     fontWeight: "700",
 
     color: "#FFF",
-
+  
   },
 
   totalPrice: {
@@ -1704,39 +1878,40 @@ elevation:12,
     fontWeight: "800",
 
     color: "#FFF",
+    textTransform: "capitalize",
 
   },
-deliveryCard:{
+  deliveryCard: {
 
-width:"100%",
+    width: "100%",
 
-backgroundColor:"#FFF",
+    backgroundColor: "#FFF",
 
-borderRadius:CARD_RADIUS,
+    borderRadius: CARD_RADIUS,
 
-padding:22,
+    padding: 22,
 
-marginBottom:22,
+    marginBottom: 22,
 
-flexDirection:"row",
+    flexDirection: "row",
 
-shadowColor:"#000",
+    shadowColor: "#000",
 
-shadowOpacity:.06,
+    shadowOpacity: .06,
 
-shadowRadius:20,
+    shadowRadius: 20,
 
-shadowOffset:{
+    shadowOffset: {
 
-width:0,
+      width: 0,
 
-height:10,
+      height: 10,
 
-},
+    },
 
-elevation:8,
+    elevation: 8,
 
-},
+  },
 
   deliveryIcon: {
 
@@ -1803,9 +1978,9 @@ elevation:8,
     backgroundColor: "#111",
 
     borderRadius: CARD_RADIUS,
-borderWidth:1,
+    borderWidth: 1,
 
-borderColor:"rgba(255,255,255,.05)",
+    borderColor: "rgba(255,255,255,.05)",
     padding: 22,
 
     marginBottom: 20,
@@ -2017,49 +2192,29 @@ borderColor:"rgba(255,255,255,.05)",
 
   },
 
-  timelineLine: {
+
+  loadingContainer: {
 
     flex: 1,
 
-    height: 2,
+    justifyContent: "center",
 
-    backgroundColor: "#E6E6E6",
-
-    marginHorizontal: 8,
+    alignItems: "center",
 
   },
-loadingContainer:{
 
-flex:1,
+  loadingText: {
 
-justifyContent:"center",
+    marginTop: 18,
 
-alignItems:"center",
+    fontSize: 15,
 
-},
+    fontWeight: "700",
 
-loadingText:{
-
-marginTop:18,
-
-fontSize:15,
-
-fontWeight:"700",
-
-color:"#777",
-
-},
-  timelineLineActive: {
-
-    flex: 1,
-
-    height: 2,
-
-    backgroundColor: "#B6FF2E",
-
-    marginHorizontal: 8,
+    color: "#777",
 
   },
+
 
   timelineText: {
 
@@ -2126,18 +2281,18 @@ color:"#777",
     borderTopWidth: 1,
 
     borderColor: "#F2F2F2",
-shadowColor:"#000",
+    shadowColor: "#000",
 
-shadowOpacity:.08,
+    shadowOpacity: .08,
 
-shadowRadius:20,
+    shadowRadius: 20,
 
-shadowOffset:{
-width:0,
-height:-8,
-},
+    shadowOffset: {
+      width: 0,
+      height: -8,
+    },
 
-elevation:20,
+    elevation: 20,
   },
 
   etaCard: {
@@ -2185,7 +2340,58 @@ elevation:20,
     color: "#888",
 
   },
+timelineCard: {
+  backgroundColor: "#FFF",
+  borderRadius: 26,
+  padding: 22,
+  marginTop: 20,
+  marginBottom: 24,
+},
 
+timelineRow: {
+  flexDirection: "row",
+},
+
+timelineLeft: {
+  width: 38,
+  alignItems: "center",
+},
+
+
+
+timelineLine: {
+  width: 2,
+  flex: 1,
+  backgroundColor: "#ECECEC",
+  marginVertical: 6,
+},
+
+timelineLineActive: {
+  backgroundColor: "#B6FF2E",
+},
+
+timelineRight: {
+  flex: 1,
+  paddingLeft: 18,
+  paddingBottom: 28,
+},
+
+timelineTitle: {
+  fontSize: 17,
+  fontWeight: "700",
+  color: "#777",
+},
+
+timelineTitleActive: {
+  color: "#111",
+  fontWeight: "900",
+},
+
+timelineSubtitle: {
+  marginTop: 4,
+  fontSize: 13,
+  color: "#999",
+},
   etaDate: {
 
     marginTop: 6,
@@ -2235,6 +2441,28 @@ elevation:20,
     color: "#111",
 
   },
+timelineCircle:{
+
+width:34,
+
+height:34,
+
+borderRadius:17,
+
+backgroundColor:"#F4F4F4",
+
+justifyContent:"center",
+
+alignItems:"center",
+
+},
+
+timelineCircleActive:{
+
+backgroundColor:"#B6FF2E",
+
+},
+
 
   shopButton: {
 

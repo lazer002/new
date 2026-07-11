@@ -7,14 +7,37 @@ import {
   TouchableOpacity,
   Alert,
   TextInput,
-  StyleSheet,Image
+  StyleSheet,
+  Image,
+  Dimensions,
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
-import { useFocusEffect } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router, useLocalSearchParams } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
+import  Screen  from "@/components/Screen";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import api from "@/utils/config";
 import { useAuth } from "@/context/AuthContext";
+
+const { width, height } = Dimensions.get("window");
+
+const H_PADDING = width * 0.055;
+
+const CARD_RADIUS = 24;
+
+const HERO_HEIGHT = height * 0.19;
+
+const STATUS_STEPS = [
+  "pending",
+  "confirmed",
+  "dispatched",
+  "shipped",
+  "out for delivery",
+  "delivered",
+];
 
 /* ---------- TYPES ---------- */
 
@@ -26,6 +49,11 @@ type Order = {
   subtotal: number;
   shipping: number;
   total: number;
+  paymentMethod: string;
+paymentStatus: "pending" | "paid" | "failed";
+shippingFee: number;
+discountCode?: string;
+couponDiscount?: number;
   shippingAddress?: {
     name: string;
     address: string;
@@ -84,36 +112,120 @@ export default function TrackOrderPage() {
 
   /* ---------- SEARCH MODE ---------- */
 
-  if (!params.orderNumber && !order) {
-    return (
-      <SafeAreaView style={styles.safe}>
-        <View style={styles.searchContainer}>
-          <Text style={styles.heading}>Track Your Order</Text>
-          <Text style={styles.subHeading}>
-            Enter your order number to view status
+if (!params.orderNumber && !order) {
+  return (
+    <Screen>
+<View style={styles.header}>
+
+  <TouchableOpacity
+    style={styles.headerButton}
+    onPress={() => router.back()}
+    activeOpacity={0.8}
+  >
+
+    <Ionicons
+      name="chevron-back"
+      size={22}
+      color="#111"
+    />
+
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={styles.headerButton}
+    activeOpacity={0.8}
+    onPress={() => {
+      () => router.push("/cart")
+    }}
+  >
+
+    <Ionicons
+      name="bag-handle-outline"
+      size={20}
+      color="#111"
+    />
+
+  </TouchableOpacity>
+
+</View>
+      <View style={styles.searchHero}>
+
+        <View style={styles.searchIconCircle}>
+
+          <Ionicons
+            name="cube-outline"
+            size={42}
+            color="#111"
+          />
+
+        </View>
+
+        <Text style={styles.searchTitle}>
+          Track{"\n"}Your Order
+        </Text>
+
+        <Text style={styles.searchSubtitle}>
+          Enter your order number to check the latest delivery status,
+          shipping progress and payment details.
+        </Text>
+
+      </View>
+
+      <View style={styles.searchCard}>
+
+        <Text style={styles.inputLabel}>
+          ORDER NUMBER
+        </Text>
+
+        <View style={styles.inputContainer}>
+
+          <Ionicons
+            name="receipt-outline"
+            size={20}
+            color="#777"
+          />
+
+          <TextInput
+            placeholder="DD-2026-0001"
+            placeholderTextColor="#AAA"
+            value={searchOrderNumber}
+            onChangeText={setSearchOrderNumber}
+            style={styles.input}
+            autoCapitalize="characters"
+            autoCorrect={false}
+          />
+
+        </View>
+
+        <TouchableOpacity
+          activeOpacity={0.9}
+          style={styles.trackButton}
+          onPress={() =>
+            fetchOrder(searchOrderNumber)
+          }
+        >
+
+          <Text
+            style={styles.trackButtonText}
+          >
+
+            TRACK ORDER
+
           </Text>
 
-          <View style={styles.inputWrapper}>
-            <TextInput
-              placeholder="e.g. ORD123456"
-              value={searchOrderNumber}
-              onChangeText={setSearchOrderNumber}
-              style={styles.input}
-              placeholderTextColor="#aaa"
-            />
-          </View>
+          <Ionicons
+            name="arrow-forward"
+            size={18}
+            color="#111"
+          />
 
-          <TouchableOpacity
-            style={styles.primaryBtn}
-            onPress={() => fetchOrder(searchOrderNumber)}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.primaryBtnText}>Track Order</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    );
-  }
+        </TouchableOpacity>
+
+      </View>
+
+    </Screen>
+  );
+}
 
   /* ---------- LOADING ---------- */
 
@@ -127,6 +239,9 @@ export default function TrackOrderPage() {
 
   /* ---------- EMPTY ---------- */
 
+
+  
+
   if (!order) {
     return (
       <View style={styles.center}>
@@ -136,164 +251,1142 @@ export default function TrackOrderPage() {
   }
 
   /* ---------- ORDER VIEW ---------- */
-const STATUS_STEPS = [
-  "pending",
-  "confirmed",
-  "dispatched",
-  "shipped",
-  "delivered",
-];
-const currentIndex = STATUS_STEPS.indexOf(order.orderStatus);
-console.log(order)
+const currentIndex =
+  STATUS_STEPS.indexOf(
+    order?.orderStatus?.toLowerCase()
+  );
+
+const statusColor = () => {
+  switch (order?.orderStatus) {
+    case "delivered":
+      return "#111";
+
+    case "cancelled":
+      return "#EF4444";
+
+    default:
+      return "#B6FF2E";
+  }
+};
+
+const statusTextColor = () => {
+  switch (order?.orderStatus) {
+    case "delivered":
+      return "#FFF";
+
+    case "cancelled":
+      return "#FFF";
+
+    default:
+      return "#111";
+  }
+};
 return (
-  <SafeAreaView style={styles.safe}>
+  <Screen>
+            <View style={styles.header}>
+
+  <TouchableOpacity
+    style={styles.headerButton}
+    onPress={() => router.back()}
+    activeOpacity={0.8}
+  >
+
+    <Ionicons
+      name="chevron-back"
+      size={22}
+      color="#111"
+    />
+
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={styles.headerButton}
+    activeOpacity={0.8}
+    onPress={() => {
+      // TODO:
+      // Open invoice
+      // or
+      // Order Details
+    }}
+  >
+
+    <Ionicons
+      name="receipt-outline"
+      size={20}
+      color="#111"
+    />
+
+  </TouchableOpacity>
+
+</View>
     <ScrollView
-      style={styles.container}
+  
       contentContainerStyle={{ paddingBottom: 40 }}
       showsVerticalScrollIndicator={false}
     >
-      {/* HEADER */}
-      <View style={styles.header}>
-        <Text style={styles.orderTitle}>
-          Order #{order.orderNumber}
-        </Text>
-
-        <View style={styles.statusBadge}>
-          <Text style={styles.statusText}>
-            {order.orderStatus}
-          </Text>
-        </View>
-      </View>
-
-      {/* 🚀 TRACKING TIMELINE */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Tracking</Text>
-
-        {STATUS_STEPS.map((step, index) => {
-          const isCompleted = index <= currentIndex;
-
-          return (
-            <View key={step} style={styles.timelineRow}>
-              {/* LEFT */}
-              <View style={styles.timelineLeft}>
-                <View
-                  style={[
-                    styles.dot,
-                    isCompleted
-                      ? styles.dotActive
-                      : styles.dotInactive,
-                  ]}
-                />
-
-                {index !== STATUS_STEPS.length - 1 && (
-                  <View
-                    style={[
-                      styles.line,
-                      isCompleted
-                        ? styles.lineActive
-                        : styles.lineInactive,
-                    ]}
-                  />
-                )}
-              </View>
-
-              {/* RIGHT */}
-              <View>
-                <Text
-                  style={
-                    isCompleted
-                      ? styles.timelineTextActive
-                      : styles.timelineTextInactive
-                  }
-                >
-                  {step}
-                </Text>
-
-                <Text style={styles.timelineSubText}>
-                  {isCompleted ? "Completed" : "Pending"}
-                </Text>
-              </View>
-            </View>
-          );
-        })}
-      </View>
-
-      {/* ITEMS */}
-<View style={styles.card}>
-  <Text style={styles.cardTitle}>Items</Text>
-
-  {order.items.map((item: any, i: number) => (
-    <View key={i} style={styles.itemRow}>
       
-      {/* IMAGE */}
-      <Image
-        source={{ uri: item.mainImage }}
-        style={styles.itemImage}
-        resizeMode="cover"
+{/* ================= HERO ================= */}
+
+<View style={styles.hero}>
+
+  <View style={styles.heroTop}>
+
+    <View
+      style={styles.orderChip}
+    >
+
+      <Ionicons
+        name="cube-outline"
+        size={15}
+        color="#111"
       />
 
-      {/* TEXT */}
-      <View style={{ flex: 1 }}>
-        <Text style={styles.itemName}>{item.title}</Text>
-        <Text style={styles.itemVariant}>{item.variant}</Text>
+      <Text
+        style={styles.orderChipText}
+      >
+
+        ORDER
+
+      </Text>
+
+    </View>
+
+    <View
+      style={[
+        styles.statusBadge,
+        {
+          backgroundColor:
+            statusColor(),
+        },
+      ]}
+    >
+
+      <Text
+        style={[
+          styles.statusText,
+          {
+            color:
+              statusTextColor(),
+          },
+        ]}
+      >
+
+        {order?.orderStatus}
+
+      </Text>
+
+    </View>
+
+  </View>
+
+  <Text
+    style={styles.heroTitle}
+  >
+
+    Track Your{"\n"}Order
+
+  </Text>
+
+  <Text
+    style={styles.heroSubtitle}
+  >
+
+    Order #{order?.orderNumber}
+
+  </Text>
+
+  <View
+    style={styles.heroBottom}
+  >
+
+    <View>
+
+      <Text
+        style={styles.heroSmall}
+      >
+
+        TOTAL AMOUNT
+
+      </Text>
+
+      <Text
+        style={styles.heroPrice}
+      >
+
+        ₹{order?.total}
+
+      </Text>
+
+    </View>
+
+    <View
+      style={styles.heroDivider}
+    />
+
+    <View>
+
+      <Text
+        style={styles.heroSmall}
+      >
+
+        ITEMS
+
+      </Text>
+
+      <Text
+        style={styles.heroValue}
+      >
+
+        {order?.items?.length}
+
+      </Text>
+
+    </View>
+
+    <View
+      style={styles.heroDivider}
+    />
+
+    <View>
+
+      <Text
+        style={styles.heroSmall}
+      >
+
+        PAYMENT
+
+      </Text>
+
+      <Text
+        style={styles.heroValue}
+      >
+
+        {order?.paymentMethod?.toUpperCase()}
+
+      </Text>
+
+    </View>
+
+  </View>
+
+</View>
+
+{/* ================= TRACK TIMELINE ================= */}
+
+<Text style={styles.sectionTitle}>
+  TRACKING
+</Text>
+
+<View style={styles.timelineCard}>
+
+  {STATUS_STEPS.map((step, index) => {
+
+    const completed =
+      index < currentIndex;
+
+    const active =
+      index === currentIndex;
+
+    return (
+
+      <View
+        key={step}
+        style={styles.timelineRow}
+      >
+
+        {/* LEFT */}
+
+        <View
+          style={styles.timelineLeft}
+        >
+
+          <View
+            style={[
+              styles.timelineDot,
+
+              completed &&
+                styles.timelineDotDone,
+
+              active &&
+                styles.timelineDotCurrent,
+            ]}
+          >
+
+            {completed && (
+
+              <Ionicons
+                name="checkmark"
+                size={13}
+                color="#111"
+              />
+
+            )}
+
+            {active && (
+
+              <View
+                style={
+                  styles.timelinePulse
+                }
+              />
+
+            )}
+
+          </View>
+
+          {index !==
+            STATUS_STEPS.length - 1 && (
+
+            <View
+              style={[
+                styles.timelineLine,
+
+                index <
+                currentIndex
+                  ? styles.timelineLineDone
+                  : styles.timelineLinePending,
+              ]}
+            />
+
+          )}
+
+        </View>
+
+        {/* RIGHT */}
+
+        <View
+          style={styles.timelineContent}
+        >
+
+          <Text
+            style={[
+              styles.timelineTitle,
+
+              active &&
+                styles.timelineTitleActive,
+
+              completed &&
+                styles.timelineTitleDone,
+            ]}
+          >
+
+            {step}
+
+          </Text>
+
+          <Text
+            style={styles.timelineSubtitle}
+          >
+
+            {completed
+              ? "Completed"
+
+              : active
+              ? "Currently in progress"
+
+              : "Waiting"}
+
+          </Text>
+
+        </View>
+
       </View>
 
-      {/* QTY */}
-      <Text style={styles.itemQty}>x{item.quantity}</Text>
-    </View>
-  ))}
+    );
+
+  })}
+
+</View>
+
+      {/* ITEMS */}
+{/* ================= PRODUCTS ================= */}
+
+<Text style={styles.sectionTitle}>
+  ORDER ITEMS
+</Text>
+
+<View
+  style={styles.productsCard}
+>
+
+  {order.items.map(
+    (item: any, index: number) => {
+
+      const isBundle =
+        item.customBundle ||
+        !!item.bundleId;
+
+      return (
+
+        <View
+          key={index}
+          style={styles.productCard}
+        >
+
+          <Image
+            source={{
+              uri:
+                item?.mainImage,
+            }}
+            style={
+              styles.productImage
+            }
+          />
+
+          <View
+            style={
+              styles.productContent
+            }
+          >
+
+            {/* TITLE */}
+
+            <View
+              style={
+                styles.productTop
+              }
+            >
+
+              <Text
+                numberOfLines={2}
+                style={
+                  styles.productTitle
+                }
+              >
+
+                {item.title}
+
+              </Text>
+
+              {isBundle && (
+
+                <View
+                  style={
+                    styles.bundleBadge
+                  }
+                >
+
+                  <Text
+                    style={
+                      styles.bundleBadgeText
+                    }
+                  >
+
+                    {item.customBundle
+                      ? "CUSTOM"
+                      : "BUNDLE"}
+
+                  </Text>
+
+                </View>
+
+              )}
+
+            </View>
+
+            {/* META */}
+
+            <View
+              style={
+                styles.productMeta
+              }
+            >
+
+              {!isBundle && (
+
+                <View
+                  style={
+                    styles.metaChip
+                  }
+                >
+
+                  <Text
+                    style={
+                      styles.metaChipText
+                    }
+                  >
+
+                    Size {item.variant}
+
+                  </Text>
+
+                </View>
+
+              )}
+
+              <View
+                style={
+                  styles.metaChip
+                }
+              >
+
+                <Text
+                  style={
+                    styles.metaChipText
+                  }
+                >
+
+                  Qty {item.quantity}
+
+                </Text>
+
+              </View>
+
+              {isBundle && (
+
+                <View
+                  style={
+                    styles.metaChipGreen
+                  }
+                >
+
+                  <Text
+                    style={
+                      styles.metaChipGreenText
+                    }
+                  >
+
+                    {item.bundleProducts
+                      ?.length || 0} Items
+
+                  </Text>
+
+                </View>
+
+              )}
+
+            </View>
+
+            {/* PRICE */}
+
+            <View
+              style={
+                styles.productBottom
+              }
+            >
+
+              <Text
+                style={
+                  styles.productPrice
+                }
+              >
+
+                ₹{item.total}
+
+              </Text>
+
+            </View>
+
+            {/* SUB PRODUCTS */}
+
+            {isBundle && (
+
+              <View
+                style={
+                  styles.bundleProducts
+                }
+              >
+
+                {item.bundleProducts?.map(
+                  (
+                    sub: any,
+                    i: number
+                  ) => (
+
+                    <View
+                      key={i}
+                      style={
+                        styles.subRow
+                      }
+                    >
+
+                      <Image
+                        source={{
+                          uri:
+                            sub.mainImage,
+                        }}
+                        style={
+                          styles.subImage
+                        }
+                      />
+
+                      <View
+                        style={{
+                          flex: 1,
+                        }}
+                      >
+
+                        <Text
+                          numberOfLines={1}
+                          style={
+                            styles.subTitle
+                          }
+                        >
+
+                          {sub.title}
+
+                        </Text>
+
+                        <Text
+                          style={
+                            styles.subMeta
+                          }
+                        >
+
+                          Size{" "}
+                          {sub.variant}
+
+                        </Text>
+
+                      </View>
+
+                    </View>
+
+                  )
+                )}
+
+              </View>
+
+            )}
+
+          </View>
+
+        </View>
+
+      );
+
+    }
+  )}
+
 </View>
 
       {/* ADDRESS */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Shipping Address</Text>
-        <Text style={styles.text}>
-          {order.shippingAddress?.name}
-        </Text>
-        <Text style={styles.text}>
-          {order.shippingAddress?.address}
-        </Text>
-        <Text style={styles.text}>
-          {order.shippingAddress?.phone}
-        </Text>
-      </View>
+{/* ================= DELIVERY ================= */}
 
-      {/* SUMMARY */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Order Summary</Text>
+<Text style={styles.sectionTitle}>
+  DELIVERY
+</Text>
 
-        <View style={styles.rowBetween}>
-          <Text style={styles.label}>Subtotal</Text>
-          <Text style={styles.value}>₹{order.subtotal}</Text>
-        </View>
+<View style={styles.deliveryCard}>
 
-        <View style={styles.rowBetween}>
-          <Text style={styles.label}>Shipping</Text>
-          <Text style={styles.value}>₹{order.shipping}</Text>
-        </View>
+  <View style={styles.deliveryTop}>
 
-        <View style={styles.totalRow}>
-          <Text style={styles.totalText}>Total</Text>
-          <Text style={styles.totalText}>₹{order.total}</Text>
-        </View>
-      </View>
+    <View style={styles.locationCircle}>
+
+      <Ionicons
+        name="location"
+        size={18}
+        color="#111"
+      />
+
+    </View>
+
+    <View
+      style={{
+        flex:1,
+        marginLeft:14,
+      }}
+    >
+
+      <Text
+        style={styles.receiverName}
+      >
+
+        {order.shippingAddress?.name}
+
+      </Text>
+
+      <Text
+        style={styles.receiverPhone}
+      >
+
+        {order.shippingAddress?.phone}
+
+      </Text>
+
+    </View>
+
+  </View>
+
+  <View
+    style={styles.deliveryDivider}
+  />
+
+  <Text
+    style={styles.fullAddress}
+  >
+
+    {order.shippingAddress?.address}
+
+  </Text>
+
+</View>
+
+{/* ================= BILL ================= */}
+
+<Text style={styles.sectionTitle}>
+  PAYMENT SUMMARY
+</Text>
+
+<View style={styles.billCard}>
+
+  <View
+    style={styles.billRow}
+  >
+
+    <Text
+      style={styles.billLabel}
+    >
+      Subtotal
+    </Text>
+
+    <Text
+      style={styles.billValue}
+    >
+      ₹{order.subtotal}
+    </Text>
+
+  </View>
+
+  <View
+    style={styles.billRow}
+  >
+
+    <Text
+      style={styles.billLabel}
+    >
+      Shipping
+    </Text>
+
+    <Text
+      style={styles.billValue}
+    >
+      ₹{order.shipping}
+    </Text>
+
+  </View>
+
+  <View
+    style={styles.billDivider}
+  />
+
+  <View
+    style={styles.billTotalRow}
+  >
+
+    <Text
+      style={styles.billTotalLabel}
+    >
+      TOTAL
+    </Text>
+
+    <Text
+      style={styles.billTotalPrice}
+    >
+      ₹{order.total}
+    </Text>
+
+  </View>
+
+</View>
     </ScrollView>
-  </SafeAreaView>
+  </Screen>
 );
 }
 
 /* ---------- STYLES ---------- */
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
 
-  container: {
-    flex: 1,
-    padding: 16,
-  },
+productsCard:{
+
+  marginHorizontal:H_PADDING,
+
+  marginBottom:28,
+
+},
+deliveryCard:{
+
+  marginHorizontal:H_PADDING,
+
+  marginBottom:28,
+
+  backgroundColor:"#FFF",
+
+  borderRadius:24,
+
+  padding:20,
+
+  borderWidth:1,
+
+  borderColor:"#EFEFEF",
+
+},
+
+deliveryTop:{
+
+  flexDirection:"row",
+
+  alignItems:"center",
+
+},
+
+locationCircle:{
+
+  width:48,
+
+  height:48,
+
+  borderRadius:24,
+
+  backgroundColor:"#B6FF2E",
+
+  justifyContent:"center",
+
+  alignItems:"center",
+
+},
+
+receiverName:{
+
+  fontSize:16,
+
+  fontWeight:"900",
+
+  color:"#111",
+
+},
+
+receiverPhone:{
+
+  marginTop:2,
+
+  fontSize:13,
+
+  color:"#666",
+
+},
+
+deliveryDivider:{
+
+  height:1,
+
+  backgroundColor:"#F2F2F2",
+
+  marginVertical:16,
+
+},
+
+fullAddress:{
+
+  fontSize:14,
+
+  color:"#444",
+
+  lineHeight:22,
+
+},
+
+billCard:{
+
+  marginHorizontal:H_PADDING,
+
+  marginBottom:40,
+
+  backgroundColor:"#111",
+
+  borderRadius:24,
+
+  padding:22,
+
+},
+
+billRow:{
+
+  flexDirection:"row",
+
+  justifyContent:"space-between",
+
+  alignItems:"center",
+
+  marginBottom:14,
+
+},
+
+billLabel:{
+
+  color:"#888",
+
+  fontSize:13,
+
+  fontWeight:"700",
+
+},
+
+billValue:{
+
+  color:"#FFF",
+
+  fontSize:14,
+
+  fontWeight:"700",
+
+},
+
+billDivider:{
+
+  height:1,
+
+  backgroundColor:"rgba(255,255,255,.08)",
+
+  marginVertical:10,
+
+},
+
+billTotalRow:{
+
+  flexDirection:"row",
+
+  justifyContent:"space-between",
+
+  alignItems:"flex-end",
+
+},
+
+billTotalLabel:{
+
+  color:"#888",
+
+  fontSize:13,
+
+  fontWeight:"800",
+
+},
+
+billTotalPrice:{
+
+  color:"#B6FF2E",
+
+  fontSize:32,
+
+  fontWeight:"900",
+
+},
+productCard:{
+
+  backgroundColor:"#FFF",
+
+  borderRadius:22,
+
+  marginBottom:14,
+
+  borderWidth:1,
+
+  borderColor:"#EEEEEE",
+
+  padding:14,
+
+  flexDirection:"row",
+
+},
+
+productImage:{
+
+  width:84,
+
+  height:106,
+
+  borderRadius:18,
+
+  backgroundColor:"#F4F4F4",
+
+},
+
+productContent:{
+
+  flex:1,
+
+  marginLeft:16,
+
+},
+
+productTop:{
+
+  flexDirection:"row",
+
+  justifyContent:"space-between",
+
+  alignItems:"flex-start",
+
+},
+
+productTitle:{
+
+  flex:1,
+
+  fontSize:16,
+
+  fontWeight:"900",
+
+  color:"#111",
+
+  lineHeight:21,
+
+},
+
+bundleBadge:{
+
+  backgroundColor:"#B6FF2E",
+
+  borderRadius:10,
+
+  paddingHorizontal:8,
+
+  paddingVertical:4,
+
+  marginLeft:8,
+
+},
+
+bundleBadgeText:{
+
+  fontSize:9,
+
+  fontWeight:"900",
+
+  color:"#111",
+
+  letterSpacing:1,
+
+},
+
+productMeta:{
+
+  flexDirection:"row",
+
+  flexWrap:"wrap",
+
+  marginTop:12,
+
+},
+
+metaChip:{
+
+  backgroundColor:"#F5F5F5",
+
+  paddingHorizontal:10,
+
+  paddingVertical:5,
+
+  borderRadius:10,
+
+  marginRight:8,
+
+  marginBottom:8,
+
+},
+
+metaChipText:{
+
+  fontSize:11,
+
+  color:"#666",
+
+  fontWeight:"700",
+
+},
+
+metaChipGreen:{
+
+  backgroundColor:"#B6FF2E",
+
+  paddingHorizontal:10,
+
+  paddingVertical:5,
+
+  borderRadius:10,
+
+},
+
+metaChipGreenText:{
+
+  fontSize:11,
+
+  color:"#111",
+
+  fontWeight:"900",
+
+},
+
+productBottom:{
+
+  marginTop:4,
+
+},
+
+productPrice:{
+
+  fontSize:22,
+
+  fontWeight:"900",
+
+  color:"#111",
+
+},
+
+bundleProducts:{
+
+  marginTop:14,
+
+  borderTopWidth:1,
+
+  borderColor:"#F0F0F0",
+
+  paddingTop:14,
+
+},
+
+subRow:{
+
+  flexDirection:"row",
+
+  alignItems:"center",
+
+  marginBottom:10,
+
+},
+
+subImage:{
+
+  width:38,
+
+  height:38,
+
+  borderRadius:10,
+
+  marginRight:12,
+
+},
+
+subTitle:{
+
+  fontSize:13,
+
+  fontWeight:"800",
+
+  color:"#111",
+
+},
+
+subMeta:{
+
+  marginTop:2,
+
+  fontSize:11,
+
+  color:"#888",
+
+},
 
   center: {
     flex: 1,
@@ -305,7 +1398,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flex: 1,
     justifyContent: "center",
-    padding: 20,
+
   },
 
   heading: {
@@ -330,11 +1423,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fafafa",
   },
 
-  input: {
-    height: 48,
-    fontSize: 14,
-    color: "#000",
-  },
 
   primaryBtn: {
     backgroundColor: "#000",
@@ -348,12 +1436,145 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
   },
+hero:{
 
-  /* HEADER */
-  header: {
-    marginBottom: 20,
-  },
+  marginHorizontal:H_PADDING,
 
+  marginTop:18,
+
+  marginBottom:28,
+
+  backgroundColor:"#111",
+
+  borderRadius:CARD_RADIUS,
+
+  padding:24,
+
+},
+
+heroTop:{
+
+  flexDirection:"row",
+
+  justifyContent:"space-between",
+
+  alignItems:"center",
+
+},
+
+orderChip:{
+
+  flexDirection:"row",
+
+  alignItems:"center",
+
+  backgroundColor:"#B6FF2E",
+
+  borderRadius:30,
+
+  paddingHorizontal:12,
+
+  paddingVertical:7,
+
+},
+
+orderChipText:{
+
+  marginLeft:6,
+
+  color:"#111",
+
+  fontWeight:"900",
+
+  fontSize:11,
+
+  letterSpacing:1,
+
+},
+
+heroTitle:{
+
+  marginTop:24,
+
+  fontSize:width*.11,
+
+  lineHeight:width*.11,
+
+  color:"#FFF",
+
+  fontWeight:"900",
+
+},
+
+heroSubtitle:{
+
+  marginTop:12,
+
+  color:"#AFAFAF",
+
+  fontSize:14,
+
+  letterSpacing:1,
+
+},
+
+heroBottom:{
+
+  marginTop:28,
+
+  flexDirection:"row",
+
+  justifyContent:"space-between",
+
+  alignItems:"center",
+
+},
+
+heroDivider:{
+
+  width:1,
+
+  height:36,
+
+  backgroundColor:"rgba(255,255,255,.12)",
+
+},
+
+heroSmall:{
+
+  fontSize:10,
+
+  color:"#888",
+
+  letterSpacing:1,
+
+  fontWeight:"700",
+
+},
+
+heroPrice:{
+
+  marginTop:6,
+
+  fontSize:28,
+
+  color:"#B6FF2E",
+
+  fontWeight:"900",
+
+},
+
+heroValue:{
+
+  marginTop:6,
+
+  fontSize:17,
+
+  color:"#FFF",
+
+  fontWeight:"800",
+
+},
   orderTitle: {
     fontSize: 20,
     fontWeight: "700",
@@ -375,7 +1596,157 @@ const styles = StyleSheet.create({
     textTransform: "capitalize",
   },
 
-  /* CARD */
+  sectionTitle:{
+
+  marginHorizontal:H_PADDING,
+
+  marginBottom:14,
+
+  fontSize:13,
+
+  color:"#777",
+
+  fontWeight:"800",
+
+  letterSpacing:1.3,
+
+},
+
+timelineCard:{
+
+  marginHorizontal:H_PADDING,
+
+  marginBottom:28,
+
+  backgroundColor:"#FFF",
+
+  borderRadius:CARD_RADIUS,
+
+  padding:22,
+
+  borderWidth:1,
+
+  borderColor:"#EFEFEF",
+
+},
+
+timelineRow:{
+
+  flexDirection:"row",
+
+},
+
+timelineLeft:{
+
+  alignItems:"center",
+
+  marginRight:18,
+
+},
+
+timelineDot:{
+
+  width:28,
+
+  height:28,
+
+  borderRadius:14,
+
+  backgroundColor:"#F2F2F2",
+
+  justifyContent:"center",
+
+  alignItems:"center",
+
+},
+
+timelineDotDone:{
+
+  backgroundColor:"#B6FF2E",
+
+},
+
+timelineDotCurrent:{
+
+  backgroundColor:"#111",
+
+},
+
+timelinePulse:{
+
+  width:10,
+
+  height:10,
+
+  borderRadius:5,
+
+  backgroundColor:"#B6FF2E",
+
+},
+
+timelineLine:{
+
+  width:2,
+
+  flex:1,
+
+  minHeight:42,
+
+},
+
+timelineLineDone:{
+
+  backgroundColor:"#B6FF2E",
+
+},
+
+timelineLinePending:{
+
+  backgroundColor:"#ECECEC",
+
+},
+
+timelineContent:{
+
+  flex:1,
+
+  paddingBottom:22,
+
+},
+
+timelineTitle:{
+
+  fontSize:16,
+
+  fontWeight:"800",
+
+  color:"#999",
+
+  textTransform:"capitalize",
+
+},
+
+timelineTitleDone:{
+
+  color:"#111",
+
+},
+
+timelineTitleActive:{
+
+  color:"#111",
+
+},
+
+timelineSubtitle:{
+
+  marginTop:4,
+
+  fontSize:12,
+
+  color:"#888",
+
+},
   card: {
     borderWidth: 1,
     borderColor: "#eee",
@@ -445,15 +1816,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#000",
   },
-  timelineRow: {
-  flexDirection: "row",
-  marginBottom: 20,
-},
 
-timelineLeft: {
-  alignItems: "center",
-  marginRight: 12,
-},
 
 dot: {
   width: 14,
@@ -467,7 +1830,157 @@ itemImage: {
   marginRight: 10,
   backgroundColor: "#f5f5f5",
 },
+searchHero: {
 
+  alignItems: "center",
+
+  paddingHorizontal: width * 0.08,
+
+  marginTop: height * 0.08,
+
+},
+
+searchIconCircle: {
+
+  width: 92,
+
+  height: 92,
+
+  borderRadius: 46,
+
+  backgroundColor: "#B6FF2E",
+
+  justifyContent: "center",
+
+  alignItems: "center",
+
+},
+
+searchTitle: {
+
+  marginTop: 28,
+
+  fontSize: width * 0.11,
+
+  lineHeight: width * 0.11,
+
+  fontWeight: "900",
+
+  color: "#111",
+
+  textAlign: "center",
+
+},
+
+searchSubtitle: {
+
+  marginTop: 18,
+
+  fontSize: 15,
+
+  color: "#777",
+
+  textAlign: "center",
+
+  lineHeight: 24,
+
+},
+
+searchCard: {
+
+  marginTop: 42,
+
+  marginHorizontal: width * 0.06,
+
+  backgroundColor: "#FFF",
+
+  borderRadius: 28,
+
+  padding: 22,
+
+  borderWidth: 1,
+
+  borderColor: "#ECECEC",
+
+},
+
+inputLabel: {
+
+  fontSize: 11,
+
+  fontWeight: "800",
+
+  color: "#888",
+
+  letterSpacing: 1.2,
+
+  marginBottom: 14,
+
+},
+
+inputContainer: {
+
+  flexDirection: "row",
+
+  alignItems: "center",
+
+  borderWidth: 1,
+
+  borderColor: "#E8E8E8",
+
+  borderRadius: 18,
+
+  paddingHorizontal: 16,
+
+  height: 62,
+
+},
+
+input: {
+
+  flex: 1,
+
+  marginLeft: 12,
+
+  fontSize: 17,
+
+  fontWeight: "700",
+
+  color: "#111",
+
+},
+
+trackButton: {
+
+  marginTop: 24,
+
+  height: 60,
+
+  borderRadius: 18,
+
+  backgroundColor: "#B6FF2E",
+
+  flexDirection: "row",
+
+  justifyContent: "center",
+
+  alignItems: "center",
+
+},
+
+trackButtonText: {
+
+  fontSize: 15,
+
+  fontWeight: "900",
+
+  color: "#111",
+
+  letterSpacing: 1,
+
+  marginRight: 8,
+
+},
 itemVariant: {
   fontSize: 12,
   color: "#777",
@@ -508,5 +2021,39 @@ timelineTextInactive: {
 timelineSubText: {
   fontSize: 12,
   color: "#999",
+},header:{
+
+  marginHorizontal:H_PADDING,
+
+  // marginTop:10,
+
+  marginBottom:8,
+
+  flexDirection:"row",
+
+  justifyContent:"space-between",
+
+  alignItems:"center",
+
+},
+
+headerButton:{
+
+  width:52,
+
+  height:52,
+
+  borderRadius:26,
+
+  backgroundColor:"#FFF",
+
+  justifyContent:"center",
+
+  alignItems:"center",
+
+  borderWidth:1,
+
+  borderColor:"#ECECEC",
+
 },
 });

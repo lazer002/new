@@ -265,9 +265,10 @@ const Badge = ({ count }: { count: number }) => {
   <Item
     icon="cube-outline"
     label="My Orders"
+      badge={activeOrderCount}
     onPress={() => go("/orders")}
   />
-  <Badge count={activeOrderCount} />
+  {/* <Badge count={activeOrderCount} /> */}
 </View>
         <Item
           icon="location-outline"
@@ -680,27 +681,35 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  orderBadge: {
-    minWidth: 24,
-    height: 24,
+orderBadge: {
+  minWidth: 26,
+  height: 26,
 
-    borderRadius: 12,
+  backgroundColor: "#B6FF2E",
 
-    backgroundColor: "#B6FF2E",
+  borderRadius: 13,
 
-    justifyContent: "center",
-    alignItems: "center",
+  justifyContent: "center",
+  alignItems: "center",
 
-    paddingHorizontal: 8,
+  paddingHorizontal: 8,
 
-    marginRight: 10,
-  },
+  marginRight: 10,
+},
 
-  orderBadgeText: {
-    color: "#111",
-    fontWeight: "900",
-    fontSize: 11,
-  },
+orderBadgeText: {
+  color: "#111",
+
+  fontSize: 11,
+
+  fontWeight: "900",
+
+  includeFontPadding: false,
+
+  textAlign: "center",
+
+  lineHeight: 13,
+},
 
   arrowWrap: {
     width: 34,

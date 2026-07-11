@@ -13,15 +13,57 @@ import { useAuth } from "@/context/AuthContext";
 import { api } from "@/utils/config";
 import { useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import Animated,{
-FadeInUp,
+import Animated, {
+  FadeInUp,
+  useSharedValue,
+  useAnimatedStyle,
+  useAnimatedScrollHandler,
+  interpolate,
+  Extrapolation,
 } from "react-native-reanimated";
 export default function OrdersScreen() {
   const router = useRouter();
   const { user, guestId } = useAuth();
   const [orders, setOrders] = useState<any[]>([]);
   const [tab, setTab] = useState<"completed" | "pending" | "cancelled">("pending");
+const scrollY = useSharedValue(0);
+const scrollHandler =
+  useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value =
+        event.contentOffset.y;
+    },
+  });
 
+const heroAnimatedStyle = useAnimatedStyle(() => {
+  return {
+    opacity: interpolate(
+      scrollY.value,
+      [0, 120],
+      [1, 0],
+      Extrapolation.CLAMP
+    ),
+
+    transform: [
+      {
+        translateY: interpolate(
+          scrollY.value,
+          [0, 120],
+          [0, -60],
+          Extrapolation.CLAMP
+        ),
+      },
+      {
+        scale: interpolate(
+          scrollY.value,
+          [0, 120],
+          [1, 0.9],
+          Extrapolation.CLAMP
+        ),
+      },
+    ],
+  };
+});
 
   useFocusEffect(
     useCallback(() => {
@@ -90,340 +132,340 @@ export default function OrdersScreen() {
 
     return (
 
-<Animated.View
-  entering={FadeInUp
-    .delay(index * 80)
-    .springify()}
->
+      <Animated.View
+        entering={FadeInUp
+          .delay(index * 80)
+          .springify()}
+      >
 
-<TouchableOpacity
-  activeOpacity={0.95}
-  style={styles.orderCard}
-  onPress={() =>
-    router.push({
-      pathname: "/order-details",
-      params: {
-        orderNumber: item.orderNumber,
-      },
-    })
-  }
->
-
-        {/* IMAGE */}
-
-<Image
-  resizeMode="cover"
-  fadeDuration={250}
-  source={{
-    uri:
-      image ||
-      "https://placehold.co/600x800/F5F5F5/111111?text=GARRIB",
-  }}
-  style={styles.orderImage}
-/>
-
-        {/* STATUS */}
-
-        <View
-          style={[
-            styles.statusPill,
-
-            getStatusStyle(status),
-
-          ]}
+        <TouchableOpacity
+          activeOpacity={0.95}
+          style={styles.orderCard}
+          onPress={() =>
+            router.push({
+              pathname: "/order-details",
+              params: {
+                orderNumber: item.orderNumber,
+              },
+            })
+          }
         >
 
-          <Text
-            style={styles.statusPillText}
-          >
+          {/* IMAGE */}
 
-            {status.toUpperCase()}
+          <Image
+            resizeMode="cover"
+            fadeDuration={250}
+            source={{
+              uri:
+                image ||
+                "https://placehold.co/600x800/F5F5F5/111111?text=GARRIB",
+            }}
+            style={styles.orderImage}
+          />
 
-          </Text>
-
-        </View>
-
-        {/* BODY */}
-
-        <View
-          style={styles.orderContent}
-        >
+          {/* STATUS */}
 
           <View
-            style={styles.orderHeader}
+            style={[
+              styles.statusPill,
+
+              getStatusStyle(status),
+
+            ]}
           >
 
             <Text
-              style={styles.orderNumber}
+              style={styles.statusPillText}
             >
 
-              ORDER #{item.orderNumber}
-
-            </Text>
-
-            <Text
-              style={styles.orderDate}
-            >
-
-              {new Date(
-                item.createdAt
-              ).toLocaleDateString()}
+              {status.toUpperCase()}
 
             </Text>
 
           </View>
 
-          <Text
-            numberOfLines={2}
-            style={styles.productTitle}
+          {/* BODY */}
+
+          <View
+            style={styles.orderContent}
           >
 
-            {item.items?.[0]?.title}
-
-          </Text>
-
-          {item.items?.length > 1 && (
-
-            <Text
-              style={styles.moreItems}
+            <View
+              style={styles.orderHeader}
             >
 
-              +{item.items.length - 1}
-              more item
+              <Text
+                style={styles.orderNumber}
+              >
 
-              {item.items.length > 2
-                ? "s"
-                : ""}
+                ORDER #{item.orderNumber}
+
+              </Text>
+
+              <Text
+                style={styles.orderDate}
+              >
+
+                {new Date(
+                  item.createdAt
+                ).toLocaleDateString()}
+
+              </Text>
+
+            </View>
+
+            <Text
+              numberOfLines={2}
+              style={styles.productTitle}
+            >
+
+              {item.items?.[0]?.title}
 
             </Text>
 
-          )}
-<View
-style={styles.timeline}
->
-
-<View
-style={styles.timelineItem}
->
-
-<View
-style={[
-styles.timelineDot,
-
-status==="pending"&&
-styles.timelineActive,
-
-]}
-/>
-
-<Text
-style={styles.timelineLabel}
->
-
-Placed
-
-</Text>
-
-</View>
-
-<View
-style={styles.timelineLine}
-/>
-
-<View
-style={styles.timelineItem}
->
-
-<View
-style={[
-styles.timelineDot,
-
-status!=="pending"&&
-styles.timelineActive,
-
-]}
-/>
-
-<Text
-style={styles.timelineLabel}
->
-
-Shipped
-
-</Text>
-
-</View>
-
-<View
-style={styles.timelineLine}
-/>
-
-<View
-style={styles.timelineItem}
->
-
-<View
-style={[
-styles.timelineDot,
-
-status==="delivered"&&
-styles.timelineActive,
-
-]}
-/>
-
-<Text
-style={styles.timelineLabel}
->
-
-Delivered
-
-</Text>
-
-</View>
-
-</View>
-          <View
-            style={styles.priceRow}
-          >
-
-            <View>
+            {item.items?.length > 1 && (
 
               <Text
-                style={styles.metaLabel}
+                style={styles.moreItems}
               >
 
-                TOTAL
+                +{item.items.length - 1}
+                more item
+
+                {item.items.length > 2
+                  ? "s"
+                  : ""}
 
               </Text>
 
-              <Text
-                style={styles.totalPrice}
-              >
-
-                ₹{item.total}
-
-              </Text>
-
-            </View>
-
-            <View>
-
-              <Text
-                style={styles.metaLabel}
-              >
-
-                ITEMS
-
-              </Text>
-
-              <Text
-                style={styles.qtyText}
-              >
-
-                {qty}
-
-              </Text>
-
-            </View>
-
-          </View>
-
-          {/* ACTIONS */}
-
-          <View
-            style={styles.actionRow}
-          >
-
-            <TouchableOpacity
-
-              style={styles.trackButton}
-
-              onPress={() =>
-                router.push({
-                  pathname: "/track",
-                  params: {
-                    orderNumber: item.orderNumber,
-                  },
-                })
-              }
-
+            )}
+            <View
+              style={styles.timeline}
             >
 
-              <Ionicons
+              <View
+                style={styles.timelineItem}
+              >
 
-                name="location-outline"
+                <View
+                  style={[
+                    styles.timelineDot,
 
-                size={18}
+                    status === "pending" &&
+                    styles.timelineActive,
 
-                color="#111"
+                  ]}
+                />
 
+                <Text
+                  style={styles.timelineLabel}
+                >
+
+                  Placed
+
+                </Text>
+
+              </View>
+
+              <View
+                style={styles.timelineLine}
               />
 
-         
-             <Ionicons
+              <View
+                style={styles.timelineItem}
+              >
 
-name="cube-outline"
+                <View
+                  style={[
+                    styles.timelineDot,
 
-size={18}
+                    status !== "pending" &&
+                    styles.timelineActive,
 
-color="#111"
+                  ]}
+                />
 
-/>
+                <Text
+                  style={styles.timelineLabel}
+                >
 
-<Text
-style={styles.trackButtonText}
->
+                  Shipped
 
-TRACK PACKAGE
+                </Text>
 
-</Text>
+              </View>
 
-          
+              <View
+                style={styles.timelineLine}
+              />
 
-            </TouchableOpacity>
+              <View
+                style={styles.timelineItem}
+              >
 
-            <TouchableOpacity
+                <View
+                  style={[
+                    styles.timelineDot,
 
-              style={styles.detailButton}
+                    status === "delivered" &&
+                    styles.timelineActive,
 
-              onPress={() =>
-                router.push({
-                  pathname: "/order-details",
-                  params: {
-                    orderNumber: item.orderNumber,
-                  },
-                })
-              }
+                  ]}
+                />
 
+                <Text
+                  style={styles.timelineLabel}
+                >
+
+                  Delivered
+
+                </Text>
+
+              </View>
+
+            </View>
+            <View
+              style={styles.priceRow}
             >
 
-              <Ionicons
+              <View>
 
-name="receipt-outline"
+                <Text
+                  style={styles.metaLabel}
+                >
 
-size={18}
+                  TOTAL
 
-color="#FFF"
+                </Text>
 
-/>
+                <Text
+                  style={styles.totalPrice}
+                >
 
-<Text
-style={styles.detailButtonText}
->
+                  ₹{item.total}
 
-ORDER DETAILS
+                </Text>
 
-</Text>
+              </View>
 
-            </TouchableOpacity>
+              <View>
+
+                <Text
+                  style={styles.metaLabel}
+                >
+
+                  ITEMS
+
+                </Text>
+
+                <Text
+                  style={styles.qtyText}
+                >
+
+                  {qty}
+
+                </Text>
+
+              </View>
+
+            </View>
+
+            {/* ACTIONS */}
+
+            <View
+              style={styles.actionRow}
+            >
+
+              <TouchableOpacity
+
+                style={styles.trackButton}
+
+                onPress={() =>
+                  router.push({
+                    pathname: "/track",
+                    params: {
+                      orderNumber: item.orderNumber,
+                    },
+                  })
+                }
+
+              >
+
+                <Ionicons
+
+                  name="location-outline"
+
+                  size={18}
+
+                  color="#111"
+
+                />
+
+
+                <Ionicons
+
+                  name="cube-outline"
+
+                  size={18}
+
+                  color="#111"
+
+                />
+
+                <Text
+                  style={styles.trackButtonText}
+                >
+
+                  TRACK PACKAGE
+
+                </Text>
+
+
+
+              </TouchableOpacity>
+
+              <TouchableOpacity
+
+                style={styles.detailButton}
+
+                onPress={() =>
+                  router.push({
+                    pathname: "/order-details",
+                    params: {
+                      orderNumber: item.orderNumber,
+                    },
+                  })
+                }
+
+              >
+
+                <Ionicons
+
+                  name="receipt-outline"
+
+                  size={18}
+
+                  color="#FFF"
+
+                />
+
+                <Text
+                  style={styles.detailButtonText}
+                >
+
+                  ORDER DETAILS
+
+                </Text>
+
+              </TouchableOpacity>
+
+            </View>
 
           </View>
 
-        </View>
-
-      </TouchableOpacity>
-</Animated.View>
+        </TouchableOpacity>
+      </Animated.View>
     );
 
   };
@@ -471,256 +513,233 @@ ORDER DETAILS
         return { backgroundColor: "#fffbeb" };
     }
   };
-  return (
-    <SafeAreaView style={styles.container}>
 
-      <View style={styles.hero}>
 
-        <View style={styles.heroTop}>
+  const Hero = () => (
+  <>
+    <View style={styles.hero}>
 
-          <TouchableOpacity
+   
+      <Animated.View style={heroAnimatedStyle}>
 
-            style={styles.backButton}
-
-            onPress={() => router.back()}
-
-          >
-
-            <Ionicons
-
-              name="chevron-back"
-
-              size={22}
-
-              color="#111"
-
-            />
-
-          </TouchableOpacity>
-
-          <TouchableOpacity>
-
-            <Ionicons
-
-              name="receipt-outline"
-
-              size={24}
-
-              color="#111"
-
-            />
-
-          </TouchableOpacity>
-
-        </View>
+        {/* 👇 PASTE EVERYTHING from here */}
 
         <Text style={styles.heroTitle}>
-
           MY ORDERS
-
         </Text>
 
         <Text style={styles.heroSubtitle}>
-
           Track every purchase,
           shipment and delivery.
-
         </Text>
 
         <View style={styles.heroAccent} />
-<View style={styles.heroStatRow}>
 
-<View style={styles.heroStat}>
+         <View style={styles.heroStatRow}>
 
-<Text style={styles.heroNumber}>
+          <View style={styles.heroStat}>
 
-{orders.length}
+            <Text style={styles.heroNumber}>
 
-</Text>
+              {orders.length}
 
-<Text style={styles.heroLabel}>
+            </Text>
 
-Orders
+            <Text style={styles.heroLabel}>
 
-</Text>
+              Orders
 
-</View>
+            </Text>
 
-<View style={styles.heroDivider}/>
+          </View>
 
-<View style={styles.heroStat}>
+          <View style={styles.heroDivider} />
 
-<Text style={styles.heroNumber}>
+          <View style={styles.heroStat}>
 
-{
+            <Text style={styles.heroNumber}>
 
-orders.filter(
-o=>getCurrentStatus(o)==="delivered"
-).length
+              {
 
-}
+                orders.filter(
+                  o => getCurrentStatus(o) === "delivered"
+                ).length
 
-</Text>
+              }
 
-<Text style={styles.heroLabel}>
+            </Text>
 
-Delivered
+            <Text style={styles.heroLabel}>
 
-</Text>
+              Delivered
 
-</View>
+            </Text>
 
-<View style={styles.heroDivider}/>
+          </View>
 
-<View style={styles.heroStat}>
+          <View style={styles.heroDivider} />
 
-<Text style={styles.heroNumber}>
+          <View style={styles.heroStat}>
 
-{
+            <Text style={styles.heroNumber}>
 
-orders.filter(
-o=>getCurrentStatus(o)!=="delivered"
-).length
+              {
 
-}
+                orders.filter(
+                  o => getCurrentStatus(o) !== "delivered"
+                ).length
 
-</Text>
+              }
 
-<Text style={styles.heroLabel}>
+            </Text>
 
-Active
+            <Text style={styles.heroLabel}>
 
-</Text>
+              Active
 
-</View>
+            </Text>
 
-</View>
+          </View>
+
+        </View>
+       
+
+        {/* 👆 until here */}
+
+      </Animated.View>
+
+    </View>
+
+  
+   
+  </>
+);
+  return (
+    <SafeAreaView style={styles.container}>
+   <View style={styles.heroTop}>
+
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons
+            name="chevron-back"
+            size={22}
+            color="#111"
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity>
+          <Ionicons
+            name="receipt-outline"
+            size={24}
+            color="#111"
+          />
+        </TouchableOpacity>
+
       </View>
 
-      <View style={styles.segment}>
+  
 
-        {[
-          {
-            key: "pending",
-            label: "Pending",
-          },
+      {orders.length === 0 ? (
+        <View style={styles.emptyContainer}>
 
-          {
-            key: "completed",
-            label: "Completed",
-          },
+          <View style={styles.emptyIcon}>
 
-          {
-            key: "cancelled",
-            label: "Cancelled",
-          },
+            <Ionicons
+              name="cube-outline"
+              size={58}
+              color="#111"
+            />
 
-        ].map((t: any) => (
+          </View>
+
+          <Text
+            style={styles.emptyTitle}
+          >
+
+            NO ORDERS YET
+
+          </Text>
+
+          <Text
+            style={styles.emptySubtitle}
+          >
+
+            Looks like you haven't
+            placed your first order.
+
+          </Text>
 
           <TouchableOpacity
 
-            key={t.key}
+            style={styles.shopNowButton}
 
             onPress={() =>
-            {if(tab!==t.key){
-
-setTab(t.key);
-
-}}
+              router.push("/")
             }
-
-            style={[
-
-              styles.segmentItem,
-
-              tab === t.key &&
-              styles.segmentActive,
-
-            ]}
 
           >
 
             <Text
-              style={[
-
-                styles.segmentText,
-
-                tab === t.key &&
-                styles.segmentTextActive,
-
-              ]}
-
+              style={styles.shopNowText}
             >
 
-              {t.label}
+              START SHOPPING
 
             </Text>
 
           </TouchableOpacity>
 
-        ))}
-
-      </View>
-
-      {orders.length === 0 ? (
-     <View style={styles.emptyContainer}>
-
-<View style={styles.emptyIcon}>
-
-<Ionicons
-name="cube-outline"
-size={58}
-color="#111"
-/>
-
-</View>
-
-<Text
-style={styles.emptyTitle}
->
-
-NO ORDERS YET
-
-</Text>
-
-<Text
-style={styles.emptySubtitle}
->
-
-Looks like you haven't
-placed your first order.
-
-</Text>
-
-<TouchableOpacity
-
-style={styles.shopNowButton}
-
-onPress={()=>
-router.push("/")
-}
-
->
-
-<Text
-style={styles.shopNowText}
->
-
-START SHOPPING
-
-</Text>
-
-</TouchableOpacity>
-
-</View>
+        </View>
       ) : (
-        <FlatList
-          data={filteredOrders}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={renderItem}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        />
+<Animated.FlatList
+  data={[{ type: "segment" }, ...filteredOrders]}
+  ListHeaderComponent={<Hero />}
+  stickyHeaderIndices={[1]}
+  keyExtractor={(item: any, index) =>
+    item.type === "segment" ? "segment" : item._id ?? index.toString()
+  }
+  renderItem={({ item, index }) => {
+    if (item.type === "segment") {
+      return (
+        <View style={styles.segmentWrapper}>
+          <View style={styles.segment}>
+            {[
+              { key: "pending", label: "Pending" },
+              { key: "completed", label: "Completed" },
+              { key: "cancelled", label: "Cancelled" },
+            ].map((t: any) => (
+              <TouchableOpacity
+                key={t.key}
+                onPress={() => setTab(t.key)}
+                style={[
+                  styles.segmentItem,
+                  tab === t.key && styles.segmentActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.segmentText,
+                    tab === t.key && styles.segmentTextActive,
+                  ]}
+                >
+                  {t.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      );
+    }
+
+    return renderItem({ item, index: index - 1 });
+  }}
+  contentContainerStyle={styles.listContent}
+  showsVerticalScrollIndicator={false}
+  scrollEventThrottle={16}
+  onScroll={scrollHandler}
+/>
       )}
     </SafeAreaView>
   );
@@ -733,24 +752,21 @@ const styles = StyleSheet.create({
   },
 
   hero: {
-
-    paddingHorizontal: 22,
-
-    paddingTop: 16,
-
-    paddingBottom: 26,
+  paddingHorizontal: 22,
+  paddingTop: 12,
+  paddingBottom: 18,
 
   },
 
-  heroTop: {
-
-    flexDirection: "row",
-
-    justifyContent: "space-between",
-
-    alignItems: "center",
-
-  },
+heroTop: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  paddingHorizontal: 22,
+  paddingBottom: 12,
+  backgroundColor: "#fff",
+  zIndex: 20,
+},
 
   backButton: {
 
@@ -808,21 +824,21 @@ const styles = StyleSheet.create({
 
   },
 
-  segment: {
+segmentWrapper: {
+  backgroundColor: "#fff",
+  paddingTop: 6,
+  paddingBottom: 12,
+  borderBottomWidth: 1,
+  borderBottomColor: "#F2F2F2",
+},
 
-    marginHorizontal: 22,
-
-    marginBottom: 22,
-
-    backgroundColor: "#F5F5F5",
-
-    borderRadius: 22,
-
-    padding: 6,
-
-    flexDirection: "row",
-
-  },
+segment: {
+  marginHorizontal: 22,
+  backgroundColor: "#F5F5F5",
+  borderRadius: 20,
+  padding: 4,
+  flexDirection: "row",
+},
 
   segmentItem: {
 
@@ -1013,33 +1029,33 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#eee",
   },
-orderCard:{
+  orderCard: {
 
-marginBottom:34,
+    marginBottom: 34,
 
-backgroundColor:"#FFF",
+    backgroundColor: "#FFF",
 
-borderRadius:32,
+    borderRadius: 32,
 
-overflow:"hidden",
+    overflow: "hidden",
 
-shadowColor:"#000",
+    shadowColor: "#000",
 
-shadowOpacity:.08,
+    shadowOpacity: .08,
 
-shadowRadius:22,
+    shadowRadius: 22,
 
-shadowOffset:{
+    shadowOffset: {
 
-width:0,
+      width: 0,
 
-height:12,
+      height: 12,
 
-},
+    },
 
-elevation:12,
+    elevation: 12,
 
-},
+  },
 
   orderImage: {
 
@@ -1051,25 +1067,25 @@ elevation:12,
 
   },
 
-statusPill:{
+  statusPill: {
 
-position:"absolute",
+    position: "absolute",
 
-top:18,
+    top: 18,
 
-right:18,
+    right: 18,
 
-paddingHorizontal:16,
+    paddingHorizontal: 16,
 
-paddingVertical:9,
+    paddingVertical: 9,
 
-borderRadius:30,
+    borderRadius: 30,
 
-borderWidth:1,
+    borderWidth: 1,
 
-borderColor:"rgba(255,255,255,.25)",
+    borderColor: "rgba(255,255,255,.25)",
 
-},
+  },
   statusPillText: {
 
     fontSize: 11,
@@ -1224,25 +1240,25 @@ borderColor:"rgba(255,255,255,.25)",
 
   },
 
-detailButton:{
+  detailButton: {
 
-flex:1,
+    flex: 1,
 
-marginLeft:14,
+    marginLeft: 14,
 
-height:58,
+    height: 58,
 
-borderRadius:18,
+    borderRadius: 18,
 
-backgroundColor:"#111",
+    backgroundColor: "#111",
 
-flexDirection:"row",
+    flexDirection: "row",
 
-justifyContent:"center",
+    justifyContent: "center",
 
-alignItems:"center",
+    alignItems: "center",
 
-},
+  },
 
   detailButtonText: {
 
@@ -1255,217 +1271,217 @@ alignItems:"center",
     letterSpacing: .8,
 
   },
-  listContent:{
+  listContent: {
 
-paddingHorizontal:22,
+    paddingHorizontal: 2,
 
-paddingBottom:220,
+    paddingBottom: 220,
 
-},
+  },
 
-emptyContainer:{
+  emptyContainer: {
 
-flex:1,
+    flex: 1,
 
-justifyContent:"center",
+    justifyContent: "center",
 
-alignItems:"center",
+    alignItems: "center",
 
-paddingHorizontal:40,
+    paddingHorizontal: 40,
 
-},
+  },
 
-emptyIcon:{
+  emptyIcon: {
 
-width:120,
+    width: 120,
 
-height:120,
+    height: 120,
 
-borderRadius:60,
+    borderRadius: 60,
 
-backgroundColor:"#F5F5F5",
+    backgroundColor: "#F5F5F5",
 
-justifyContent:"center",
+    justifyContent: "center",
 
-alignItems:"center",
+    alignItems: "center",
 
-},
+  },
 
-emptyTitle:{
+  emptyTitle: {
 
-marginTop:28,
+    marginTop: 28,
 
-fontSize:30,
+    fontSize: 30,
 
-fontWeight:"900",
+    fontWeight: "900",
 
-letterSpacing:.8,
+    letterSpacing: .8,
 
-color:"#111",
+    color: "#111",
 
-},
+  },
 
-emptySubtitle:{
+  emptySubtitle: {
 
-marginTop:12,
+    marginTop: 12,
 
-fontSize:15,
+    fontSize: 15,
 
-lineHeight:24,
+    lineHeight: 24,
 
-textAlign:"center",
+    textAlign: "center",
 
-color:"#777",
+    color: "#777",
 
-},
+  },
 
-shopNowButton:{
+  shopNowButton: {
 
-marginTop:36,
+    marginTop: 36,
 
-height:58,
+    height: 58,
 
-paddingHorizontal:34,
+    paddingHorizontal: 34,
 
-borderRadius:18,
+    borderRadius: 18,
 
-backgroundColor:"#B6FF2E",
+    backgroundColor: "#B6FF2E",
 
-justifyContent:"center",
+    justifyContent: "center",
 
-alignItems:"center",
+    alignItems: "center",
 
-},
+  },
 
-shopNowText:{
+  shopNowText: {
 
-fontSize:14,
+    fontSize: 14,
 
-fontWeight:"900",
+    fontWeight: "900",
 
-letterSpacing:1,
+    letterSpacing: 1,
 
-color:"#111",
+    color: "#111",
 
-},
-heroStatRow:{
+  },
+  heroStatRow: {
 
-marginTop:30,
+    marginTop: 30,
 
-height:90,
+    height: 90,
 
-backgroundColor:"#111",
+    backgroundColor: "#111",
 
-borderRadius:28,
+    borderRadius: 28,
 
-flexDirection:"row",
+    flexDirection: "row",
 
-alignItems:"center",
+    alignItems: "center",
 
-},
+  },
 
-heroStat:{
+  heroStat: {
 
-flex:1,
+    flex: 1,
 
-justifyContent:"center",
+    justifyContent: "center",
 
-alignItems:"center",
+    alignItems: "center",
 
-},
+  },
 
-heroDivider:{
+  heroDivider: {
 
-width:1,
+    width: 1,
 
-height:42,
+    height: 42,
 
-backgroundColor:"rgba(255,255,255,.08)",
+    backgroundColor: "rgba(255,255,255,.08)",
 
-},
+  },
 
-heroNumber:{
+  heroNumber: {
 
-fontSize:28,
+    fontSize: 28,
 
-fontWeight:"900",
+    fontWeight: "900",
 
-color:"#B6FF2E",
+    color: "#B6FF2E",
 
-},
+  },
 
-heroLabel:{
+  heroLabel: {
 
-marginTop:6,
+    marginTop: 6,
 
-fontSize:12,
+    fontSize: 12,
 
-fontWeight:"700",
+    fontWeight: "700",
 
-letterSpacing:.8,
+    letterSpacing: .8,
 
-color:"#FFF",
+    color: "#FFF",
 
-},
-timeline:{
+  },
+  timeline: {
 
-marginTop:22,
+    marginTop: 22,
 
-flexDirection:"row",
+    flexDirection: "row",
 
-alignItems:"center",
+    alignItems: "center",
 
-justifyContent:"space-between",
+    justifyContent: "space-between",
 
-},
+  },
 
-timelineItem:{
+  timelineItem: {
 
-alignItems:"center",
+    alignItems: "center",
 
-},
+  },
 
-timelineDot:{
+  timelineDot: {
 
-width:16,
+    width: 16,
 
-height:16,
+    height: 16,
 
-borderRadius:8,
+    borderRadius: 8,
 
-backgroundColor:"#DDD",
+    backgroundColor: "#DDD",
 
-},
+  },
 
-timelineActive:{
+  timelineActive: {
 
-backgroundColor:"#B6FF2E",
+    backgroundColor: "#B6FF2E",
 
-},
+  },
 
-timelineLine:{
+  timelineLine: {
 
-flex:1,
+    flex: 1,
 
-height:2,
+    height: 2,
 
-backgroundColor:"#E7E7E7",
+    backgroundColor: "#E7E7E7",
 
-marginHorizontal:8,
+    marginHorizontal: 8,
 
-},
+  },
 
-timelineLabel:{
+  timelineLabel: {
 
-marginTop:8,
+    marginTop: 8,
 
-fontSize:11,
+    fontSize: 11,
 
-fontWeight:"700",
+    fontWeight: "700",
 
-color:"#888",
+    color: "#888",
 
-letterSpacing:.5,
+    letterSpacing: .5,
 
-},
+  },
 });
