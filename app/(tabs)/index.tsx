@@ -29,7 +29,7 @@ import Animated, {
     withTiming,
 } from "react-native-reanimated";
 import { useUI } from "@/context/UIContext";
-const { width } = Dimensions.get("window");
+const { width ,height} = Dimensions.get("window");
 const CARD_WIDTH = (width - 60) / 2;
 
 /* ───────────────── PRODUCT CARD ───────────────── */
@@ -613,9 +613,7 @@ function Header({
 >
 
   <Image
-    source={{
-      uri: "https://i.pravatar.cc/150?img=12",
-    }}
+    source={require("@/assets/public/profile.png")}
     style={styles.profileImage}
   />
 
@@ -726,7 +724,23 @@ function Header({
   </Pressable>
 
   {/* CATEGORIES */}
+<Pressable
+  onPress={() => router.push("/bundle")}
+  style={styles.bundlePill}
+>
+  <Ionicons
+    name="sparkles"
+    size={14}
+    color="#111"
+    style={{ marginRight: 6 }}
+  />
 
+  <Text style={styles.bundlePillText}>
+    Bundle
+  </Text>
+
+ 
+</Pressable>
   {categories.map((cat) => {
 
     const active =
@@ -1192,36 +1206,51 @@ menuLineBottom: {
   backgroundColor: "#111",
 },
 profileBtn: {
-  width: 46,
-  height: 46,
+  width: "auto",
+ 
   borderRadius: 23,
-  overflow: "hidden",
+  // overflow: "hidden",
 
   shadowColor: "#000",
   shadowOpacity: 0.12,
   shadowRadius: 10,
-  shadowOffset: {
-    width: 0,
-    height: 4,
-  },
-  elevation: 6,
+
 },
 
 profileImage: {
-  width: "100%",
-  height: "100%",
+  width: width * 0.15,
+  height: "auto",
+  aspectRatio: 1,
+  borderRadius: 23,
+  resizeMode: "contain",
+  filter: "hue-rotate(45deg) saturate(1.2) brightness(1.1)",
 },
 
 onlineDot: {
   position: "absolute",
-  right: 2,
-  top: 2,
-  width: 10,
-  height: 10,
-  borderRadius: 5,
+
+  top: 4,
+  right: 4,
+
+  width: 16,
+  height: 16,
+
+  borderRadius: 8,
+
   backgroundColor: "#B6FF2E",
-  borderWidth: 2,
+
+  borderWidth: 3,
   borderColor: "#FFF",
+
+  shadowColor: "#B6FF2E",
+  shadowOpacity: 0.45,
+  shadowRadius: 6,
+  shadowOffset: {
+    width: 0,
+    height: 2,
+  },
+
+  elevation: 5,
 },
 pillRow: {
   flexDirection: "row",
@@ -1314,4 +1343,35 @@ pillText: {
 pillTextActive: {
   color: "#FFF",
 },
+
+
+bundlePill: {
+  height: 42,
+  borderRadius: 21,
+  backgroundColor: "#B6FF2E",
+
+  flexDirection: "row",
+  alignItems: "center",
+
+  paddingHorizontal: 18,
+  marginRight: 12,
+
+  shadowColor: "#B6FF2E",
+  shadowOpacity: 0.35,
+  shadowRadius: 10,
+  shadowOffset: {
+    width: 0,
+    height: 4,
+  },
+
+  elevation: 6,
+},
+
+bundlePillText: {
+  color: "#111",
+  fontSize: 15,
+  fontWeight: "900",
+},
+
+
 });

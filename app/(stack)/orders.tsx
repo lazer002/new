@@ -21,6 +21,7 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from "react-native-reanimated";
+const { height,width } = require("react-native").Dimensions.get("window");
 export default function OrdersScreen() {
   const router = useRouter();
   const { user, guestId } = useAuth();
@@ -244,85 +245,70 @@ const heroAnimatedStyle = useAnimatedStyle(() => {
               style={styles.timeline}
             >
 
-              <View
-                style={styles.timelineItem}
-              >
+      <View style={styles.timelineItem}>
+  <View
+    style={[
+      styles.timelineIcon,
+      status === "pending" && styles.timelineActive,
+    ]}
+  >
+    <Ionicons
+      name="receipt-outline"
+      size={14}
+      color={status === "pending" ? "#111" : "#888"}
+    />
+  </View>
 
-                <View
-                  style={[
-                    styles.timelineDot,
-
-                    status === "pending" &&
-                    styles.timelineActive,
-
-                  ]}
-                />
-
-                <Text
-                  style={styles.timelineLabel}
-                >
-
-                  Placed
-
-                </Text>
-
-              </View>
+  <Text style={styles.timelineLabel}>
+    Placed
+  </Text>
+</View>
 
               <View
                 style={styles.timelineLine}
               />
 
-              <View
-                style={styles.timelineItem}
-              >
+          <View style={styles.timelineItem}>
+  <View
+    style={[
+      styles.timelineIcon,
+      status !== "pending" && styles.timelineActive,
+    ]}
+  >
+    <Ionicons
+      name="cube-outline"
+      size={14}
+      color={status !== "pending" ? "#111" : "#888"}
+    />
+  </View>
 
-                <View
-                  style={[
-                    styles.timelineDot,
-
-                    status !== "pending" &&
-                    styles.timelineActive,
-
-                  ]}
-                />
-
-                <Text
-                  style={styles.timelineLabel}
-                >
-
-                  Shipped
-
-                </Text>
-
-              </View>
+  <Text style={styles.timelineLabel}>
+    Shipped
+  </Text>
+</View>
 
               <View
                 style={styles.timelineLine}
               />
 
-              <View
-                style={styles.timelineItem}
-              >
+   <View style={styles.timelineItem}>
+  <View
+    style={[
+      styles.timelineIcon,
+      status === "delivered" && styles.timelineActive,
+    ]}
+  >
+    <Ionicons
+      name="checkmark"
+      size={15}
+      color={status === "delivered" ? "#111" : "#888"}
+    />
+  </View>
 
-                <View
-                  style={[
-                    styles.timelineDot,
-
-                    status === "delivered" &&
-                    styles.timelineActive,
-
-                  ]}
-                />
-
-                <Text
-                  style={styles.timelineLabel}
-                >
-
-                  Delivered
-
-                </Text>
-
-              </View>
+  <Text style={styles.timelineLabel}>
+    Delivered
+  </Text>
+</View>
 
             </View>
             <View
@@ -1021,17 +1007,10 @@ segment: {
     fontWeight: "600",
   },
 
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: "#eee",
-  },
+
   orderCard: {
 
-    marginBottom: 34,
+    marginBottom: height * 0.04,
 
     backgroundColor: "#FFF",
 
@@ -1423,65 +1402,50 @@ segment: {
     color: "#FFF",
 
   },
-  timeline: {
+timeline: {
+  marginTop: 22,
+  flexDirection: "row",
+  alignItems: "flex-start",
+},
 
-    marginTop: 22,
+timelineItem: {
+  width: 60,
+  alignItems: "center",
+},
 
-    flexDirection: "row",
+timelineDot: {
+  width: 16,
+  height: 16,
+  borderRadius: 8,
+  backgroundColor: "#DDD",
+},
 
-    alignItems: "center",
+timelineLine: {
+  flex: 1,
+  height: 2,
+  marginTop: 7,
+  backgroundColor: "#E7E7E7",
+},
 
-    justifyContent: "space-between",
-
-  },
-
-  timelineItem: {
-
-    alignItems: "center",
-
-  },
-
-  timelineDot: {
-
-    width: 16,
-
-    height: 16,
-
-    borderRadius: 8,
-
-    backgroundColor: "#DDD",
-
-  },
-
-  timelineActive: {
-
-    backgroundColor: "#B6FF2E",
-
-  },
-
-  timelineLine: {
-
-    flex: 1,
-
-    height: 2,
-
-    backgroundColor: "#E7E7E7",
-
-    marginHorizontal: 8,
-
-  },
-
-  timelineLabel: {
-
-    marginTop: 8,
-
-    fontSize: 11,
-
-    fontWeight: "700",
-
-    color: "#888",
-
-    letterSpacing: .5,
-
-  },
+timelineLabel: {
+  marginTop: 10,
+  fontSize: 11,
+  fontWeight: "700",
+  color: "#888",
+  textAlign: "center",
+  minHeight: 30,
+},
+timelineActive: {
+  backgroundColor: "#B6FF2E",
+  // borderWidth: 3,
+  // borderColor: "#111",
+},
+timelineIcon: {
+  width: 28,
+  height: 28,
+  borderRadius: 14,
+  backgroundColor: "#F3F3F3",
+  justifyContent: "center",
+  alignItems: "center",
+},
 });

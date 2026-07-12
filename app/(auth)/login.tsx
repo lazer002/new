@@ -15,7 +15,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Animated
+  Animated,
+  ScrollView
 } from "react-native";
 import { Image } from "react-native";
 import Screen from "@/components/Screen";
@@ -141,7 +142,14 @@ return (
     style={{ flex: 1 }}
     behavior={Platform.OS === "ios" ? "padding" : undefined}
   >
-    <Screen>
+
+<ScrollView
+    keyboardShouldPersistTaps="handled"
+    showsVerticalScrollIndicator={false}
+    contentContainerStyle={{
+        flexGrow:1,
+    }}
+>
 
         {/* ================= BACKGROUND ================= */}
 
@@ -151,95 +159,96 @@ return (
 
         {/* ================= HERO ================= */}
 
-        <View style={styles.hero}>
-          <View style={styles.heroTop}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => router.back()}
-            >
-              <Ionicons
-                name="chevron-back"
-                size={22}
-                color="#111"
-              />
-            </TouchableOpacity>
+  {/* ================= HERO ================= */}
 
-            <TouchableOpacity
-              onPress={() => router.push("/register")}
-            >
-              <Text style={styles.createAccount}>
-                CREATE ACCOUNT
-              </Text>
-            </TouchableOpacity>
-          </View>
+<View style={styles.hero}>
+  <Image
+    source={require("@/assets/public/banner3.jpg")}
+    style={styles.heroImage}
+  />
 
-          <Animated.View
-            style={[
-              styles.heroContent,
-              {
-                opacity,
-              },
-            ]}
-          >
-            <View style={styles.brandRow}>
-              <View style={styles.brandDot} />
+  <LinearGradient
+    colors={[
+      "rgba(0,0,0,0)",
+      "rgba(0,0,0,.18)",
+      "rgba(0,0,0,.88)",
+    ]}
+    style={StyleSheet.absoluteFillObject}
+  />
 
-              <Text style={styles.brandLabel}>
-                PREMIUM STREETWEAR
-              </Text>
-            </View>
+  {/* Top Bar */}
 
-            <Text style={styles.brand}>
-              GARRIB
-            </Text>
+  <View style={styles.heroTop}>
+    <TouchableOpacity
+      style={styles.backButton}
+      onPress={() => router.back()}
+      activeOpacity={0.85}
+    >
+      <Ionicons
+        name="chevron-back"
+        size={22}
+        color="#FFF"
+      />
+    </TouchableOpacity>
 
-            <Text style={styles.heroTitle}>
-              {slides[index].title.toUpperCase()}
-            </Text>
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={() => router.push("/register")}
+    >
+      <Text style={styles.createAccountHero}>
+        CREATE ACCOUNT
+      </Text>
+    </TouchableOpacity>
+  </View>
 
-            <Text style={styles.heroSubtitle}>
-              {slides[index].subtitle}
-            </Text>
+ 
 
-            <View style={styles.slideIndicator}>
-              {slides.map((_, i) => (
-                <View
-                  key={i}
-                  style={[
-                    styles.dot,
-                    i === index && styles.activeDot,
-                  ]}
-                />
-              ))}
-            </View>
-          </Animated.View>
+  <Animated.View
+    style={[
+      styles.heroContent,
+      {
+        opacity,
+      },
+    ]}
+  >
+    <View style={styles.collectionTag}>
+      <View style={styles.collectionDot} />
 
-          {/* Premium Fashion Card */}
+      <Text style={styles.collectionText}>
+        NEW COLLECTION
+      </Text>
+    </View>
 
-          <View style={styles.fashionCard}>
-            <View style={styles.fashionGlow} />
+    <Text style={styles.brand}>
+      GARRIB
+    </Text>
 
-            <MaterialCommunityIcons
-              name="hanger"
-              size={62}
-              color="#111"
-            />
+    <Text style={styles.heroTitle}>
+      {slides[index].title.toUpperCase()}
+    </Text>
 
-            <Text style={styles.cardTitle}>
-              NEW DROP
-            </Text>
+    <Text style={styles.heroSubtitle}>
+      {slides[index].subtitle}
+    </Text>
 
-            <Text style={styles.cardSubtitle}>
-              Editorial Collection
-            </Text>
+    <View style={styles.sliderRow}>
+      {slides.map((_, i) => (
+        <View
+          key={i}
+          style={[
+            styles.sliderDot,
+            i === index &&
+              styles.sliderDotActive,
+          ]}
+        />
+      ))}
+    </View>
+  </Animated.View>
+</View>
 
-            <View style={styles.cardAccent} />
-          </View>
-        </View>
+{/* ================= LOGIN CARD ================= */}
 
-        {/* ================= LOGIN SHEET ================= */}
-
-        <View style={styles.sheet}>
+ <View style={styles.sheet}>
           <View style={styles.sheetHandle} />
 
           <Text style={styles.sheetEyebrow}>
@@ -422,7 +431,12 @@ return (
             <View style={styles.bottomLine} />
           </View>
         </View>
-    </Screen>
+
+        {/* ================= LOGIN SHEET ================= */}
+
+
+        </ScrollView>
+
   </KeyboardAvoidingView>
 );
 }
@@ -431,7 +445,219 @@ return (
 
 const styles = StyleSheet.create({
 
+/* ================= CONTAINER ================= */
 
+container: {
+  flex: 1,
+  backgroundColor: "#F8F8F8",
+},
+
+content: {
+  backgroundColor: "#F8F8F8",
+  paddingBottom: 40,
+},
+
+/* ================= HERO ================= */
+
+hero: {
+  height:  height * 0.45,
+  backgroundColor: "#111",
+  overflow: "hidden",
+  position: "relative",
+},
+
+heroImage: {
+  ...StyleSheet.absoluteFillObject,
+  width: undefined,
+  height: undefined,
+  resizeMode: "cover",
+},
+
+heroTop: {
+  position: "absolute",
+  top: Platform.OS === "ios" ? 60 : 44,
+  left: 24,
+  right: 24,
+
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+
+  zIndex: 20,
+},
+
+backButton: {
+  width: 48,
+  height: 48,
+  borderRadius: 24,
+
+  justifyContent: "center",
+  alignItems: "center",
+
+  backgroundColor: "rgba(255,255,255,.14)",
+
+  borderWidth: 1,
+  borderColor: "rgba(255,255,255,.18)",
+},
+
+createAccountHero: {
+  color: "#FFF",
+  fontSize: 12,
+  fontWeight: "900",
+  letterSpacing: 2,
+},
+
+heroContent: {
+  position: "absolute",
+    left: width * 0.08,
+    right: width * 0.08,
+    top: height * 0.14,
+},
+
+collectionTag: {
+  alignSelf: "flex-start",
+
+  flexDirection: "row",
+  alignItems: "center",
+
+  paddingHorizontal: 14,
+  paddingVertical: 8,
+
+  borderRadius: 50,
+
+  backgroundColor: "rgba(255,255,255,.15)",
+
+  // marginBottom: 22,
+},
+
+collectionDot: {
+  width: 8,
+  height: 8,
+  borderRadius: 4,
+  backgroundColor: "#B6FF2E",
+  marginRight: 8,
+},
+
+collectionText: {
+  color: "#FFF",
+  fontSize: 10,
+  fontWeight: "800",
+  letterSpacing: 2,
+},
+
+brand: {
+  color: "#FFF",
+  fontSize: 54,
+  fontWeight: "900",
+  letterSpacing: 4,
+},
+
+heroTitle: {
+  marginTop: 14,
+
+  color: "#FFF",
+
+  fontSize: 34,
+  fontWeight: "900",
+
+  lineHeight: 40,
+},
+
+heroSubtitle: {
+  marginTop: 12,
+
+  width: "85%",
+
+  color: "rgba(255,255,255,.78)",
+
+  fontSize: 16,
+  lineHeight: 25,
+},
+
+sliderRow: {
+  flexDirection: "row",
+  marginTop: 24,
+},
+
+sliderDot: {
+  width: 8,
+  height: 8,
+  borderRadius: 4,
+
+  marginRight: 8,
+
+  backgroundColor: "rgba(255,255,255,.25)",
+},
+
+sliderDotActive: {
+  width: 32,
+  backgroundColor: "#B6FF2E",
+},
+
+/* ================= FORM CARD ================= */
+
+formCard: {
+  marginTop: -(height * 0.040),
+  backgroundColor: "#FFF",
+
+  borderTopLeftRadius: 38,
+  borderTopRightRadius: 38,
+
+  paddingHorizontal: 26,
+  paddingTop: 20,
+  paddingBottom: 38,
+
+  shadowColor: "#000",
+  shadowOpacity: 0.08,
+  shadowRadius: 18,
+  shadowOffset: {
+    width: 0,
+    height: -6,
+  },
+
+  elevation: 12,
+},
+
+handle: {
+  alignSelf: "center",
+
+  width: 52,
+  height: 5,
+
+  borderRadius: 5,
+
+  backgroundColor: "#DDD",
+
+  marginBottom: 22,
+},
+
+sheetEyebrow: {
+  color: "#888",
+  fontWeight: "800",
+  letterSpacing: 2,
+  fontSize: 11,
+},
+
+sheetTitle: {
+  marginTop: 10,
+
+  color: "#111",
+
+  fontSize: 38,
+  fontWeight: "900",
+
+  lineHeight: 42,
+},
+
+sheetSubtitle: {
+  marginTop: 12,
+  marginBottom: 34,
+
+  color: "#777",
+
+  fontSize: 15,
+  lineHeight: 24,
+},
   /* ---------------- BACKGROUND ---------------- */
 
   bgCircleOne: {
@@ -465,38 +691,9 @@ const styles = StyleSheet.create({
 
   /* ---------------- HERO ---------------- */
 
-  hero: {
-    height: height * 0.44,
-    paddingTop: Platform.OS === "ios" ? 62 : 48,
-    paddingHorizontal: 28,
-    justifyContent: "space-between",
-  },
 
-  heroTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
 
-  backButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 18,
-    backgroundColor: "#FAFAFA",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#ECECEC",
 
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    shadowOffset: {
-      width: 0,
-      height: 5,
-    },
-    elevation: 3,
-  },
 
   createAccount: {
     fontSize: 12,
@@ -505,10 +702,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1.4,
   },
 
-  heroContent: {
-    marginTop: 18,
-    width: "65%",
-  },
 
   brandRow: {
     flexDirection: "row",
@@ -531,29 +724,7 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
 
-  brand: {
-    fontSize: 48,
-    fontWeight: "900",
-    color: "#111",
-    letterSpacing: 3,
-  },
-
-  heroTitle: {
-    marginTop: 16,
-    fontSize: 30,
-    fontWeight: "900",
-    color: "#111",
-    letterSpacing: 1,
-    lineHeight: 36,
-  },
-
-  heroSubtitle: {
-    marginTop: 10,
-    fontSize: 15,
-    color: "#777",
-    lineHeight: 25,
-    paddingRight: 10,
-  },
+ 
 
   slideIndicator: {
     flexDirection: "row",
@@ -576,29 +747,12 @@ const styles = StyleSheet.create({
   /* ---------------- FASHION CARD ---------------- */
 
   fashionCard: {
-    position: "absolute",
-    right: 26,
-    bottom: 15,
-
-    width: 145,
-    height: 170,
-
-    borderRadius: 34,
-
-    backgroundColor: "#111",
-
-    justifyContent: "center",
-    alignItems: "center",
-
-    shadowColor: "#000",
-    shadowOpacity: 0.16,
-    shadowRadius: 24,
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-
-    elevation: 8,
+    width: width * 0.33,
+    aspectRatio: 0.82,
+    borderRadius: 30,
+    backgroundColor:"#111",
+    justifyContent:"center",
+    alignItems:"center",
   },
 
   fashionGlow: {
@@ -635,31 +789,15 @@ const styles = StyleSheet.create({
 
   /* ---------------- SHEET ---------------- */
 
-  sheet: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-
-    backgroundColor: "#FFF",
-
-    borderTopLeftRadius: 42,
-    borderTopRightRadius: 42,
-
-    paddingHorizontal: 28,
-    paddingTop: 22,
-    paddingBottom: 34,
-
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 25,
-    shadowOffset: {
-      width: 0,
-      height: -8,
-    },
-
-    elevation: 15,
-  },
+sheet: {
+    marginTop: -(height * 0.040),
+    backgroundColor:"#FFF",
+    borderTopLeftRadius:42,
+    borderTopRightRadius:42,
+    paddingHorizontal:24,
+    paddingTop:24,
+    paddingBottom:40,
+},
 
   sheetHandle: {
     alignSelf: "center",
@@ -670,28 +808,7 @@ const styles = StyleSheet.create({
     marginBottom: 22,
   },
 
-  sheetEyebrow: {
-    color: "#777",
-    fontSize: 11,
-    fontWeight: "800",
-    letterSpacing: 2,
-    marginBottom: 10,
-  },
 
-  sheetTitle: {
-    color: "#111",
-    fontSize: 36,
-    fontWeight: "900",
-    lineHeight: 40,
-  },
-
-  sheetSubtitle: {
-    marginTop: 12,
-    marginBottom: 34,
-    color: "#777",
-    lineHeight: 24,
-    fontSize: 15,
-  },
 
   fieldLabel: {
     color: "#999",

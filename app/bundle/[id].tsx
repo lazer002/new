@@ -270,6 +270,7 @@ useEffect(() => {
 
 <View style={styles.topBar}>
 
+<View style={styles.leftAction}>
   <Pressable
     onPress={() => router.back()}
     style={styles.topBtnWrapper}
@@ -286,43 +287,38 @@ useEffect(() => {
       />
     </BlurView>
   </Pressable>
+</View>
 
-  <View style={styles.rightActions}>
+<View style={styles.rightActions}>
 
-    <Pressable
-      style={styles.topBtnWrapper}
-      onPress={() =>
-        isInWishlist(bundle._id)
-          ? removeFromWishlist(bundle._id)
-          : addToWishlist(bundle._id)
-      }
-    >
-      <BlurView
-        intensity={90}
-        tint="light"
-        style={styles.blurButton}
-      >
-        <Ionicons
-          name={
-            isInWishlist(bundle._id)
-              ? "heart"
-              : "heart-outline"
-          }
-          size={20}
-          color={
-            isInWishlist(bundle._id)
-              ? "#D90429"
-              : "#111"
-          }
-        />
-      </BlurView>
-    </Pressable>
+  <CartIcon />
 
-    <View style={styles.topBtnWrapper}>
-      <CartIcon />
-    </View>
+  <Pressable
+    onPress={() =>
+      isInWishlist(bundle._id)
+        ? removeFromWishlist(bundle._id)
+        : addToWishlist(bundle._id)
+    }
+    style={styles.heartWrapper}
+  >
 
-  </View>
+      <Ionicons
+        name={
+          isInWishlist(bundle._id)
+            ? "heart"
+            : "heart-outline"
+        }
+        size={22}
+        color={
+          isInWishlist(bundle._id)
+            ? "#111"
+            : "#000000"
+        }
+      />
+   
+  </Pressable>
+
+</View>
 
 </View>
           {/* IMAGE COUNT */}
@@ -2425,39 +2421,60 @@ topBar: {
 
   flexDirection: "row",
   justifyContent: "space-between",
-  alignItems: "center",
 
   zIndex: 999,
-  overflow: "visible",
+},
+
+leftAction: {
+  width: width * 0.12,
+  height: height * 0.06,
+  justifyContent: "flex-start",
 },
 
 rightActions: {
-  flexDirection: "row",
+  width: width * 0.12,
   alignItems: "center",
-  overflow: "visible",
+},
+
+heartWrapper: {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+
+  marginTop: 12,
+  backgroundColor: "#B6FF2E",
+  borderRadius: width * 0.03,
+    width: width * 0.12,
+  height: height * 0.05,
 },
 
 topBtnWrapper: {
-  marginLeft: 12,
-  overflow: "visible",
+  marginLeft: 0,
 },
 
 blurButton: {
-  width: 54,
-  height: 54,
-
-  borderRadius: 27,
+  width: width * 0.12,
+  height: height * 0.06,
+  borderRadius: width * 0.03,
 
   overflow: "hidden",
 
   justifyContent: "center",
   alignItems: "center",
 
+  backgroundColor: "rgba(255,255,255,.15)",
+
   borderWidth: 1,
   borderColor: "rgba(255,255,255,.35)",
-
-  backgroundColor: "rgba(255,255,255,.08)",
 },
+
+wishlistButton: {
+  backgroundColor: "#B6FF2E",
+  marginTop: 10,
+  marginLeft: 0,
+},
+
+
   featureContainer: {
     marginTop: 34,
     flexDirection: "row",

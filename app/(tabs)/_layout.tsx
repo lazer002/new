@@ -36,7 +36,7 @@ function CustomTabBar({
   navigation,
 }: any) {
 
-  const { width } =
+  const { width ,height} =
     useWindowDimensions();
 
   const { wishlist } =
@@ -52,6 +52,8 @@ const { items } = useCart();
 
 const isCartScreen =
   state.routes[state.index]?.name === "cart";
+
+  const hasCartItems = items.length > 0;
 
   const tabCount =
     state.routes.length;
@@ -141,7 +143,7 @@ const toValue =
       !drawerOpen &&
       !isFilterOpen &&
       tabBarVisible &&
-    !isCartScreen;
+   !(isCartScreen && hasCartItems);
 
     Animated.parallel([
 
@@ -171,6 +173,7 @@ const toValue =
     isFilterOpen,
     tabBarVisible,
     isCartScreen,
+    hasCartItems
   ]);
 
   if (isFilterOpen)

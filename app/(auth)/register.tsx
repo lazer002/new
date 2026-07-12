@@ -18,7 +18,7 @@ Image,
   Animated,ScrollView 
 } from "react-native";
 import Toast from "react-native-toast-message";
-const { height } = Dimensions.get("window");
+const { height,width } = Dimensions.get("window");
 
 /* 🔥 HEADER SLIDES */
 const slides = [
@@ -441,14 +441,14 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    paddingBottom: 40,
+    // paddingBottom: 40,
     backgroundColor: "#F8F8F8",
   },
 
   /* ================= HERO ================= */
 
   hero: {
-    height: 420,
+    height: height * 0.45,
     position: "relative",
     overflow: "hidden",
     backgroundColor: "#111",
@@ -497,9 +497,9 @@ const styles = StyleSheet.create({
 
   heroContent: {
     position: "absolute",
-    left: 28,
-    right: 28,
-    bottom: 42,
+    left: width * 0.08,
+    right: width * 0.08,
+    top: height * 0.14,
   },
 
   collectionTag: {
@@ -515,7 +515,7 @@ const styles = StyleSheet.create({
 
     backgroundColor: "rgba(255,255,255,.15)",
 
-    marginBottom: 24,
+    marginBottom: 4,
   },
 
   collectionDot: {
@@ -587,12 +587,12 @@ const styles = StyleSheet.create({
   /* ================= FORM CARD ================= */
 
   formCard: {
-    marginTop: -30,
+    marginTop: -(height * 0.040),
 
     backgroundColor: "#FFF",
 
-    borderTopLeftRadius: 36,
-    borderTopRightRadius: 36,
+    borderTopLeftRadius: 42,
+    borderTopRightRadius: 42,
 
     paddingHorizontal: 26,
     paddingTop: 20,
