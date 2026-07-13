@@ -607,18 +607,16 @@ function Header({
 
 </Pressable>
 
-   <Pressable
+<Pressable
   style={styles.profileBtn}
   onPress={() => router.push("/profile")}
 >
-
-  <Image
-    source={require("@/assets/public/profile.png")}
-    style={styles.profileImage}
+  <Ionicons
+    name="person-outline"
+    size={24}
+    color="#000000"
   />
-
   <View style={styles.onlineDot} />
-
 </Pressable>
 
       </View>
@@ -918,7 +916,7 @@ sectionLabel: {
 
 sectionTitle: {
   marginTop: 6,
-  fontSize: 30,
+  fontSize: height * 0.038,
   fontWeight: "900",
   color: "#111",
   letterSpacing: -.5,
@@ -929,7 +927,7 @@ sectionBtn: {
   alignItems: "center",
 
   paddingHorizontal: 16,
-  height: 42,
+  height: height * 0.045,
 
   borderRadius: 21,
 
@@ -1206,15 +1204,12 @@ menuLineBottom: {
   backgroundColor: "#111",
 },
 profileBtn: {
-  width: "auto",
- 
-  borderRadius: 23,
-  // overflow: "hidden",
-
-  shadowColor: "#000",
-  shadowOpacity: 0.12,
-  shadowRadius: 10,
-
+  width: 52,
+  height: 52,
+  borderRadius: 18,
+  backgroundColor: "#B6FF2E",
+  justifyContent: "center",
+  alignItems: "center",
 },
 
 profileImage: {
@@ -1232,15 +1227,15 @@ onlineDot: {
   top: 4,
   right: 4,
 
-  width: 16,
-  height: 16,
+  width: 10,
+  height: 10,
 
   borderRadius: 8,
 
-  backgroundColor: "#B6FF2E",
+  backgroundColor: "#000000",
 
   borderWidth: 3,
-  borderColor: "#FFF",
+  // borderColor: "#FFF",
 
   shadowColor: "#B6FF2E",
   shadowOpacity: 0.45,
@@ -1258,31 +1253,32 @@ pillRow: {
   justifyContent: "center",
 },
 explore: {
-  marginTop: 34,
+  marginTop: height * 0.03,
   color: "#000000",
-  fontSize: 18,
+  fontSize: width * 0.058,
   fontWeight: "500",
 },
 
 heroTitle: {
   marginTop: 8,
-  fontSize: 58,
+  fontSize:width * 0.158,
   fontWeight: "900",
   color: "#111",
-  lineHeight: 60,
+  lineHeight: height * 0.075,
 },
 
 heroAccent: {
   marginTop: -2,
-  fontSize: 58,
+  fontSize: width * 0.158,
   fontWeight: "900",
   color: "#B6FF2E",
-  lineHeight: 60,
+  lineHeight: height * 0.075,
+ 
 },
 
 searchBox: {
-  marginTop: 32,
-  height: 60,
+  marginTop: height * 0.032,
+  height: height * 0.075,
   borderRadius: 32,
   backgroundColor: "#F5F5F5",
   flexDirection: "row",
@@ -1297,8 +1293,8 @@ searchInput: {
   fontSize: 17,
 },
 filterIcon: {
-  width: 42,
-  height: 42,
+  width: width * 0.12,
+  height: height * 0.055,
   borderRadius: 8,
   backgroundColor: "#000000ee",
 
@@ -1315,13 +1311,13 @@ filterIcon: {
  
 },
 tabs: {
-  paddingTop: 22,
-  paddingBottom: 10,
-  paddingRight: 20,
+  paddingTop: height * 0.02,
+  // paddingBottom: height * 0.01,
+  paddingRight: width * 0.05,
 },
 
 pill: {
-  height: 42,
+  height: height * 0.045,
   borderRadius: 21,
   backgroundColor: "#F5F5F5",
   justifyContent: "center",
@@ -1346,7 +1342,7 @@ pillTextActive: {
 
 
 bundlePill: {
-  height: 42,
+  height: height * 0.045,
   borderRadius: 21,
   backgroundColor: "#B6FF2E",
 

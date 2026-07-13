@@ -15,7 +15,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useWishlist } from "@/context/WishlistContext";
 import { useFilter } from "@/context/FilterContext";
 import { useUI } from "@/context/UIContext";
-
+const { height, width } = require("react-native").Dimensions.get("window");
 
 const Badge = ({ count }: { count: number }) => {
   if (!count) return null;
@@ -28,8 +28,8 @@ const Badge = ({ count }: { count: number }) => {
     </View>
   );
 };
-const WRAPPER_HEIGHT = 78;
-const PILL_HEIGHT = 54;
+const WRAPPER_HEIGHT = height * 0.078;
+const PILL_HEIGHT = height * 0.055;
 
 function CustomTabBar({
   state,
@@ -405,11 +405,11 @@ const styles = StyleSheet.create({
 
     position: "absolute",
 
-    bottom: 18,
+    bottom: height * 0.026,
 
     alignSelf: "center",
 
-    height: 78,
+    height:height * 0.078,
 
     // width: "90%",
 
@@ -502,9 +502,9 @@ tab: {
 
     backgroundColor: "#9DFF00",
 
-    minWidth: 18,
+    minWidth: width * 0.05,
 
-    height: 18,
+    height:height * 0.018,
 
     borderRadius: 9,
 

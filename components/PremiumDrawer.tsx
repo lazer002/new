@@ -347,7 +347,7 @@ if (!mounted)
 
   <Pressable
     onPress={() =>
-      navigate("new-drops", "/new-drops")
+      navigate("new-drops", "/category")
     }
     style={[
       styles.menuItem,
@@ -500,7 +500,7 @@ if (!mounted)
 
   <Pressable
     onPress={() =>
-      navigate("collections", "/collections")
+      navigate("collections", "/bundle")
     }
     style={[
       styles.menuItem,
@@ -545,7 +545,7 @@ if (!mounted)
 
   <Pressable
     onPress={() =>
-      navigate("build-bundle", "/build-bundle")
+      navigate("build-bundle", "/bundle/create")
     }
     style={[
       styles.menuItem,
@@ -617,7 +617,7 @@ if (!mounted)
   </Pressable>
     <Pressable
     onPress={() =>
-      navigate("settings", "/settings")
+      navigate("settings", "/profile")
     }
     style={[
       styles.menuItem,
@@ -640,7 +640,7 @@ if (!mounted)
 
   <Pressable
     onPress={() =>
-      navigate("help", "/help")
+      navigate("help", "/profile/help")
     }
     style={[
       styles.menuItem,

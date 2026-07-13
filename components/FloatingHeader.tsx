@@ -5,6 +5,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Text,
 } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -12,7 +13,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
-
+import { router } from "expo-router";
+const { height } = require("react-native").Dimensions.get("window");
 type Props = {
   visible: boolean;
   categories: any[];
@@ -110,15 +112,15 @@ pointerEvents={
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.tabs}
       >
-     <Pressable
+<Pressable
   onPress={() => setActiveCategory("all")}
   style={[
     styles.pill,
-    activeCategory === null && styles.active,
+    activeCategory === null  && styles.active,
   ]}
 >
   <View style={styles.pillRow}>
-    {activeCategory === null && (
+    {activeCategory === null  && (
       <Ionicons
         name="sparkles"
         size={14}
@@ -130,7 +132,7 @@ pointerEvents={
     <Animated.Text
       style={[
         styles.pillText,
-        activeCategory === null &&
+        activeCategory === null  &&
           styles.pillTextActive,
       ]}
     >
@@ -139,47 +141,72 @@ pointerEvents={
   </View>
 </Pressable>
 
-        {categories.map((cat) => {
-
-          const active =
-            activeCategory === cat._id;
-
-          return (
-        <Pressable
-  key={cat._id}
-  onPress={() =>
-    setActiveCategory(cat._id)
-  }
+<Pressable
+  onPress={() => {
+    setActiveCategory("bundle");
+    router.push("/bundle");
+  }}
   style={[
-    styles.pill,
-    active && styles.active,
+    styles.bundlePill,
+    activeCategory === "bundle" && styles.active,
   ]}
 >
-  <View style={styles.pillRow}>
-    {active && (
-      <Ionicons
-        name="sparkles"
-        size={14}
-        color="#B6FF2E"
-        style={{ marginRight: 6 }}
-      />
-    )}
 
-    <Animated.Text
-      numberOfLines={1}
+    <Ionicons
+      name="sparkles"
+      size={14}
+      color="#000000"
+      style={{ marginRight: 6 }}
+    />
+
+
+  <Text
+    style={[
+      styles.bundlePillText,
+      activeCategory === "bundle" && {
+        color: "#FFF",
+      },
+    ]}
+  >
+    Bundle
+  </Text>
+</Pressable>
+
+{categories.map((cat) => {
+  const active = activeCategory === cat._id;
+
+  return (
+    <Pressable
+      key={cat._id}
+      onPress={() => setActiveCategory(cat._id)}
       style={[
-        styles.pillText,
-        active &&
-          styles.pillTextActive,
+        styles.pill,
+        active && styles.active,
       ]}
     >
-      {cat.name}
-    </Animated.Text>
-  </View>
-</Pressable>
-          );
+      <View style={styles.pillRow}>
+        {active && (
+          <Ionicons
+            name="sparkles"
+            size={14}
+            color="#B6FF2E"
+            style={{ marginRight: 6 }}
+          />
+        )}
 
-        })}
+        <Animated.Text
+          numberOfLines={1}
+          style={[
+            styles.pillText,
+            active && styles.pillTextActive,
+          ]}
+        >
+          {cat.name}
+        </Animated.Text>
+      </View>
+    </Pressable>
+  );
+})}
 
       </ScrollView>
 
@@ -292,5 +319,31 @@ pill: {
     backgroundColor: "#111",
 
   },
+bundlePill: {
+  height: height * 0.045,
+  borderRadius: 21,
+  backgroundColor: "#B6FF2E",
 
+  flexDirection: "row",
+  alignItems: "center",
+
+  paddingHorizontal: 18,
+  marginRight: 12,
+
+  shadowColor: "#B6FF2E",
+  shadowOpacity: 0.35,
+  shadowRadius: 10,
+  shadowOffset: {
+    width: 0,
+    height: 4,
+  },
+
+  elevation: 6,
+},
+
+bundlePillText: {
+  color: "#111",
+  fontSize: 15,
+  fontWeight: "900",
+},
 });
