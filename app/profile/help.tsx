@@ -10,12 +10,13 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  Dimensions,
 } from "react-native";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "expo-router";
 import Octicons from "@expo/vector-icons/Octicons";
 import Screen from "@/components/Screen";
-
+const { width, height } = Dimensions.get("window");
 // Enable animation (Android)
 if (Platform.OS === "android") {
   UIManager.setLayoutAnimationEnabledExperimental?.(true);
@@ -222,89 +223,304 @@ return (
   <Screen>
     <ScrollView
       style={styles.container}
+      contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
-      {/* 🔍 SEARCH */}
-      <View style={styles.searchBox}>
-        <Octicons name="search" size={18} color="#888" />
+
+      {/* ---------------- HERO ---------------- */}
+
+      <View style={styles.hero}>
+
+        <Text style={styles.label}>
+          SUPPORT
+        </Text>
+
+        <Text style={styles.heroTitle}>
+          HELP{"\n"}CENTER
+        </Text>
+
+        <Text style={styles.heroSubtitle}>
+          Everything you need to know about orders,
+          returns, payments and your account.
+        </Text>
+
+        <View style={styles.greenLine} />
+
+      </View>
+
+      {/* ---------------- SEARCH ---------------- */}
+
+      <View style={styles.searchContainer}>
+
+        <Octicons
+          name="search"
+          size={height * 0.024}
+          color="#666"
+        />
+
         <TextInput
-          placeholder="Search help..."
           value={search}
           onChangeText={setSearch}
-          style={styles.searchInput}
+          placeholder="Search help..."
           placeholderTextColor="#999"
+          style={styles.searchInput}
         />
+
       </View>
 
-      {/* ⚡ QUICK ACTIONS */}
-      <Text style={styles.sectionTitle}>Quick Help</Text>
+      {/* ---------------- QUICK HELP ---------------- */}
 
-      <View style={styles.quickRow}>
-        <QuickItem icon="package" label="Orders" onPress={() => router.push("/profile")} />
-        <QuickItem icon="sync" label="Returns" onPress={() => {}} />
-        <QuickItem icon="credit-card" label="Payments" onPress={() => {}} />
-        <QuickItem icon="person" label="Account" onPress={() => {}} />
+      <View style={styles.sectionHeader}>
+
+        <Text style={styles.sectionLabel}>
+          QUICK HELP
+        </Text>
+
+        <Text style={styles.sectionHeading}>
+          Popular Topics
+        </Text>
+
       </View>
 
-      {/* 📚 FAQ */}
-      <Text style={styles.sectionTitle}>FAQs</Text>
+      <View style={styles.quickGrid}>
+
+        <QuickItem
+          icon="package"
+          label="Orders"
+          onPress={() => router.push("/profile")}
+        />
+
+        <QuickItem
+          icon="sync"
+          label="Returns"
+          onPress={() => {}}
+        />
+
+        <QuickItem
+          icon="credit-card"
+          label="Payments"
+          onPress={() => {}}
+        />
+
+        <QuickItem
+          icon="person"
+          label="Account"
+          onPress={() => {}}
+        />
+
+      </View>
+
+      {/* ---------------- FAQ ---------------- */}
+
+      <View style={styles.sectionHeader}>
+
+        <Text style={styles.sectionLabel}>
+          FREQUENTLY ASKED
+        </Text>
+
+        <Text style={styles.sectionHeading}>
+          Questions
+        </Text>
+
+      </View>
 
       {filteredFAQ.map((cat) => (
-        <View key={cat.category} style={styles.categoryCard}>
-          <Text style={styles.category}>{cat.category}</Text>
+
+        <View
+          key={cat.category}
+          style={styles.categorySection}
+        >
+
+          <View style={styles.categoryHeader}>
+
+            <Text style={styles.categoryLabel}>
+              CATEGORY
+            </Text>
+
+            <Text style={styles.categoryTitle}>
+              {cat.category}
+            </Text>
+
+            <View style={styles.categoryLine} />
+
+          </View>
 
           {cat.items.map((item, idx) => {
-            const key = cat.category + idx;
-            const isOpen = openIndex === key;
+
+            const key =
+              cat.category + idx;
+
+            const isOpen =
+              openIndex === key;
 
             return (
-              <TouchableOpacity
-                key={key}
-                activeOpacity={0.8}
-                style={styles.faqCard}
-                onPress={() => toggle(key)}
-              >
-                <View style={styles.faqHeader}>
-                  <Text style={styles.question}>{item.q}</Text>
 
-                  <Octicons
-                    name={isOpen ? "chevron-up" : "chevron-down"}
-                    size={18}
-                    color="#555"
-                  />
+              <TouchableOpacity
+
+                key={key}
+
+                activeOpacity={0.92}
+
+                style={[
+                  styles.faqCard,
+                  isOpen &&
+                    styles.faqCardOpen,
+                ]}
+
+                onPress={() =>
+                  toggle(key)
+                }
+
+              >
+
+                <View
+                  style={styles.faqHeader}
+                >
+
+                  <Text
+                    style={styles.question}
+                  >
+                    {item.q}
+                  </Text>
+
+                  <View
+                    style={[
+                      styles.arrowCircle,
+                      isOpen &&
+                        styles.arrowCircleActive,
+                    ]}
+                  >
+
+                    <Octicons
+                      name={
+                        isOpen
+                          ? "chevron-up"
+                          : "chevron-down"
+                      }
+                      size={height * 0.02}
+                      color={
+                        isOpen
+                          ? "#111"
+                          : "#FFF"
+                      }
+                    />
+
+                  </View>
+
                 </View>
 
                 {isOpen && (
-                  <View style={styles.answerBox}>
-                    <Text style={styles.answer}>{item.a}</Text>
+
+                  <View
+                    style={styles.answerContainer}
+                  >
+
+                    <View
+                      style={styles.answerDivider}
+                    />
+
+                    <Text
+                      style={styles.answer}
+                    >
+                      {item.a}
+                    </Text>
+
                   </View>
+
                 )}
+
               </TouchableOpacity>
+
             );
+
           })}
+
         </View>
+
       ))}
 
-      {/* 📞 CONTACT */}
-      <Text style={styles.sectionTitle}>Need more help?</Text>
+      {/* ---------------- CONTACT ---------------- */}
 
-      <View style={styles.contactRow}>
-        <TouchableOpacity style={styles.contactCard}>
-          <Text style={styles.contactTitle}>📧 Email</Text>
-          <Text style={styles.contactSub}>support@yourapp.com</Text>
+      <View style={styles.contactSection}>
+
+        <Text style={styles.sectionLabel}>
+          STILL NEED HELP?
+        </Text>
+
+        <Text style={styles.sectionHeading}>
+          Contact Us
+        </Text>
+
+        <TouchableOpacity
+          activeOpacity={0.9}
+          style={styles.contactCard}
+        >
+
+          <View>
+
+            <Text style={styles.contactTitle}>
+              EMAIL SUPPORT
+            </Text>
+
+            <Text style={styles.contactText}>
+              support@garrib.com
+            </Text>
+
+          </View>
+
+          <View style={styles.contactArrow}>
+
+            <Octicons
+              name="arrow-right"
+              size={height * 0.024}
+              color="#111"
+            />
+
+          </View>
+
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.contactCard}>
-          <Text style={styles.contactTitle}>📞 Call</Text>
-          <Text style={styles.contactSub}>+91 9876543210</Text>
+        <TouchableOpacity
+          activeOpacity={0.9}
+          style={[
+            styles.contactCard,
+            {
+              marginTop: height * 0.018,
+            },
+          ]}
+        >
+
+          <View>
+
+            <Text style={styles.contactTitle}>
+              CALL SUPPORT
+            </Text>
+
+            <Text style={styles.contactText}>
+              +91 98765 43210
+            </Text>
+
+          </View>
+
+          <View style={styles.contactArrow}>
+
+            <Octicons
+              name="device-mobile"
+              size={height * 0.024}
+              color="#111"
+            />
+
+          </View>
+
         </TouchableOpacity>
+
       </View>
+
     </ScrollView>
+
   </Screen>
-);
 
-
-}
+);}
 
 /* ---------------- COMPONENTS ---------------- */
 
@@ -317,9 +533,26 @@ const QuickItem = ({
   label: string;
   onPress: () => void;
 }) => (
-  <TouchableOpacity style={styles.quickItem} onPress={onPress}>
-    <Octicons name={icon} size={22} />
-    <Text style={styles.quickText}>{label}</Text>
+  <TouchableOpacity
+    activeOpacity={0.9}
+    style={styles.quickCard}
+    onPress={onPress}
+  >
+    <View style={styles.quickIconCircle}>
+      <Octicons
+        name={icon}
+        size={height * 0.026}
+        color="#111"
+      />
+    </View>
+
+    <Text style={styles.quickTitle}>
+      {label}
+    </Text>
+
+    <Text style={styles.quickSubtitle}>
+      Explore
+    </Text>
   </TouchableOpacity>
 );
 
@@ -327,131 +560,290 @@ const QuickItem = ({
 
 
 const styles = StyleSheet.create({
+
   container: {
     flex: 1,
-    backgroundColor: "#fafafa",
-    padding: 6,
+    backgroundColor: "#F8F8F8",
   },
 
-  /* 🔍 SEARCH */
-  searchBox: {
+  content: {
+    paddingBottom: height * 0.06,
+  },
+
+  /* ---------------- HERO ---------------- */
+
+  hero: {
+    backgroundColor: "#111",
+    borderBottomLeftRadius: width * 0.09,
+    borderBottomRightRadius: width * 0.09,
+    paddingHorizontal: width * 0.06,
+    paddingTop: height * 0.075,
+    paddingBottom: height * 0.05,
+  },
+
+  label: {
+    color: "#B6FF2E",
+    fontSize: width * 0.03,
+    fontWeight: "900",
+    letterSpacing: 3,
+  },
+
+  heroTitle: {
+    marginTop: height * 0.015,
+    color: "#FFF",
+    fontSize: width * 0.12,
+    lineHeight: width * 0.12,
+    fontWeight: "900",
+    letterSpacing: -2,
+  },
+
+  heroSubtitle: {
+    marginTop: height * 0.02,
+    color: "#999",
+    fontSize: width * 0.038,
+    lineHeight: height * 0.03,
+    width: "88%",
+  },
+
+  greenLine: {
+    marginTop: height * 0.03,
+    width: width * 0.22,
+    height: 4,
+    borderRadius: 20,
+    backgroundColor: "#B6FF2E",
+  },
+
+  /* ---------------- SEARCH ---------------- */
+
+  searchContainer: {
+    marginHorizontal: width * 0.06,
+    marginTop: -height * 0.028,
+    backgroundColor: "#FFF",
+    borderRadius: width * 0.045,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#eee",
-    marginBottom: 16,
+    paddingHorizontal: width * 0.05,
+    height: height * 0.07,
+
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+
+    elevation: 10,
   },
+
   searchInput: {
     flex: 1,
-    padding: 12,
-    fontSize: 14,
-  },
-
-  /* SECTION */
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 10,
-    marginTop: 10,
-  },
-
-  /* QUICK */
-  quickRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
-
-  quickItem: {
-    alignItems: "center",
-    flex: 1,
-    backgroundColor: "#fff",
-    marginHorizontal: 4,
-    padding: 12,
-    borderRadius: 12,
-    elevation: 2,
-  },
-
-  quickText: {
-    fontSize: 12,
-    marginTop: 6,
-  },
-
-  /* CATEGORY */
-  categoryCard: {
-    marginBottom: 12,
-  },
-
-  category: {
-    fontSize: 16,
+    marginLeft: width * 0.03,
+    color: "#111",
+    fontSize: width * 0.04,
     fontWeight: "600",
-    marginBottom: 6,
   },
 
-  /* FAQ */
+  /* ---------------- SECTION ---------------- */
+
+  sectionHeader: {
+    marginTop: height * 0.045,
+    marginHorizontal: width * 0.06,
+    marginBottom: height * 0.022,
+  },
+
+  sectionLabel: {
+    color: "#73D01C",
+    fontSize: width * 0.028,
+    fontWeight: "900",
+    letterSpacing: 2,
+  },
+
+  sectionHeading: {
+    marginTop: 4,
+    color: "#111",
+    fontSize: width * 0.075,
+    fontWeight: "900",
+    letterSpacing: -1,
+  },
+
+  /* ---------------- QUICK GRID ---------------- */
+
+  quickGrid: {
+    marginHorizontal: width * 0.06,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+
+  quickCard: {
+    width: "48%",
+    backgroundColor: "#111",
+    borderRadius: width * 0.07,
+    paddingVertical: height * 0.03,
+    paddingHorizontal: width * 0.05,
+    marginBottom: height * 0.02,
+  },
+
+  quickIconCircle: {
+    width: width * 0.13,
+    height: width * 0.13,
+    borderRadius: width * 0.065,
+    backgroundColor: "#B6FF2E",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  quickTitle: {
+    marginTop: height * 0.02,
+    color: "#FFF",
+    fontSize: width * 0.045,
+    fontWeight: "800",
+  },
+
+  quickSubtitle: {
+    marginTop: 5,
+    color: "#888",
+    fontSize: width * 0.03,
+    fontWeight: "600",
+    letterSpacing: 1,
+  },
+
+  /* ---------------- CATEGORY ---------------- */
+
+  categorySection: {
+    marginTop: height * 0.02,
+    marginHorizontal: width * 0.06,
+  },
+
+  categoryHeader: {
+    marginBottom: height * 0.018,
+  },
+
+  categoryLabel: {
+    color: "#73D01C",
+    fontSize: width * 0.027,
+    fontWeight: "900",
+    letterSpacing: 2,
+  },
+
+  categoryTitle: {
+    marginTop: 4,
+    fontSize: width * 0.065,
+    fontWeight: "900",
+    color: "#111",
+  },
+
+  categoryLine: {
+    marginTop: height * 0.015,
+    width: width * 0.12,
+    height: 3,
+    borderRadius: 10,
+    backgroundColor: "#B6FF2E",
+  },
+
+  /* ---------------- FAQ ---------------- */
+
   faqCard: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 8,
-    elevation: 1,
+    backgroundColor: "#FFF",
+    borderRadius: width * 0.06,
+    borderWidth: 1,
+    borderColor: "#ECECEC",
+    paddingVertical: height * 0.024,
+    paddingHorizontal: width * 0.05,
+    marginBottom: height * 0.018,
+  },
+
+  faqCardOpen: {
+    borderColor: "#B6FF2E",
   },
 
   faqHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
   },
 
   question: {
-    fontSize: 14,
-    fontWeight: "500",
     flex: 1,
-    paddingRight: 10,
+    color: "#111",
+    fontSize: width * 0.042,
+    fontWeight: "800",
+    lineHeight: height * 0.03,
+    paddingRight: width * 0.04,
   },
 
-  answerBox: {
-    marginTop: 10,
-    borderTopWidth: 1,
-    borderColor: "#eee",
-    paddingTop: 8,
+  arrowCircle: {
+    width: width * 0.1,
+    height: width * 0.1,
+    borderRadius: width * 0.05,
+    backgroundColor: "#111",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  arrowCircleActive: {
+    backgroundColor: "#B6FF2E",
+  },
+
+  answerContainer: {
+    marginTop: height * 0.02,
+  },
+
+  answerDivider: {
+    width: "100%",
+    height: 1,
+    backgroundColor: "#ECECEC",
+    marginBottom: height * 0.018,
   },
 
   answer: {
-    fontSize: 13,
-    color: "#555",
-    lineHeight: 18,
+    color: "#777",
+    fontSize: width * 0.037,
+    lineHeight: height * 0.03,
+    fontWeight: "500",
   },
 
-  /* CONTACT */
-  contactRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
+  /* ---------------- CONTACT ---------------- */
+
+  contactSection: {
+    marginTop: height * 0.055,
+    marginHorizontal: width * 0.06,
+    marginBottom: height * 0.05,
   },
 
   contactCard: {
-    flex: 1,
-    backgroundColor: "#fff",
-    padding: 14,
-    borderRadius: 12,
-    marginHorizontal: 4,
-    elevation: 2,
+    backgroundColor: "#111",
+    borderRadius: width * 0.07,
+    paddingVertical: height * 0.028,
+    paddingHorizontal: width * 0.055,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 
   contactTitle: {
-    fontSize: 14,
-    fontWeight: "600",
+    color: "#B6FF2E",
+    fontSize: width * 0.03,
+    fontWeight: "900",
+    letterSpacing: 2,
   },
 
-  contactSub: {
-    fontSize: 12,
-    color: "#666",
-    marginTop: 4,
+  contactText: {
+    marginTop: height * 0.01,
+    color: "#FFF",
+    fontSize: width * 0.043,
+    fontWeight: "700",
   },
+
+  contactArrow: {
+    width: width * 0.13,
+    height: width * 0.13,
+    borderRadius: width * 0.065,
+    backgroundColor: "#B6FF2E",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
 });
-
-
 

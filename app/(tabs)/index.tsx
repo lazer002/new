@@ -52,7 +52,7 @@ const getProductMeta = (id: string) => {
 };
 
 
-
+// product card 
 function ProductCard({ item }: { item: any }) {
 
   const router = useRouter();
@@ -294,6 +294,9 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
 const [showFloatingHeader, setShowFloatingHeader] = useState(false);
 const [headerHeight, setHeaderHeight] = useState(0);
+
+
+
 const { setTabBarVisible } = useUI();
 const {
   drawerOpen,
@@ -572,6 +575,7 @@ function Header({
   openFilter,
     openMenu,
     setHeaderHeight
+    
 }: {
   categories: any[];
   activeCategory: string | null;
@@ -583,6 +587,31 @@ function Header({
   setHeaderHeight: (height: number) => void;
 }) {
 
+const categoryScrollRef = useRef<ScrollView>(null);
+
+const categoryRefs = useRef<
+  Record<string, View | null>
+>({});
+
+const scrollToCategory = (key: string) => {
+  const pill = categoryRefs.current[key];
+  const scroll = categoryScrollRef.current;
+
+  if (!pill || !scroll) return;
+
+  requestAnimationFrame(() => {
+    pill.measureLayout(
+      scroll as any,
+      (x, y, w) => {
+        scroll.scrollTo({
+          x: Math.max(0, x - width / 2 + w / 2),
+          animated: true,
+        });
+      },
+      () => {}
+    );
+  });
+};
   return (
 
     <View style={styles.header}
@@ -676,6 +705,7 @@ function Header({
       {/* ---------- CATEGORY ---------- */}
 
    <ScrollView
+    ref={categoryScrollRef}
   horizontal
   showsHorizontalScrollIndicator={false}
   contentContainerStyle={styles.tabs}
@@ -683,14 +713,20 @@ function Header({
 
   {/* ALL */}
 
-  <Pressable
-    onPress={() => setActiveCategory("all")}
-    style={[
-      styles.pill,
-      activeCategory === null &&
-        styles.pillActive,
-    ]}
-  >
+<Pressable
+  ref={(ref) => {
+    categoryRefs.current["all"] = ref;
+  }}
+  onPress={() => {
+    setActiveCategory("all");
+    scrollToCategory("all");
+  }}
+  style={[
+    styles.pill,
+    activeCategory === null &&
+      styles.pillActive,
+  ]}
+>
 
     <View style={styles.pillRow}>
 
@@ -746,17 +782,21 @@ function Header({
 
     return (
 
-      <Pressable
-        key={cat._id}
-        onPress={() =>
-          setActiveCategory(cat._id)
-        }
-        style={[
-          styles.pill,
-          active &&
-            styles.pillActive,
-        ]}
-      >
+<Pressable
+  ref={(ref) => {
+    categoryRefs.current[cat._id] = ref;
+  }}
+  key={cat._id}
+  onPress={() => {
+    setActiveCategory(cat._id);
+    scrollToCategory(cat._id);
+  }}
+  style={[
+    styles.pill,
+    active &&
+      styles.pillActive,
+  ]}
+>
 
         <View style={styles.pillRow}>
 
