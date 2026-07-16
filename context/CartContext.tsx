@@ -164,20 +164,20 @@ export function CartProvider({ children }: CartProviderProps) {
     }
 
     try {
-      await api.post(
-        "/api/cart/update",
-        {
-          quantity,
-          size: isBundle ? undefined : size,
-          productId: isBundle ? undefined : id,
-          bundleId: isBundle ? id : undefined,
-        },
-        {
-          headers: {
-            "x-guest-id": guestId,
-          },
-        }
-      );
+   await api.post(
+  "/api/cart/update",
+  {
+    quantity,
+    size: isBundle ? undefined : size,
+    productId: isBundle ? undefined : id,
+    cartItemId: isBundle ? id : undefined,
+  },
+  {
+    headers: {
+      "x-guest-id": guestId,
+    },
+  }
+);
 
       await refresh();
 
@@ -199,15 +199,17 @@ export function CartProvider({ children }: CartProviderProps) {
     if (!guestId) return;
 
     try {
-      await api.post(
-        "/api/cart/remove",
-        isBundle ? { bundleId: id } : { productId: id, size },
-        {
-          headers: {
-            "x-guest-id": guestId,
-          },
-        }
-      );
+ await api.post(
+  "/api/cart/remove",
+  isBundle
+    ? { cartItemId: id }
+    : { productId: id, size },
+  {
+    headers: {
+      "x-guest-id": guestId,
+    },
+  }
+);
 
       await refresh();
     } catch (err) {

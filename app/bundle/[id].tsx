@@ -69,7 +69,7 @@ export default function BundlePDP() {
   const flatListRef = useRef<FlatList>(null);
   const scrollY = useRef(new Animated.Value(0)).current;
   const [showDrawer, setShowDrawer] = useState(false);
-
+const imageRefs = useRef<Record<string, View | null>>({});
   const drawerTranslate = useRef(new Animated.Value(height)).current;
 
 
@@ -1013,6 +1013,9 @@ export default function BundlePDP() {
               >
 
                 <Image
+                                     ref={(ref) => {
+    imageRefs.current[product._id] = ref;
+  }}
                   source={{ uri: product.images?.[0] }}
                   style={styles.drawerImage}
                 />
@@ -1073,7 +1076,23 @@ export default function BundlePDP() {
                     </View>
 
                     <TouchableOpacity
+ 
                       style={styles.previewBtn}
+                      onPress={() => {
+      imageRefs.current[product._id]?.measureInWindow((x, y, w, h) => {
+      router.replace({
+        pathname: "/product/[id]",
+        params: {
+          id: product._id,
+          image: product.images?.[0],
+          x,
+          y,
+          w,
+          h,
+        },
+      });
+    });
+  }}
                     >
 
                       <Text style={styles.previewText}>

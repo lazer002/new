@@ -1,5 +1,5 @@
 // src/screens/CartScreen.tsx
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import {
   View,
@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Dimensions,
   useColorScheme,
+  Pressable,
 } from "react-native";
 
 import Animated, {
@@ -21,11 +22,14 @@ import Animated, {
   withTiming,
   interpolate,
   Extrapolation,
-} from "react-native-reanimated";
+  withSequence,
+  withDelay,
+  Easing,
 
+} from "react-native-reanimated";
+import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Swipeable } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
 import BundleDrawer from "@/components/cart/BundleDrawer";
 import { useCart } from "@/context/CartContext";
@@ -40,7 +44,6 @@ export default function CartScreen() {
   const router = useRouter();
   const theme = useColorScheme();
   const isDark = theme === "dark";
-
   const [coupon, setCoupon] = useState("");
   const [expandedBundle, setExpandedBundle] =
     useState<string | null>(null);
@@ -85,40 +88,94 @@ export default function CartScreen() {
   }
 
   /* ---------- DELETE BACKGROUND ---------- */
-  const renderDelete = (item: any) => {
+const renderDelete = (
+  item: any,
+  progress: any,
+  drag: any
+) => {
+  const isBundle =
+    !!item.bundle || !!item.customBundle;
 
-    const isBundle = !!item.bundle;
-    const isCustomBundle = !!item.customBundle;
+  const cartItemId = item._id;
 
-    const itemId =
-      item.product?._id ??
-      item.bundle?._id ??
-      item.customBundle?._id;
+  const itemId =
+    item.product?._id ??
+    item.bundle?._id;
 
-    const isExpanded =
-      expandedBundle === itemId;
+  const iconStyle = useAnimatedStyle(() => {
+    const scale = interpolate(
+      progress.value,
+      [0, 0.3, 1],
+      [0.6, 0.9, 1],
+      Extrapolation.CLAMP
+    );
 
-    return (
-      <TouchableOpacity
+    const opacity = interpolate(
+      progress.value,
+      [0, 0.2, 1],
+      [0, 0.7, 1],
+      Extrapolation.CLAMP
+    );
+
+    const translateX = interpolate(
+      progress.value,
+      [0, 1],
+      [25, 0],
+      Extrapolation.CLAMP
+    );
+
+    const rotate = interpolate(
+      progress.value,
+      [0, 1],
+      [-12, 0],
+      Extrapolation.CLAMP
+    );
+
+    return {
+      opacity,
+      transform: [
+        { translateX },
+        { scale },
+        { rotate: `${rotate}deg` },
+      ],
+    };
+  });
+
+  return (
+    <View style={styles.deleteWrapper}>
+      <Pressable
         style={styles.deleteBox}
         onPress={() =>
           remove(
-            itemId,
-            isBundle || isCustomBundle
-              ? undefined
-              : item.size,
-            isBundle || isCustomBundle
+            isBundle ? cartItemId : itemId,
+            isBundle ? undefined : item.size,
+            isBundle
           )
         }
       >
-        <Ionicons
-          name="trash-outline"
-          size={26}
-          color="#fff"
-        />
-      </TouchableOpacity>
-    );
-  };
+        <Animated.View
+          style={[styles.deleteCircle, iconStyle]}
+        >
+          <Ionicons
+            name="trash-outline"
+            size={24}
+            color="#111"
+          />
+        </Animated.View>
+
+        <Text style={styles.deleteTitle}>
+          REMOVE
+        </Text>
+
+        <Text style={styles.deleteSubtitle}>
+          Swipe
+        </Text>
+      </Pressable>
+    </View>
+  );
+};
+
+
 
   return (
     <SafeAreaView
@@ -204,12 +261,13 @@ export default function CartScreen() {
         }}
       >
         <View style={styles.itemsContainer}>
-          {items.map((it) => {
+          {items.map((it,index) => {
 
-            const itemId =
-              it.product?._id ??
-              it.bundle?._id ??
-              it.customBundle?._id;
+           const cartItemId = it._id;
+
+          const itemId =
+            it.product?._id ??
+            it.bundle?._id;
 
             const isBundle =
               !!it.bundle ||
@@ -218,191 +276,215 @@ export default function CartScreen() {
             const isExpanded =
               expandedBundle === itemId;
 
+
      
             return (
+<Animated.View
+  key={it._id}
+ 
+>
 
-              <Swipeable
-                key={it._id}
-                renderRightActions={() =>
-                  renderDelete(it)
-                }
-              >
+                <ReanimatedSwipeable
+                  renderRightActions={(progress, drag) =>
+                    renderDelete(it, progress, drag)
+                  }
 
-                <View>
+                  rightThreshold={80}
 
-                  {/* CARD */}
+                  overshootRight={false}
 
-                  <View style={styles.cartCard}>
+                  friction={2.5}
 
-                    <View style={styles.leftColumn}>
+                  dragOffsetFromRightEdge={30}
 
-                      <Image
-                        source={{
-                          uri:
-                            it.mainImage ??
-                            it.product?.images?.[0] ??
-                            it.bundleProducts?.[0]?.product?.images?.[0],
-                        }}
-                        style={styles.productImage}
-                      />
+                  enableTrackpadTwoFingerGesture
 
-                      {isBundle &&
-                        it.bundleProducts?.length > 0 && (
+                  containerStyle={{
+                    overflow: "hidden",
+                    borderRadius: 24,
+                  }}
+                >
 
-                          <BundleDrawer
-                            expanded={isExpanded}
-                            bundleProducts={it.bundleProducts}
-                            onToggle={() => {
+               
 
-                              setExpandedBundle(prev =>
-                                prev === itemId
-                                  ? null
-                                  : itemId
-                              );
+                    {/* CARD */}
 
-                            }}
-                          />
+                    <Animated.View
+                      style={[
+                        styles.cartCard,
 
-                        )}
+                      ]}
+                    >
 
-                    </View>
+                      <View style={styles.leftColumn}>
 
-                    <View style={styles.productInfo}>
-
-                      {/* TITLE */}
-
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                        }}
-                      >
-
-                        <Text
-                          numberOfLines={2}
-                          style={[
-                            styles.productName,
-                            { flex: 1 },
-                          ]}
-                        >
-
-                          {it.customBundle?.title ||
-                            it.bundle?.title ||
-                            it.product?.title}
-
-                        </Text>
-
-
-                      </View>
-
-                      {/* SIZE */}
-
-                      <Text style={styles.productMeta}>
-
-                        Size {it.size || "OS"}
-
-                      </Text>
-
-                      {/* PRICE */}
-
-                      <Text style={styles.productPrice}>
-
-                        ₹
-                        {(
-                          it.customBundle?.price ??
-                          it.bundle?.price ??
-                          it.product?.price ??
-                          0
-                        ).toLocaleString()}
-
-                      </Text>
-
-                      {/* INCLUDED PRODUCTS */}
-
-
-
-                    </View>
-
-                    {/* RIGHT SIDE */}
-
-                    <View style={styles.rightSide}>
-
-                      <TouchableOpacity
-                        onPress={() =>
-                          remove(
-                            itemId,
-                            it.size,
-                            isBundle
-                          )
-                        }
-                      >
-
-                        <Ionicons
-                          name="trash-outline"
-                          size={21}
-                          color="#999"
+                        <Image
+                          source={{
+                            uri:
+                              it.mainImage ??
+                              it.product?.images?.[0] ??
+                              it.bundleProducts?.[0]?.product?.images?.[0],
+                          }}
+                          style={styles.productImage}
                         />
 
-                      </TouchableOpacity>
+                        {isBundle &&
+                          it.bundleProducts?.length > 0 && (
 
-                      <View style={styles.qtyBox}>
+                            <BundleDrawer
+                              expanded={isExpanded}
+                              bundleProducts={it.bundleProducts}
+                              onToggle={() => {
 
-                        <TouchableOpacity
-                          style={styles.qtyBtn}
-                          onPress={() =>
-                            update(
-                              itemId,
-                              it.quantity - 1,
-                              it.size,
-                              isBundle
-                            )
-                          }
-                        >
+                                setExpandedBundle(prev =>
+                                  prev === itemId
+                                    ? null
+                                    : itemId
+                                );
 
-                          <Ionicons
-                            name="remove"
-                            size={16}
-                            color="#111"
-                          />
+                              }}
+                            />
 
-                        </TouchableOpacity>
-
-                        <Text style={styles.qty}>
-                          {it.quantity}
-                        </Text>
-
-                        <TouchableOpacity
-                          style={styles.qtyBtn}
-                          onPress={() =>
-                            update(
-                              itemId,
-                              it.quantity + 1,
-                              it.size,
-                              isBundle
-                            )
-                          }
-                        >
-
-                          <Ionicons
-                            name="add"
-                            size={16}
-                            color="#111"
-                          />
-
-                        </TouchableOpacity>
+                          )}
 
                       </View>
 
-                    </View>
+                      <View style={styles.productInfo}>
 
-                  </View>
+                        {/* TITLE */}
 
-                  {/* BUNDLE DRAWER */}
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                          }}
+                        >
 
-                </View>
+                          <Text
+                            numberOfLines={2}
+                            style={[
+                              styles.productName,
+                              { flex: 1 },
+                            ]}
+                          >
 
-              </Swipeable>
+                            {it.customBundle?.title ||
+                              it.bundle?.title ||
+                              it.product?.title}
 
+                          </Text>
+
+
+                        </View>
+
+                        {/* SIZE */}
+
+                        <Text style={styles.productMeta}>
+
+                          Size {it.size || "OS"}
+
+                        </Text>
+
+                        {/* PRICE */}
+
+                        <Text style={styles.productPrice}>
+
+                          ₹
+                          {(
+                            it.customBundle?.price ??
+                            it.bundle?.price ??
+                            it.product?.price ??
+                            0
+                          ).toLocaleString()}
+
+                        </Text>
+
+                        {/* INCLUDED PRODUCTS */}
+
+
+
+                      </View>
+
+                      {/* RIGHT SIDE */}
+
+                      <View style={styles.rightSide}>
+
+                        <TouchableOpacity
+                          onPress={() =>
+                            remove(
+                              isBundle ? cartItemId : itemId,
+                              it.size,
+                              isBundle
+                            )
+                          }
+                        >
+
+                          <Ionicons
+                            name="trash-outline"
+                            size={21}
+                            color="#999"
+                          />
+
+                        </TouchableOpacity>
+
+                        <View style={styles.qtyBox}>
+
+                          <TouchableOpacity
+                            style={styles.qtyBtn}
+                            onPress={() =>
+                              update(
+                                isBundle ? cartItemId : itemId,
+                                it.quantity - 1,
+                                it.size,
+                                isBundle
+                              )
+                            }
+                          >
+
+                            <Ionicons
+                              name="remove"
+                              size={16}
+                              color="#111"
+                            />
+
+                          </TouchableOpacity>
+
+                          <Text style={styles.qty}>
+                            {it.quantity}
+                          </Text>
+
+                          <TouchableOpacity
+                            style={styles.qtyBtn}
+                            onPress={() =>
+                              update(
+                                isBundle ? cartItemId : itemId,
+                                it.quantity + 1,
+                                it.size,
+                                isBundle
+                              )
+                            }
+                          >
+
+                            <Ionicons
+                              name="add"
+                              size={16}
+                              color="#111"
+                            />
+
+                          </TouchableOpacity>
+
+                        </View>
+
+                      </View>
+
+                    </Animated.View>
+
+                    {/* BUNDLE DRAWER */}
+
+            
+
+                </ReanimatedSwipeable>
+</Animated.View>
             );
 
           })}
@@ -620,7 +702,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
 
     borderWidth: 1,
-
+ overflow: "hidden",
     borderColor: "#EFEFEF",
 
   },
@@ -797,17 +879,71 @@ const styles = StyleSheet.create({
   },
 
   /* Delete */
-  deleteBox: {
-    width: 80,
-    backgroundColor: "#dc2626",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 16,
-    // marginVertical: 8,
-    marginBottom: height * 0.02,
-    marginLeft: width * 0.02,
+deleteBox: {
+  flex: 1,
+
+  width: 100,
+
+  backgroundColor: "#111",
+
+  borderTopRightRadius: 24,
+  borderBottomRightRadius: 24,
+
+  justifyContent: "center",
+  alignItems: "center",
+
+  marginBottom:  height * 0.018, // same as cartCard marginBottom
+},
+deleteCircle: {
+
+  width: 58,
+
+  height: 58,
+
+  borderRadius: 29,
+
+  backgroundColor: "#B6FF2E",
+
+  justifyContent: "center",
+
+  alignItems: "center",
+
+  shadowColor: "#B6FF2E",
+
+  shadowOpacity: .35,
+
+  shadowRadius: 12,
+
+  shadowOffset: {
+    width: 0,
+    height: 5,
   },
 
+},
+
+deleteTitle: {
+
+  marginTop: height * 0.018,
+
+  color: "#FFF",
+
+  fontSize: width * 0.03,
+
+  fontWeight: "900",
+
+  letterSpacing: 2,
+
+},
+
+deleteSubtitle: {
+
+  marginTop: 4,
+
+  color: "#777",
+
+  fontSize: width * 0.028,
+
+},
   /* Summary */
   summaryContainer: {
     height: SUMMARY_HEIGHT,
@@ -1250,4 +1386,9 @@ const styles = StyleSheet.create({
     color: "#777",
 
   },
+deleteWrapper: {
+  width: 100,
+  height: "100%",
+  justifyContent: "center",
+},
 });
