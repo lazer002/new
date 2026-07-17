@@ -207,7 +207,7 @@ console.log("Profile render", wishlist.length ,user);
       <TouchableOpacity
         style={styles.statCard}
         activeOpacity={0.9}
-        onPress={() => go("/savedAddresses")}
+        onPress={() => go("/profile/savedAddresses")}
       >
 
         <Ionicons

@@ -10,6 +10,7 @@ import {
   Animated,
   Dimensions,
   Platform,
+    Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
@@ -34,6 +35,8 @@ export default function OrderDetails() {
   const { orderNumber } = useLocalSearchParams();
   const { guestId, user } = useAuth();
   const [order, setOrder] = useState<any>(null);
+const [cancelModalVisible, setCancelModalVisible] = useState(false);
+
   const [
     expandedBundle,
     setExpandedBundle,
@@ -127,20 +130,15 @@ export default function OrderDetails() {
     return null;
   };
 
-  const handleCancel = () => {
-    Alert.alert(
-      "Cancel Order",
-      "Are you sure you want to cancel this order?",
-      [
-        { text: "No", style: "cancel" },
-        {
-          text: "Yes, Cancel",
-          style: "destructive",
-          onPress: confirmCancel,
-        },
-      ]
-    );
-  };
+
+const handleCancel = () => {
+  setCancelModalVisible(true);
+};
+
+const handleConfirmCancel = async () => {
+  setCancelModalVisible(false);
+  await confirmCancel();
+};
   const confirmCancel = async () => {
     try {
       await api.put(
@@ -1208,7 +1206,86 @@ export default function OrderDetails() {
 
       </View>
 
+<Modal
+  visible={cancelModalVisible}
+  transparent
+  animationType="fade"
+  statusBarTranslucent
+  onRequestClose={() =>
+    setCancelModalVisible(false)
+  }
+>
+  <View style={styles.cancelOverlay}>
+    <TouchableOpacity
+      activeOpacity={1}
+      style={StyleSheet.absoluteFill}
+      onPress={() =>
+        setCancelModalVisible(false)
+      }
+    />
 
+    <View style={styles.cancelModal}>
+      {/* ICON */}
+
+      <View style={styles.cancelIcon}>
+        <Ionicons
+          name="close"
+          size={26}
+          color="#111"
+        />
+      </View>
+
+      {/* CONTENT */}
+
+      <Text style={styles.cancelLabel}>
+        ORDER ACTION
+      </Text>
+
+      <Text style={styles.cancelTitle}>
+        Cancel Order?
+      </Text>
+
+      <Text style={styles.cancelDescription}>
+        Are you sure you want to cancel this order?
+        This action may not be reversible once confirmed.
+      </Text>
+
+      {/* ACTIONS */}
+
+      <View style={styles.cancelActions}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={styles.keepOrderButton}
+          onPress={() =>
+            setCancelModalVisible(false)
+          }
+        >
+          <Text style={styles.keepOrderText}>
+            KEEP ORDER
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.9}
+          style={styles.confirmCancelButton}
+          onPress={handleConfirmCancel}
+        >
+          <Text style={styles.confirmCancelText}>
+            CANCEL ORDER
+          </Text>
+
+          <View style={styles.confirmCancelIcon}>
+            <Ionicons
+              name="arrow-forward"
+              size={17}
+              color="#111"
+            />
+          </View>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </View>
+</Modal>
     </SafeAreaView>
   );
 }
@@ -2408,4 +2485,101 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "700",
   },
+  cancelOverlay: {
+  flex: 1,
+  backgroundColor: "rgba(0,0,0,0.55)",
+  justifyContent: "flex-end",
+},
+
+cancelModal: {
+  backgroundColor: "#FFFFFF",
+  borderTopLeftRadius: 32,
+  borderTopRightRadius: 32,
+  paddingHorizontal: 22,
+  paddingTop: 26,
+  paddingBottom: 30,
+},
+
+cancelIcon: {
+  width: 54,
+  height: 54,
+  borderRadius: 27,
+  backgroundColor: "#B6FF2E",
+  justifyContent: "center",
+  alignItems: "center",
+  marginBottom: 24,
+},
+
+cancelLabel: {
+  fontSize: 10,
+  fontWeight: "800",
+  letterSpacing: 1.5,
+  color: "#888",
+  marginBottom: 8,
+},
+
+cancelTitle: {
+  fontSize: 30,
+  fontWeight: "900",
+  letterSpacing: -0.8,
+  color: "#111",
+},
+
+cancelDescription: {
+  marginTop: 10,
+  fontSize: 14,
+  lineHeight: 21,
+  color: "#777",
+  maxWidth: 330,
+},
+
+cancelActions: {
+  flexDirection: "row",
+  marginTop: 30,
+  gap: 10,
+},
+
+keepOrderButton: {
+  flex: 0.8,
+  height: 58,
+  borderRadius: 20,
+  backgroundColor: "#F5F5F5",
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+keepOrderText: {
+  fontSize: 11,
+  fontWeight: "800",
+  letterSpacing: 0.8,
+  color: "#111",
+},
+
+confirmCancelButton: {
+  flex: 1.3,
+  height: 58,
+  borderRadius: 20,
+  backgroundColor: "#111",
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  paddingLeft: 18,
+  paddingRight: 6,
+},
+
+confirmCancelText: {
+  fontSize: 11,
+  fontWeight: "800",
+  letterSpacing: 0.8,
+  color: "#FFF",
+},
+
+confirmCancelIcon: {
+  width: 46,
+  height: 46,
+  borderRadius: 23,
+  backgroundColor: "#B6FF2E",
+  justifyContent: "center",
+  alignItems: "center",
+},
 });

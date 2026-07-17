@@ -37,7 +37,56 @@ const STATUS_STEPS = [
   "shipped",
   "out for delivery",
   "delivered",
+  "return requested",
+  "return approved",
+  "returned",
+  "refunded",
+  "exchange requested",
+  "exchange approved",
+  "exchange processing",
+  "exchanged",
+  "repair requested",
+  "repair approved",
+  "repair processing",
+  "repaired",
+  "service requested",
+  "cancelled",
 ];
+
+const NORMAL_DELIVERY_STEPS = [
+  "pending",
+  "confirmed",
+  "dispatched",
+  "shipped",
+  "out for delivery",
+  "delivered",
+];
+
+const RETURN_STEPS = [
+  "delivered",
+  "return requested",
+  "return approved",
+  "returned",
+  "refunded",
+];
+
+const EXCHANGE_STEPS = [
+  "delivered",
+  "exchange requested",
+  "exchange approved",
+  "exchange processing",
+  "exchanged",
+];
+
+const REPAIR_STEPS = [
+  "delivered",
+  "repair requested",
+  "repair approved",
+  "repair processing",
+  "repaired",
+];
+
+
 
 /* ---------- TYPES ---------- */
 
@@ -111,6 +160,31 @@ export default function TrackOrderPage() {
   );
 
   /* ---------- SEARCH MODE ---------- */
+
+
+
+const getStatusSteps = (status?: string) => {
+  const value = status?.toLowerCase() || "";
+
+  if (value.startsWith("return") || value === "returned" || value === "refunded") {
+    return RETURN_STEPS;
+  }
+
+  if (value.startsWith("exchange") || value === "exchanged") {
+    return EXCHANGE_STEPS;
+  }
+
+  if (value.startsWith("repair") || value === "repaired") {
+    return REPAIR_STEPS;
+  }
+
+  return NORMAL_DELIVERY_STEPS;
+};
+const activeStatusSteps = getStatusSteps(order?.orderStatus);
+
+const currentIndex = activeStatusSteps.indexOf(
+  order?.orderStatus?.toLowerCase() ?? ""
+);
 
 if (!params.orderNumber && !order) {
   return (
@@ -250,11 +324,6 @@ if (!params.orderNumber && !order) {
     );
   }
 
-  /* ---------- ORDER VIEW ---------- */
-const currentIndex =
-  STATUS_STEPS.indexOf(
-    order?.orderStatus?.toLowerCase()
-  );
 
 const statusColor = () => {
   switch (order?.orderStatus) {
@@ -478,124 +547,67 @@ return (
 </Text>
 
 <View style={styles.timelineCard}>
-
-  {STATUS_STEPS.map((step, index) => {
-
-    const completed =
-      index < currentIndex;
-
-    const active =
-      index === currentIndex;
+  {activeStatusSteps.map((step, index) => {
+    const completed = index < currentIndex;
+    const active = index === currentIndex;
 
     return (
-
-      <View
-        key={step}
-        style={styles.timelineRow}
-      >
-
-        {/* LEFT */}
-
-        <View
-          style={styles.timelineLeft}
-        >
-
+      <View key={step} style={styles.timelineRow}>
+        <View style={styles.timelineLeft}>
           <View
             style={[
               styles.timelineDot,
-
-              completed &&
-                styles.timelineDotDone,
-
-              active &&
-                styles.timelineDotCurrent,
+              completed && styles.timelineDotDone,
+              active && styles.timelineDotCurrent,
             ]}
           >
-
             {completed && (
-
               <Ionicons
                 name="checkmark"
                 size={13}
                 color="#111"
               />
-
             )}
 
             {active && (
-
-              <View
-                style={
-                  styles.timelinePulse
-                }
-              />
-
+              <View style={styles.timelinePulse} />
             )}
-
           </View>
 
-          {index !==
-            STATUS_STEPS.length - 1 && (
-
+          {index !== activeStatusSteps.length - 1 && (
             <View
               style={[
                 styles.timelineLine,
-
-                index <
-                currentIndex
+                index < currentIndex
                   ? styles.timelineLineDone
                   : styles.timelineLinePending,
               ]}
             />
-
           )}
-
         </View>
 
-        {/* RIGHT */}
-
-        <View
-          style={styles.timelineContent}
-        >
-
+        <View style={styles.timelineContent}>
           <Text
             style={[
               styles.timelineTitle,
-
-              active &&
-                styles.timelineTitleActive,
-
-              completed &&
-                styles.timelineTitleDone,
+              active && styles.timelineTitleActive,
+              completed && styles.timelineTitleDone,
             ]}
           >
-
             {step}
-
           </Text>
 
-          <Text
-            style={styles.timelineSubtitle}
-          >
-
+          <Text style={styles.timelineSubtitle}>
             {completed
               ? "Completed"
-
               : active
               ? "Currently in progress"
-
               : "Waiting"}
-
           </Text>
-
         </View>
-
       </View>
-
     );
-
   })}
-
 </View>
 
       {/* ITEMS */}

@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
+  ActivityIndicator
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -25,7 +26,8 @@ const { height,width } = require("react-native").Dimensions.get("window");
 export default function OrdersScreen() {
   const router = useRouter();
   const { user, guestId } = useAuth();
-  const [orders, setOrders] = useState<any[]>([]);
+const [orders, setOrders] = useState<any[]>([]);
+const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"completed" | "pending" | "cancelled">("pending");
 const scrollY = useSharedValue(0);
 const scrollHandler =
@@ -71,16 +73,20 @@ const heroAnimatedStyle = useAnimatedStyle(() => {
       loadOrders();
     }, [guestId, user])
   );
-  const loadOrders = async () => {
-    try {
-      const res = await api.get("/api/orders/mine");
+const loadOrders = async () => {
+  try {
+    setLoading(true);
 
-      setOrders(res.data.orders || res.data);
-    } catch (e) {
-      console.log("Order fetch error:", e);
-    }
+    const res = await api.get("/api/orders/mine");
+
+    setOrders(res.data.orders || res.data || []);
+  } catch (e) {
+    console.log("Order fetch error:", e);
+    setOrders([]);
+  } finally {
+    setLoading(false);
   }
-
+};
 
   const getStatusStyle = (status: string) => {
 
@@ -120,6 +126,25 @@ const heroAnimatedStyle = useAnimatedStyle(() => {
 
     const status =
       getCurrentStatus(item);
+
+
+        const isPlaced = [
+    "pending",
+    "confirmed",
+    "processing",
+    "shipped",
+    "out_for_delivery",
+    "delivered",
+  ].includes(status);
+
+  const isShipped = [
+    "shipped",
+    "out_for_delivery",
+    "delivered",
+  ].includes(status);
+
+  const isDelivered =
+    status === "delivered";
 
     const image =
       item.items?.[0]?.mainImage;
@@ -241,76 +266,86 @@ const heroAnimatedStyle = useAnimatedStyle(() => {
               </Text>
 
             )}
-            <View
-              style={styles.timeline}
-            >
+        <View style={styles.timeline}>
 
-      <View style={styles.timelineItem}>
-  <View
-    style={[
-      styles.timelineIcon,
-      status === "pending" && styles.timelineActive,
-    ]}
-  >
-    <Ionicons
-      name="receipt-outline"
-      size={14}
-      color={status === "pending" ? "#111" : "#888"}
-    />
+  {/* PLACED */}
+
+  <View style={styles.timelineItem}>
+    <View
+      style={[
+        styles.timelineIcon,
+        isPlaced && styles.timelineActive,
+      ]}
+    >
+      <Ionicons
+        name="receipt-outline"
+        size={14}
+        color="#111"
+      />
+    </View>
+
+    <Text style={styles.timelineLabel}>
+      Placed
+    </Text>
   </View>
 
-  <Text style={styles.timelineLabel}>
-    Placed
-  </Text>
-</View>
-
-              <View
-                style={styles.timelineLine}
-              />
-
-          <View style={styles.timelineItem}>
   <View
     style={[
-      styles.timelineIcon,
-      status !== "pending" && styles.timelineActive,
+      styles.timelineLine,
+      isShipped && styles.timelineLineActive,
     ]}
-  >
-    <Ionicons
-      name="cube-outline"
-      size={14}
-      color={status !== "pending" ? "#111" : "#888"}
-    />
+  />
+
+  {/* SHIPPED */}
+
+  <View style={styles.timelineItem}>
+    <View
+      style={[
+        styles.timelineIcon,
+        isShipped && styles.timelineActive,
+      ]}
+    >
+      <Ionicons
+        name="cube-outline"
+        size={14}
+        color={isShipped ? "#111" : "#888"}
+      />
+    </View>
+
+    <Text style={styles.timelineLabel}>
+      Shipped
+    </Text>
   </View>
 
-  <Text style={styles.timelineLabel}>
-    Shipped
-  </Text>
-</View>
-
-              <View
-                style={styles.timelineLine}
-              />
-
-   <View style={styles.timelineItem}>
   <View
     style={[
-      styles.timelineIcon,
-      status === "delivered" && styles.timelineActive,
+      styles.timelineLine,
+      isDelivered && styles.timelineLineActive,
     ]}
-  >
-    <Ionicons
-      name="checkmark"
-      size={15}
-      color={status === "delivered" ? "#111" : "#888"}
-    />
+  />
+
+  {/* DELIVERED */}
+
+  <View style={styles.timelineItem}>
+    <View
+      style={[
+        styles.timelineIcon,
+        isDelivered && styles.timelineActive,
+      ]}
+    >
+      <Ionicons
+        name="checkmark"
+        size={15}
+        color={isDelivered ? "#111" : "#888"}
+      />
+    </View>
+
+    <Text style={styles.timelineLabel}>
+      Delivered
+    </Text>
   </View>
 
-  <Text style={styles.timelineLabel}>
-    Delivered
-  </Text>
 </View>
-
-            </View>
             <View
               style={styles.priceRow}
             >
@@ -627,106 +662,112 @@ const heroAnimatedStyle = useAnimatedStyle(() => {
 
   
 
-      {orders.length === 0 ? (
-        <View style={styles.emptyContainer}>
+   {loading ? (
+  <View style={styles.loadingContainer}>
+    <ActivityIndicator
+      size="large"
+      color="#B6FF2E"
+    />
 
-          <View style={styles.emptyIcon}>
+    <Text style={styles.loadingText}>
+      LOADING YOUR ORDERS
+    </Text>
+  </View>
+) : orders.length === 0 ? (
+  <View style={styles.emptyContainer}>
+    <View style={styles.emptyIcon}>
+      <Ionicons
+        name="cube-outline"
+        size={58}
+        color="#B6FF2E"
+      />
+    </View>
 
-            <Ionicons
-              name="cube-outline"
-              size={58}
-              color="#111"
-            />
+    <Text style={styles.emptyTitle}>
+      NO ORDERS YET
+    </Text>
 
-          </View>
+    <Text style={styles.emptySubtitle}>
+      Looks like you haven't placed your first order.
+    </Text>
 
-          <Text
-            style={styles.emptyTitle}
-          >
-
-            NO ORDERS YET
-
-          </Text>
-
-          <Text
-            style={styles.emptySubtitle}
-          >
-
-            Looks like you haven't
-            placed your first order.
-
-          </Text>
-
-          <TouchableOpacity
-
-            style={styles.shopNowButton}
-
-            onPress={() =>
-              router.push("/")
-            }
-
-          >
-
-            <Text
-              style={styles.shopNowText}
-            >
-
-              START SHOPPING
-
-            </Text>
-
-          </TouchableOpacity>
-
-        </View>
-      ) : (
-<Animated.FlatList
-  data={[{ type: "segment" }, ...filteredOrders]}
-  ListHeaderComponent={<Hero />}
-  stickyHeaderIndices={[1]}
-  keyExtractor={(item: any, index) =>
-    item.type === "segment" ? "segment" : item._id ?? index.toString()
-  }
-  renderItem={({ item, index }) => {
-    if (item.type === "segment") {
-      return (
-        <View style={styles.segmentWrapper}>
-          <View style={styles.segment}>
-            {[
-              { key: "pending", label: "Pending" },
-              { key: "completed", label: "Completed" },
-              { key: "cancelled", label: "Cancelled" },
-            ].map((t: any) => (
-              <TouchableOpacity
-                key={t.key}
-                onPress={() => setTab(t.key)}
-                style={[
-                  styles.segmentItem,
-                  tab === t.key && styles.segmentActive,
-                ]}
-              >
-                <Text
+    <TouchableOpacity
+      style={styles.shopNowButton}
+      onPress={() => router.push("/")}
+    >
+      <Text style={styles.shopNowText}>
+        START SHOPPING
+      </Text>
+    </TouchableOpacity>
+  </View>
+) : (
+  <Animated.FlatList
+    data={[
+      { type: "segment" },
+      ...filteredOrders,
+    ]}
+    ListHeaderComponent={<Hero />}
+    stickyHeaderIndices={[1]}
+    keyExtractor={(item: any, index) =>
+      item.type === "segment"
+        ? "segment"
+        : item._id ?? index.toString()
+    }
+    renderItem={({ item, index }) => {
+      if (item.type === "segment") {
+        return (
+          <View style={styles.segmentWrapper}>
+            <View style={styles.segment}>
+              {[
+                {
+                  key: "pending",
+                  label: "Pending",
+                },
+                {
+                  key: "completed",
+                  label: "Completed",
+                },
+                {
+                  key: "cancelled",
+                  label: "Cancelled",
+                },
+              ].map((t: any) => (
+                <TouchableOpacity
+                  key={t.key}
+                  onPress={() => setTab(t.key)}
                   style={[
-                    styles.segmentText,
-                    tab === t.key && styles.segmentTextActive,
+                    styles.segmentItem,
+                    tab === t.key &&
+                      styles.segmentActive,
                   ]}
                 >
-                  {t.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    style={[
+                      styles.segmentText,
+                      tab === t.key &&
+                        styles.segmentTextActive,
+                    ]}
+                  >
+                    {t.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
-        </View>
-      );
-    }
+        );
+      }
 
-    return renderItem({ item, index: index - 1 });
-  }}
-  contentContainerStyle={styles.listContent}
-  showsVerticalScrollIndicator={false}
-  scrollEventThrottle={16}
-  onScroll={scrollHandler}
-/>
-      )}
+      return renderItem({
+        item,
+        index: index - 1,
+      });
+    }}
+    contentContainerStyle={styles.listContent}
+    showsVerticalScrollIndicator={false}
+    scrollEventThrottle={16}
+    onScroll={scrollHandler}
+  />
+)}
     </SafeAreaView>
   );
 }
@@ -1331,7 +1372,9 @@ segment: {
     alignItems: "center",
 
   },
-
+timelineLineActive: {
+  backgroundColor: "#B6FF2E",
+},
   shopNowText: {
 
     fontSize: 14,
@@ -1368,7 +1411,19 @@ segment: {
     alignItems: "center",
 
   },
+loadingContainer: {
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+},
 
+loadingText: {
+  marginTop: 16,
+  fontSize: 11,
+  fontWeight: "800",
+  letterSpacing: 1.2,
+  color: "#777",
+},
   heroDivider: {
 
     width: 1,
