@@ -9,6 +9,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ActivityIndicator,
+  InteractionManager
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -19,7 +21,7 @@ import Toast from "react-native-toast-message"
 import { getAddressFromPincode } from "@/utils/helper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 /* ================= TYPES ================= */
-
+import RazorpayCheckout from "react-native-razorpay";
 type PaymentMethod = "cod" | "razorpay";
 
 type Address = {
@@ -141,6 +143,7 @@ const emptyAddress: Address = {
   const [paymentMethod, setPaymentMethod] =
     useState<PaymentMethod>("cod");
   const [loading, setLoading] = useState<boolean>(false);
+  const [verifyingPayment, setVerifyingPayment] = useState(false);
 const toggleExpanded = (id: string) => {
   setExpandedItems((prev) => ({
     ...prev,
@@ -306,14 +309,103 @@ const placeOrder = async (): Promise<void> => {
     // ✅ CLEAR CART (IMPORTANT FIX)
 
 
-    // ✅ PAYMENT FLOW
-    if (paymentMethod === "razorpay") {
-      router.push({
-        pathname: "/razorpay",
-        params: { orderId: res.data._id },
-      });
-      return;
-    }
+  console.log("ORDER RESPONSE:", res.data);
+
+if (paymentMethod === "razorpay") {
+  console.log("Opening Razorpay:", {
+    orderId: res.data.orderId,
+    razorpayOrderId: res.data.razorpayOrderId,
+    amount: res.data.amount,
+    currency: res.data.currency,
+  });
+
+  const options = {
+    key: process.env.EXPO_PUBLIC_RAZORPAY_KEY,
+    amount: res.data.amount,
+    currency: res.data.currency || "INR",
+    name: "GARRIB",
+    description: `Order ${res.data.orderNumber || ""}`,
+    order_id: res.data.razorpayOrderId,
+
+    prefill: {
+      name: `${address.firstName} ${address.lastName}`.trim(),
+      email,
+      contact: address.phone,
+    },
+
+    theme: {
+      color: "#B6FF2E",
+    },
+  };
+
+  console.log("RAZORPAY OPTIONS:", options);
+setVerifyingPayment(true);
+
+// Give React Native time to actually render the full-screen loader
+await new Promise<void>((resolve) => {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      resolve();
+    });
+  });
+});
+
+try {
+  const payment = await RazorpayCheckout.open(options);
+
+console.log("RAZORPAY SUCCESS:", payment);
+
+const verifyRes = await api.post(
+  "/api/orders/payment-success",
+  {
+    orderId: res.data.orderId,
+
+    razorpay_payment_id:
+      payment.razorpay_payment_id,
+
+    razorpay_order_id:
+      payment.razorpay_order_id,
+
+    razorpay_signature:
+      payment.razorpay_signature,
+  },
+  {
+    headers: {
+      "x-guest-id": guestId || "",
+    },
+  }
+);
+
+console.log(
+  "PAYMENT VERIFY RESPONSE:",
+  verifyRes.data
+);
+
+if (!verifyRes.data?.success) {
+  setVerifyingPayment(false);
+  throw new Error(
+    "Payment verification failed"
+  );
+}
+
+await clearCart();
+
+router.replace({
+  pathname: "/order-success",
+  params: {
+    orderNumber: res.data.orderNumber,
+    email,
+  },
+});
+
+return;
+} catch (error: any) {
+  // Razorpay was cancelled OR payment/verification failed
+  setVerifyingPayment(false);
+  throw error;
+}
+
+}
 
     // ✅ SUCCESS FLOW
     router.replace({
@@ -1154,7 +1246,24 @@ const isBundle = !!it.bundle && !isCustomBundle;
     </TouchableOpacity>
 
   </View>
+{verifyingPayment && (
+  <View style={styles.paymentLoader}>
+    <View style={styles.paymentLoaderCard}>
+      <ActivityIndicator
+        size="large"
+        color="#111"
+      />
 
+      <Text style={styles.paymentLoaderTitle}>
+        PAYMENT SUCCESSFUL
+      </Text>
+
+      <Text style={styles.paymentLoaderText}>
+        Confirming your order...
+      </Text>
+    </View>
+  </View>
+)}
 </SafeAreaView>
   );
 }
@@ -2108,4 +2217,32 @@ saveAmount:{
     justifyContent: "center",
     alignItems: "center",
   },
+  paymentLoader: {
+  ...StyleSheet.absoluteFillObject,
+  backgroundColor: "#B6FF2E",
+  zIndex: 9999,
+  elevation: 9999,
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+paymentLoaderCard: {
+  alignItems: "center",
+  justifyContent: "center",
+},
+
+paymentLoaderTitle: {
+  marginTop: 24,
+  color: "#111",
+  fontSize: 20,
+  fontWeight: "900",
+  letterSpacing: 1.5,
+},
+
+paymentLoaderText: {
+  marginTop: 8,
+  color: "#555",
+  fontSize: 14,
+  fontWeight: "600",
+},
 });
