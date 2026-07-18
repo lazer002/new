@@ -159,7 +159,7 @@ return (
           GOOD EVENING
         </Text>
 
-        <Text style={styles.brand}>
+        <Text style={styles.brand} onPress={()=> router.push("/(tabs)")}>
           GARRIB
         </Text>
       </View>

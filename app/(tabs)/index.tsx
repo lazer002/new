@@ -20,6 +20,11 @@ import { useWishlist } from "@/context/WishlistContext";
 import { LinearGradient } from "expo-linear-gradient";
 import PremiumDrawer from "@/components/PremiumDrawer";
 import FloatingHeader from "@/components/FloatingHeader";
+import {
+  Typography,
+  Spacing,
+  Radius,
+} from "@/theme";
 
 import Animated, {
   useAnimatedScrollHandler,
@@ -922,7 +927,7 @@ tabContent: {
   },
 
   title: {
-    fontSize: 18,
+    fontSize: 8,
     fontWeight: "600",
     marginTop: 2,
   },
@@ -1093,7 +1098,7 @@ buyText: {
 cardTitle: {
   marginTop: 12,
   color: "#FFF",
-  fontSize: 22,
+  fontSize: 12,
   fontWeight: "900",
   lineHeight: 28,
 },
