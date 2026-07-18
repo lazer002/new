@@ -1,21 +1,26 @@
+
+
 {
   "expo": {
-    "name": "monkey",
-    "newArchEnabled": true,
-    "slug": "monkey",
+    "name": "GARRIB",
+    "slug": "new",
     "version": "1.0.0",
+    "newArchEnabled": true,
     "orientation": "portrait",
-    "scheme": "com.anonymous.monkey",
+    "scheme": "garrib",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
+
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+
     "assetBundlePatterns": [
       "**/*"
     ],
+
     "android": {
       "backgroundColor": "#ffffff",
       "adaptiveIcon": {
@@ -23,8 +28,9 @@
         "foregroundImage": "./assets/images/android-icon-foreground.png"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.monkey"
+      "package": "com.anonymous.GARRIB"
     },
+
     "plugins": [
       "expo-router",
       [
@@ -38,6 +44,7 @@
       "expo-font",
       "expo-web-browser"
     ],
+
     "extra": {
       "router": {},
       "eas": {
