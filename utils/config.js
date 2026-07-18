@@ -3,7 +3,7 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const BASE_URL = "https://urbanzoro.onrender.com/api";
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL
 
 export const api = axios.create({
   baseURL: BASE_URL,
