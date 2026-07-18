@@ -28,7 +28,6 @@ type AuthContextType = {
   register: (name: string, email: string, password: string) => Promise<any>;
   loginWithGoogle: (code: string, codeVerifier: string) => Promise<any>;
   promptGoogleLogin: () => Promise<void>;
-  promptFacebookLogin: () => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -291,38 +290,7 @@ useEffect(() => {
   };
 
 
-const [fbRequest, fbResponse, fbPromptAsync] = AuthSession.useAuthRequest(
-  {
-    clientId: process.env.EXPO_PUBLIC_FACEBOOK_APP_ID,
-    redirectUri: AuthSession.makeRedirectUri(),
-    scopes: ["public_profile", "email"],
-    responseType: AuthSession.ResponseType.Token,
-  },
-  {
-    authorizationEndpoint: "https://www.facebook.com/v18.0/dialog/oauth",
-  }
-);
-const promptFacebookLogin = async () => {
-  try {
-    const result = await fbPromptAsync();
-    if (result?.type !== "success") return;
 
-    const accessToken = result.params?.access_token;
-    if (!accessToken) return;
-
-    // 🔥 SAME PATTERN AS GOOGLE
-    const { data } = await baseApi.post("/api/auth/facebook", {
-      access_token: accessToken,
-    });
-
-    setAccessToken(data.accessToken);
-    setRefreshToken(data.refreshToken);
-    setUser(data.user);
-
-  } catch (err) {
-    console.log("Facebook error:", err);
-  }
-};
 
 console.log("AuthContext rendered", { user, guestId, loading });
   /* ---------- PROVIDER ---------- */
@@ -340,7 +308,6 @@ console.log("AuthContext rendered", { user, guestId, loading });
         loginWithGoogle,
         logout: handleLogout,
         promptGoogleLogin,
-         promptFacebookLogin,
       }}
     >
       {children}

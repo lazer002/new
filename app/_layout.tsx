@@ -5,7 +5,6 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import AnimatedBackground from "@/components/Background";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
@@ -62,7 +61,6 @@ export default function RootLayout() {
 
                       <View style={styles.darkBg} />
 
-                      <AnimatedBackground />
 
                       <Slot />
 
