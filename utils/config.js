@@ -2,7 +2,9 @@
 
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Dimensions, PixelRatio } from "react-native";
 
+console.log(Dimensions.get("window"));
 console.log("EXPO_PUBLIC_API_URL =", process.env.EXPO_PUBLIC_API_URL);
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL
 

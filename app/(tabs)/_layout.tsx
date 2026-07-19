@@ -16,7 +16,7 @@ import { useWishlist } from "@/context/WishlistContext";
 import { useFilter } from "@/context/FilterContext";
 import { useUI } from "@/context/UIContext";
 const { height, width } = require("react-native").Dimensions.get("window");
-
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 const Badge = ({ count }: { count: number }) => {
   if (!count) return null;
 
@@ -35,7 +35,7 @@ function CustomTabBar({
   state,
   navigation,
 }: any) {
-
+const insets = useSafeAreaInsets();
   const { width ,height} =
     useWindowDimensions();
 
@@ -186,7 +186,7 @@ const toValue =
         styles.wrapper,
         {
           width: navWidth,
-
+ bottom: insets.bottom + 12,
           opacity: footerOpacity,
 
           transform: [
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
 
     position: "absolute",
 
-    bottom: height * 0.026,
+    // bottom: height * 0.026,
 
     alignSelf: "center",
 

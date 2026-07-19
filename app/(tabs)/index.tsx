@@ -21,9 +21,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import PremiumDrawer from "@/components/PremiumDrawer";
 import FloatingHeader from "@/components/FloatingHeader";
 import {
-  Typography,
-  Spacing,
-  Radius,
+responsive
 } from "@/theme";
 
 import Animated, {
@@ -849,94 +847,6 @@ const scrollToCategory = (key: string) => {
 
 const styles = StyleSheet.create({
   screen: { backgroundColor: "#fafafa" },
-
-
-
-headerTop: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-},
-
-headerLabel: {
-  fontSize: 12,
-  fontWeight: "700",
-  color: "#9A9A9A",
-  letterSpacing: 2,
-  textTransform: "uppercase",
-},
-
-headerTitle: {
-  marginTop: 4,
-  fontSize: 36,
-  fontWeight: "900",
-  color: "#111",
-  letterSpacing: -.8,
-}
-
-,
-search: {
-  flex: 1,
-  flexDirection: "row",
-  alignItems: "center",
-  backgroundColor: "#f2f2f2",
-  borderRadius: 30,
-  paddingHorizontal: 16,
-  paddingTop: 1,
-  height: 46,
-},
-
-
-
-tab: {
-  paddingHorizontal: 24,
-  paddingVertical: 10,
-  backgroundColor: "#eee",
-  borderRadius: 20,
-  marginRight: 10,
-},
-
-tabActive: {
-  backgroundColor: "#000000ff", // green like your design
-},
-
-tabText: {
-  fontSize: 16,
-  color: "#000",
-  fontWeight: "500",
-},
-
-tabTextActive: {
-  color: "#fff",
-  fontWeight: "600",
-},
-
-tabContent: {
-  flexDirection: "row",
-  alignItems: "center",
-},
-
-
-
-
-
-  category: {
-    fontSize: 14,
-    color: "#999",
-    marginTop: 6,
-  },
-
-  title: {
-    fontSize: 8,
-    fontWeight: "600",
-    marginTop: 2,
-  },
-
-  searchRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  gap: 10, // if not supported use marginRight
-},
 
 
 
