@@ -7,6 +7,16 @@ import {
   useWindowDimensions,
   Text,
 } from "react-native";
+import {
+  FONT,
+  ICON,
+  BUTTON,
+  SPACING,
+  RADIUS,
+  SAFE,
+  SHADOW,
+  hairline,
+} from "@/theme/responsive";
 import { useEffect, useRef } from "react";
 import { useCart } from "@/context/CartContext";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -28,8 +38,8 @@ const Badge = ({ count }: { count: number }) => {
     </View>
   );
 };
-const WRAPPER_HEIGHT = height * 0.078;
-const PILL_HEIGHT = height * 0.055;
+const WRAPPER_HEIGHT = 68;
+const PILL_HEIGHT = 46;
 
 function CustomTabBar({
   state,
@@ -59,8 +69,7 @@ const isCartScreen =
     state.routes.length;
 
     const HORIZONTAL_PADDING = 10;
-  const navWidth =    width * 0.88;
-
+const navWidth = Math.min(width - 24, 380);
 const tabWidth = (navWidth - HORIZONTAL_PADDING * 2) / tabCount;
 
 
@@ -250,11 +259,7 @@ const toValue =
                       ? "home-fill"
                       : "home"
                   }
-                  size={
-                    isFocused
-                      ? 26
-                      : 21
-                  }
+size={isFocused ? ICON.md : ICON.sm}
                   color={iconColor}
                 />
               );
@@ -274,11 +279,7 @@ const toValue =
                         ? "heart-fill"
                         : "heart"
                     }
-                    size={
-                      isFocused
-                        ? 26
-                        : 21
-                    }
+                 size={isFocused ? ICON.md : ICON.sm}
                     color={iconColor}
                   />
 
@@ -300,7 +301,7 @@ const toValue =
               icon = (
                 <MaterialIcons
                   name="inventory-2"
-                  size={isFocused ? 26 : 21}
+                 size={isFocused ? ICON.md : ICON.sm}
                   color={iconColor}
                 />
               );
@@ -316,7 +317,7 @@ const toValue =
 
       <MaterialIcons
         name="shopping-bag"
-        size={isFocused ? 26 : 21}
+       size={isFocused ? ICON.md : ICON.sm}
         color={iconColor}
       />
 
@@ -400,141 +401,131 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
+wrapper: {
+  position: "absolute",
 
-  wrapper: {
+  alignSelf: "center",
 
-    position: "absolute",
+  height: WRAPPER_HEIGHT,
 
-    // bottom: height * 0.026,
+  borderRadius: 26,
 
-    alignSelf: "center",
+  backgroundColor: "#0E0E0E",
 
-    height:height * 0.078,
+  flexDirection: "row",
 
-    // width: "90%",
+  alignItems: "center",
 
-    borderRadius: 30,
+  paddingHorizontal: SPACING.sm,
 
-    backgroundColor: "#0E0E0E",
+  borderWidth: hairline,
 
-    flexDirection: "row",
+  borderColor: "#1D1D1D",
 
-    alignItems: "center",
+  shadowColor: "#000",
 
-    paddingHorizontal: 10,
+  shadowOpacity: 0.32,
 
-    borderWidth: 1,
+  shadowRadius: 22,
 
-    borderColor: "#1D1D1D",
-
-    shadowColor: "#000",
-
-    shadowOpacity: 0.32,
-
-    shadowRadius: 26,
-
-    shadowOffset: {
-      width: 0,
-      height: 14,
-    },
-
-    elevation: 24,
-
+  shadowOffset: {
+    width: 0,
+    height: 12,
   },
 
-  activePill: {
-
-    position: "absolute",
-
-    left: 0,
-top: (WRAPPER_HEIGHT - PILL_HEIGHT) / 2,
-    borderRadius: 22,
-
-    backgroundColor: "#B6FF2E",
-
-    borderWidth: 1,
-
-    borderColor: "#D8FF77",
-
-    shadowColor: "#B6FF2E",
-
-    shadowOpacity: 0.65,
-
-    shadowRadius: 22,
-
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-
-    elevation: 18,
-
-  },
-tab: {
-    flex: 1,
-    height: "100%",
-    justifyContent: "center",
-    alignItems: "center",
+  elevation: 22,
 },
-  activeLabel: {
+activePill: {
+  position: "absolute",
 
-    marginTop: 0,
+  left: 0,
 
-    fontSize: 10,
+  top: (WRAPPER_HEIGHT - PILL_HEIGHT) / 2,
 
-    fontWeight: "800",
+  borderRadius: 18,
 
-    color: "#111",
+  backgroundColor: "#B6FF2E",
 
-    letterSpacing: .5,
+  borderWidth: hairline,
 
-    textTransform: "uppercase",
+  borderColor: "#D8FF77",
 
+  shadowColor: "#B6FF2E",
+
+  shadowOpacity: 0.6,
+
+  shadowRadius: 18,
+
+  shadowOffset: {
+    width: 0,
+    height: 8,
   },
 
-  badge: {
+  elevation: 16,
+},
 
-    position: "absolute",
+tab: {
+  flex: 1,
+  height: "100%",
+  justifyContent: "center",
+  alignItems: "center",
+},
 
-    top: -6,
-
-    right: -10,
-
-    backgroundColor: "#9DFF00",
-
-    minWidth: width * 0.05,
-
-    height:height * 0.018,
-
-    borderRadius: 9,
-
-    justifyContent: "center",
-
-    alignItems: "center",
-
-    paddingHorizontal: 4,
-
-  },
 tabContent: {
   width: "100%",
- height:"100%",
+  height: "100%",
   justifyContent: "center",
   alignItems: "center",
 },
 
 labelContainer: {
-  height: 12,
+  height: 10,
+
   justifyContent: "center",
+
   alignItems: "center",
 },
-  badgeText: {
 
-    color: "#111",
+activeLabel: {
+  marginTop: 0,
 
-    fontWeight: "900",
+  fontSize: 8,
 
-    fontSize: 10,
+  fontWeight: "800",
 
-  },
+  color: "#111",
+
+  letterSpacing: 0.3,
+
+  textTransform: "uppercase",
+},
+badge: {
+  position: "absolute",
+
+  top: 5,
+
+  right: -8,
+
+  backgroundColor: "#9DFF00",
+
+  minWidth: 18,
+
+  height: 16,
+
+  borderRadius: 8,
+
+  justifyContent: "center",
+
+  alignItems: "center",
+
+  paddingHorizontal: 3,
+},
+badgeText: {
+  color: "#111",
+
+  fontWeight: "900",
+
+  fontSize: 8,
+},
 
 });

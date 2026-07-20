@@ -15,6 +15,7 @@ import Animated, {
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 const { height } = require("react-native").Dimensions.get("window");
+
 type Props = {
   visible: boolean;
   categories: any[];

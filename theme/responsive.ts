@@ -5,20 +5,13 @@ import { Dimensions, PixelRatio } from "react-native";
 =========================================================== */
 
 const { width, height } = Dimensions.get("window");
-console.log(Dimensions.get("window"));
-/* ===========================================================
-   BASE DESIGN (FIGMA)
-=========================================================== */
 
-const BASE_WIDTH = 393;
-const BASE_HEIGHT = 852;
+const shortSide = Math.min(width, height);
+const longSide = Math.max(width, height);
 
 /* ===========================================================
    DEVICE
 =========================================================== */
-
-const shortSide = Math.min(width, height);
-const longSide = Math.max(width, height);
 
 export const DEVICE = {
   width,
@@ -31,33 +24,14 @@ export const DEVICE = {
 
   isTablet: shortSide >= 600,
 
-  bucket:
-    shortSide < 330 ? 320 :
-    shortSide < 348 ? 340 :
-    shortSide < 356 ? 350 :
-    shortSide < 366 ? 360 :
-    shortSide < 384 ? 375 :
-    shortSide < 398 ? 390 :
-    shortSide < 408 ? 400 :
-    shortSide < 420 ? 412 :
-    shortSide < 432 ? 430 :
-    shortSide < 480 ? 450 :
-    shortSide < 600 ? 500 :
-    shortSide < 720 ? 600 :
-    shortSide < 840 ? 720 :
-    shortSide < 960 ? 840 :
-    960,
+  isSmallPhone: shortSide < 360,
+
+  isLargePhone: shortSide >= 430,
 };
 
 /* ===========================================================
-   SCREEN INFO
+   SCREEN
 =========================================================== */
-export const isSmallDevice =
-  DEVICE.shortSide < 360;
-
-export const isLargePhone =
-  DEVICE.shortSide >= 430;
-
 
 export const SCREEN = {
   width,
@@ -66,32 +40,16 @@ export const SCREEN = {
   shortSide,
   longSide,
 
-  isLandscape: DEVICE.isLandscape,
-  isTablet: DEVICE.isTablet,
-
   aspectRatio: height / width,
 
   pixelRatio: PixelRatio.get(),
 
   fontScale: PixelRatio.getFontScale(),
-};;
 
-/* ===========================================================
-   SCALE VALUES
-=========================================================== */
+  isTablet: DEVICE.isTablet,
 
-const widthRatio = width / BASE_WIDTH;
-
-const heightRatio = height / BASE_HEIGHT;
-
-/**
- * Uses the smaller ratio to avoid oversized UI
- * on tall phones.
- */
-const responsiveRatio = Math.min(
-  widthRatio,
-  heightRatio
-);
+  isLandscape: DEVICE.isLandscape,
+};
 
 /* ===========================================================
    HELPERS
@@ -100,253 +58,165 @@ const responsiveRatio = Math.min(
 const round = (value: number) =>
   PixelRatio.roundToNearestPixel(value);
 
-const clamp = (
-  value: number,
-  min: number,
-  max: number
-) => Math.min(max, Math.max(min, value));
-
 /* ===========================================================
-   WIDTH
+   DESIGN TOKENS
 =========================================================== */
 
-export const scaleWidth = (
-  size: number
-) => round(size * widthRatio);
+export const FONT = Object.freeze({
+  xs: 12,
+  sm: 14,
+  md: 16,
+  lg: 18,
+  xl: 20,
+  xxl: 24,
 
-/* ===========================================================
-   HEIGHT
-=========================================================== */
+  h3: 28,
+  h2: 32,
+  h1: 40,
 
-export const scaleHeight = (
-  size: number
-) => round(size * heightRatio);
+  hero: 48,
+});
 
-/* ===========================================================
-   UNIVERSAL SCALE
-=========================================================== */
+export const ICON = Object.freeze({
+  xs: 16,
+  sm: 18,
+  md: 22,
+  lg: 24,
+  xl: 28,
+  xxl: 32,
+});
 
-/**
- * General responsive scaling.
- *
- * factor
- * 0   = no scaling
- * 0.5 = moderate scaling
- * 1   = full scaling
- */
-
-export const scale = (
-  size: number,
-  factor = 0.5
-) => {
-
-  const scaled =
-    size * responsiveRatio;
-
-  return round(
-    size +
-      (scaled - size) *
-        factor
-  );
-};
-
-/* ===========================================================
-   FONT
-=========================================================== */
-
-/**
- * Responsive font.
- *
- * factor
- * 0.35 = recommended
- */
-
-export const scaleFont = (
-  size: number,
-  factor = 0.35
-) => {
-
-  const scaled = scale(size, factor);
-
-  return round(
-  clamp(
-    scaled,
-    size * 0.88,
-    size * 1.20
-  )
-)
-};
-
-/* ===========================================================
-   SPACING
-=========================================================== */
-
-export const scaleSpacing = (
-  size: number
-) => scale(size, 0.55);
-
+export const BUTTON = Object.freeze({
+  xs: 40,
+  sm: 44,
+  md: 48,
+  lg: 56,
+  xl: 64,
+});
 
 export const SPACING = Object.freeze({
-  xs: scaleSpacing(4),
-  sm: scaleSpacing(8),
-  md: scaleSpacing(12),
-  lg: scaleSpacing(16),
-  xl: scaleSpacing(20),
-  xxl: scaleSpacing(24),
-  xxxl: scaleSpacing(32),
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+  xxxl: 32,
+  huge: 40,
 });
-/* ===========================================================
-   BORDER RADIUS
-=========================================================== */
-
-export const scaleRadius = (
-  size: number
-) =>   round(scale(size, 0.30))
 
 export const RADIUS = Object.freeze({
-  sm: scaleRadius(8),
-  md: scaleRadius(12),
-  lg: scaleRadius(16),
-  xl: scaleRadius(20),
-  pill: scaleRadius(999),
+  xs: 6,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+  full: 999,
 });
 
-/* ===========================================================
-   BUTTON
-=========================================================== */
 
-/**
- * Never smaller than 44dp
- */
 
-export const scaleButton = (
-  size: number
-) =>
-  round(
-    clamp(
-      scale(size, 0.45),
-      44,
-      size + 8
-    )
-  );
 
 /* ===========================================================
-   ICON
-=========================================================== */
-
-export const scaleIcon = (
-  size: number
-) =>
-      round(
-  clamp(
-    scale(size, 0.40),
-    size - 2,
-    size + 4
-  )
-  )
-
-/* ===========================================================
-   AVATAR
-=========================================================== */
-
-export const scaleAvatar = (
-  size: number
-) =>
-  round(
-  clamp(
-    scale(size, 0.55),
-    size - 4,
-    size + 12
-  )
-  )
-
-/* ===========================================================
-   LINE HEIGHT
-=========================================================== */
-
-export const lineHeight = (
-  fontSize: number,
-  multiplier = 1.35
-) =>
-  round(
-    scaleFont(fontSize) *
-      multiplier
-  );
-
-/* ===========================================================
-   WIDTH %
-=========================================================== */
-
-export const widthPercent = (
-  percent: number
-) =>
-  round(
-    (width * percent) / 100
-  );
-
-/* ===========================================================
-   HEIGHT %
-=========================================================== */
-
-export const heightPercent = (
-  percent: number
-) =>
-  round(
-    (height * percent) / 100
-  );
-
-/* ===========================================================
-   SAFE AREA HELPERS
+   SAFE AREA
 =========================================================== */
 
 export const SAFE = Object.freeze({
-  horizontal: scaleSpacing(20),
-  vertical: scaleSpacing(24),
+  horizontal: SPACING.lg,
+  vertical: SPACING.xl,
 });
+
 /* ===========================================================
-   GRID HELPERS
+   WIDTH / HEIGHT HELPERS
 =========================================================== */
 
-export const CONTENT_WIDTH =
-  SCREEN.width - SAFE.horizontal * 2;
+export const widthPercent = (percent: number) =>
+  round((SCREEN.width * percent) / 100);
 
+export const heightPercent = (percent: number) =>
+  round((SCREEN.height * percent) / 100);
+
+/* ===========================================================
+   FULL SCREEN
+=========================================================== */
+
+export const FULL = Object.freeze({
+  width: SCREEN.width,
+  height: SCREEN.height,
+});
+
+/* ===========================================================
+   SCREEN CENTER
+=========================================================== */
 
 export const SCREEN_CENTER = Object.freeze({
   x: SCREEN.width / 2,
   y: SCREEN.height / 2,
 });
 
-export const FULL = Object.freeze({
-  width: widthPercent(100),
-  height: heightPercent(100),
-});
-/**
- * Product Grid
- */
+/* ===========================================================
+   CONTENT
+=========================================================== */
+
+export const CONTENT_WIDTH =
+  SCREEN.width - SAFE.horizontal * 2;
+
+/* ===========================================================
+   GRID
+=========================================================== */
 
 export const PRODUCT_COLUMNS =
-  SCREEN.isTablet
-    ? 3
-    : 2;
+  DEVICE.isTablet ? 3 : 2;
 
-/**
- * Default card spacing
- */
+export const GRID_GAP = SPACING.lg;
 
-export const GRID_GAP =
-  scaleSpacing(16);
-
-/**
- * Card width
- */
-
-export const productCardWidth = round(
-(
-    SCREEN.width -
-    SAFE.horizontal * 2 -
+export const productCardWidth =
+  (
+    CONTENT_WIDTH -
     GRID_GAP * (PRODUCT_COLUMNS - 1)
-) / PRODUCT_COLUMNS
-);
+  ) / PRODUCT_COLUMNS;
+
+/* ===========================================================
+   COMMON SIZES
+=========================================================== */
+
+export const IMAGE = Object.freeze({
+  avatarSm: 32,
+  avatarMd: 40,
+  avatarLg: 56,
+  avatarXl: 72,
+
+  thumbnail: 72,
+
+  product: productCardWidth,
+
+  hero: widthPercent(100),
+});
+
+/* ===========================================================
+   HEADER
+=========================================================== */
+
+export const HEADER = Object.freeze({
+  height: 56,
+
+  largeHeight: 72,
+
+  searchHeight: 48,
+});
+
+/* ===========================================================
+   TAB BAR
+=========================================================== */
+
+export const TABBAR = Object.freeze({
+  height: 72,
+
+  icon: ICON.lg,
+
+  label: FONT.xs,
+});
 
 /* ===========================================================
    HAIRLINE
@@ -354,3 +224,180 @@ export const productCardWidth = round(
 
 export const hairline =
   1 / PixelRatio.get();
+
+/* ===========================================================
+   TYPOGRAPHY
+=========================================================== */
+
+export const lineHeight = (
+  fontSize: number,
+  multiplier = 1.35
+) =>
+  round(fontSize * multiplier);
+
+
+  /* ===========================================================
+   BREAKPOINTS
+=========================================================== */
+
+export const BREAKPOINTS = Object.freeze({
+  phone: 0,
+  largePhone: 430,
+  tablet: 600,
+  largeTablet: 840,
+});
+
+/* ===========================================================
+   LAYOUT
+=========================================================== */
+
+export const LAYOUT = Object.freeze({
+  compact: SCREEN.width < BREAKPOINTS.largePhone,
+
+  regular:
+    SCREEN.width >= BREAKPOINTS.largePhone &&
+    SCREEN.width < BREAKPOINTS.tablet,
+
+  tablet:
+    SCREEN.width >= BREAKPOINTS.tablet,
+
+  largeTablet:
+    SCREEN.width >= BREAKPOINTS.largeTablet,
+});
+
+/* ===========================================================
+   MAX WIDTHS
+=========================================================== */
+
+export const MAX_WIDTH = Object.freeze({
+  content: 1200,
+
+  modal: DEVICE.isTablet ? 560 : CONTENT_WIDTH,
+
+  sheet: DEVICE.isTablet ? 600 : CONTENT_WIDTH,
+
+  drawer: DEVICE.isTablet ? 420 : SCREEN.width * 0.85,
+});
+
+/* ===========================================================
+   PRODUCT GRID
+=========================================================== */
+
+export const PRODUCT = Object.freeze({
+  columns:
+    DEVICE.isTablet
+      ? 3
+      : 2,
+
+  gap: GRID_GAP,
+
+  cardWidth: productCardWidth,
+
+  imageRatio: 1.35,
+});
+
+/* ===========================================================
+   ANIMATION
+=========================================================== */
+
+export const ANIMATION = Object.freeze({
+  fast: 150,
+
+  normal: 250,
+
+  slow: 350,
+
+  extraSlow: 500,
+});
+
+/* ===========================================================
+   ELEVATION
+=========================================================== */
+
+export const SHADOW = Object.freeze({
+  xs: {
+    shadowOpacity: 0.04,
+    shadowRadius: 2,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    elevation: 1,
+  },
+
+  sm: {
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    elevation: 2,
+  },
+
+  md: {
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    elevation: 4,
+  },
+
+  lg: {
+    shadowOpacity: 0.12,
+    shadowRadius: 14,
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    elevation: 8,
+  },
+});
+
+/* ===========================================================
+   EXPORT
+=========================================================== */
+
+export default {
+  DEVICE,
+  SCREEN,
+
+  FONT,
+  ICON,
+  BUTTON,
+  SPACING,
+  RADIUS,
+
+  SAFE,
+  FULL,
+
+  HEADER,
+  TABBAR,
+
+  IMAGE,
+
+  PRODUCT,
+
+  CONTENT_WIDTH,
+  productCardWidth,
+
+  widthPercent,
+  heightPercent,
+
+  SCREEN_CENTER,
+
+  BREAKPOINTS,
+  LAYOUT,
+
+  MAX_WIDTH,
+
+  ANIMATION,
+
+  SHADOW,
+
+  hairline,
+
+  lineHeight,
+};

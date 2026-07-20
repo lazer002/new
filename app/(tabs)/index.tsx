@@ -21,8 +21,19 @@ import { LinearGradient } from "expo-linear-gradient";
 import PremiumDrawer from "@/components/PremiumDrawer";
 import FloatingHeader from "@/components/FloatingHeader";
 import {
-responsive
-} from "@/theme";
+  FONT,
+  ICON,
+  BUTTON,
+  SPACING,
+  RADIUS,
+  SAFE,
+  SHADOW,
+  PRODUCT,
+  productCardWidth,
+  hairline,
+  lineHeight,
+  SCREEN,
+} from "@/theme/responsive";
 
 import Animated, {
   useAnimatedScrollHandler,
@@ -32,10 +43,11 @@ import Animated, {
     withTiming,
 } from "react-native-reanimated";
 import { useUI } from "@/context/UIContext";
-const { width ,height} = Dimensions.get("window");
-const CARD_WIDTH = (width - 60) / 2;
+const CARD_WIDTH = productCardWidth;
+const CARD_HEIGHT = CARD_WIDTH * PRODUCT.imageRatio;
 
-/* ───────────────── PRODUCT CARD ───────────────── */
+
+
 const getProductMeta = (id: string) => {
   let hash = 0;
 
@@ -45,13 +57,10 @@ const getProductMeta = (id: string) => {
 
   const positiveHash = Math.abs(hash);
 
-  // ⭐ Rating between 4.0 - 4.9
-  const rating = (4 + (positiveHash % 10) / 10).toFixed(1);
-
-  // 🛒 Buy count between 50 - 100
-  const buyCount = 50 + (positiveHash % 51); // 50 to 100
-
-  return { rating, buyCount };
+  return {
+    rating: (4 + (positiveHash % 10) / 10).toFixed(1),
+    buyCount: 50 + (positiveHash % 51),
+  };
 };
 
 
@@ -200,7 +209,7 @@ function ProductCard({ item }: { item: any }) {
           ? "heart"
           : "heart-outline"
       }
-      size={22}
+    size={ICON.md}
       color={
         isFav
           ? "#000000"
@@ -256,7 +265,7 @@ function ProductCard({ item }: { item: any }) {
       {item.title}
     </Text>
 
-<View style={styles.priceRow}>
+<View style={styles.priceRow} >
   <Text style={styles.price}>₹{item.price}</Text>
 
   <View style={styles.oldPriceContainer}>
@@ -270,7 +279,7 @@ function ProductCard({ item }: { item: any }) {
 
   </View>
 
-  <Pressable style={styles.arrowBtn} onPress={onOpenPDP}>
+  {/* <Pressable style={styles.arrowBtn} onPress={onOpenPDP}>
 
     <Ionicons
       name="arrow-forward"
@@ -278,7 +287,7 @@ function ProductCard({ item }: { item: any }) {
       color="#111"
     />
 
-  </Pressable>
+  </Pressable> */}
 
 </View>
 
@@ -471,7 +480,7 @@ if (offset < 10) {
           <SectionHeader onSeeAll={() => router.push("/category")} />
             </>
         }
-        contentContainerStyle={{   paddingTop: 10,
+        contentContainerStyle={{   paddingTop:10,
   paddingBottom: 120, }}
 renderItem={({ item, index }) => {
 
@@ -483,13 +492,13 @@ renderItem={({ item, index }) => {
       style={{
         width: CARD_WIDTH,
 
-        marginBottom: 2,
+        marginBottom: -6,
 
-        marginTop: isLeft ? 0 : 34,
+        marginTop: isLeft ? 0 : 32,
 
-        marginLeft: isLeft ? 12  : 8,
+        marginLeft: isLeft ? SPACING.md : SPACING.sm,
 
-        marginRight: isLeft ? 8 : 16,
+        marginRight: isLeft ? SPACING.sm : SPACING.lg,
       }}
     >
 
@@ -554,7 +563,7 @@ function SectionHeader({
 
         <Ionicons
           name="arrow-forward"
-          size={16}
+          size={ICON.xs}
           color="#B6FF2E"
           style={{
             marginLeft: 6,
@@ -607,7 +616,7 @@ const scrollToCategory = (key: string) => {
       scroll as any,
       (x, y, w) => {
         scroll.scrollTo({
-          x: Math.max(0, x - width / 2 + w / 2),
+          x: Math.max(0, x - SCREEN.width / 2 + w / 2),
           animated: true,
         });
       },
@@ -645,7 +654,7 @@ const scrollToCategory = (key: string) => {
 >
   <Ionicons
     name="person-outline"
-    size={24}
+   size={ICON.md}
     color="#000000"
   />
   <View style={styles.onlineDot} />
@@ -677,14 +686,14 @@ const scrollToCategory = (key: string) => {
 
   <Ionicons
     name="search-outline"
-    size={23}
+    size={ICON.md}
     color="#8A8A8A"
   />
 
   <TextInput
     value={searchQuery}
     onChangeText={setSearchQuery}
-    placeholder="Search sneakers, apparel..."
+    placeholder="Search sneakers..."
     placeholderTextColor="#9A9A9A"
     style={styles.searchInput}
   />
@@ -696,7 +705,7 @@ const scrollToCategory = (key: string) => {
 
     <Ionicons
       name="options-outline"
-      size={22}
+     size={ICON.md}
       color="#ffffffc0"
       
     />
@@ -737,7 +746,7 @@ const scrollToCategory = (key: string) => {
 
         <Ionicons
           name="sparkles"
-          size={14}
+          size={ICON.xs}
           color="#9dff00"
           style={{
             marginRight: 6,
@@ -767,7 +776,7 @@ const scrollToCategory = (key: string) => {
 >
   <Ionicons
     name="sparkles"
-    size={14}
+    size={ICON.xs}
     color="#111"
     style={{ marginRight: 6 }}
   />
@@ -807,7 +816,7 @@ const scrollToCategory = (key: string) => {
 
             <Ionicons
               name="sparkles"
-              size={14}
+              size={ICON.xs}
               color="#9dff00"
               style={{
                 marginRight: 6,
@@ -855,55 +864,55 @@ sectionHeader: {
   justifyContent: "space-between",
   alignItems: "flex-end",
 
-  paddingHorizontal: 20,
-
-  marginTop: 18,
-  marginBottom: 24,
+paddingHorizontal: SAFE.horizontal,
+marginTop: SPACING.xl,
+marginBottom: SPACING.xxl,
 },
 
 sectionLabel: {
-  fontSize: 11,
   fontWeight: "800",
   color: "#A1A1A1",
-  letterSpacing: 2,
+fontSize: FONT.xs,
+letterSpacing: 2,
   textTransform: "uppercase",
+  marginBottom: -SPACING.md,
 },
 
 sectionTitle: {
-  marginTop: 6,
-  fontSize: height * 0.038,
+marginTop: SPACING.sm,
+fontSize: 27,
+letterSpacing: -0.5,
   fontWeight: "900",
   color: "#111",
-  letterSpacing: -.5,
 },
 
 sectionBtn: {
   flexDirection: "row",
   alignItems: "center",
 
-  paddingHorizontal: 16,
-  height: height * 0.045,
+paddingHorizontal: SPACING.lg,
 
-  borderRadius: 21,
+height: BUTTON.sm,
+
+borderRadius: RADIUS.full,
 
   backgroundColor: "#111",
 },
 
 sectionBtnText: {
   color: "#FFF",
-  fontSize: 14,
+fontSize: FONT.sm,
   fontWeight: "700",
 },
 
-
 oldPriceWrapper: {
-  marginLeft: 8,
+  marginLeft: SPACING.xs,
   position: "relative",
   justifyContent: "center",
 },
 
 oldPriceText: {
-  fontSize: 16,
+  fontSize: FONT.md,
   fontWeight: "500",
   color: "#272727ff",
 },
@@ -913,24 +922,25 @@ strikeLine: {
   left: 0,
   right: -2,
   top: "55%",
-  height: 2,
+  height: hairline * 2,
   backgroundColor: "red",
-  transform: [{ rotate: "-12deg" }], // 👈 diagonal slash
+  transform: [{ rotate: "-12deg" }],
 },
-
 
 seeAll: {
   fontSize: 18,
-  color: "#464747ff", // green accent
+  color: "#464747ff",
   fontWeight: "600",
 },
+
 card: {
   width: CARD_WIDTH,
-  height: CARD_WIDTH * 1.55,
-  borderRadius: 30,
+  height: CARD_HEIGHT ,
+  borderRadius: RADIUS.xxl,
   overflow: "hidden",
-  marginBottom: 26,
+  marginBottom: SPACING.xxl,
   backgroundColor: "#111",
+
   shadowColor: "#000",
   shadowOpacity: 0.22,
   shadowRadius: 18,
@@ -938,6 +948,7 @@ card: {
     width: 0,
     height: 10,
   },
+
   elevation: 12,
 },
 
@@ -953,38 +964,48 @@ cardGradient: {
 
 newBadge: {
   position: "absolute",
-  top: 16,
-  left: 16,
+  top: SPACING.md,
+  left: SPACING.md,
+
   backgroundColor: "#000000",
-  borderRadius: 18,
-  paddingHorizontal: 14,
-  paddingVertical: 8,
+
+  borderRadius: RADIUS.xl,
+
+  paddingHorizontal: SPACING.md,
+  paddingVertical: SPACING.xs,
 },
 
 newText: {
   color: "#ffffff",
-  fontSize: 11,
+  fontSize:FONT.xs,
   fontWeight: "900",
   letterSpacing: 1.2,
 },
 
 heart: {
   position: "absolute",
-  top: 14,
-  right: 14,
+
+   top: SPACING.sm,
+
+  right: SPACING.sm,
+
   width: 42,
   height: 42,
+
   borderRadius: 21,
-  backgroundColor: "rgba(255, 255, 255, 0)",
+
+  backgroundColor: "rgba(255,255,255,0)",
+
   justifyContent: "center",
   alignItems: "center",
 },
 
 cardContent: {
   position: "absolute",
-  left: 18,
-  right: 18,
-  bottom: 18,
+
+  left: SPACING.lg,
+  right: SPACING.lg,
+  bottom: SPACING.lg,
 },
 
 ratingRow: {
@@ -993,7 +1014,7 @@ ratingRow: {
 },
 
 ratingText: {
-  marginLeft: 5,
+  marginLeft: SPACING.xs,
   color: "#FFF",
   fontSize: 15,
   fontWeight: "800",
@@ -1006,23 +1027,23 @@ buyText: {
 },
 
 cardTitle: {
-  marginTop: 12,
+  marginTop: SPACING.sm,
   color: "#FFF",
-  fontSize: 12,
+  fontSize: FONT.md,
   fontWeight: "900",
-  lineHeight: 28,
+ lineHeight: lineHeight(FONT.md),
 },
 
 bottomRow: {
-  marginTop: 18,
+  marginTop: SPACING.lg,
   flexDirection: "row",
   justifyContent: "space-between",
-  alignItems: "flex-end",
+  // alignItems: "flex-end",
 },
 
 price: {
   color: "#FFF",
-  fontSize: 28,
+  fontSize: 23,
   fontWeight: "900",
 },
 
@@ -1043,27 +1064,34 @@ oldPriceStrike: {
   position: "absolute",
   left: 0,
   right: 0,
-  top: 11, // Adjust between 8-10 if needed
-  height: 1,
+
+  top: 12,
+
+  height: hairline * 3,
+
   backgroundColor: "#B6FF2E",
+
   borderRadius: 2,
 },
 
 heartGlass: {
   width: 46,
   height: 46,
+
   borderRadius: 23,
-  backgroundColor: "rgba(255, 255, 255, 0)",
+
+  backgroundColor: "rgba(255,255,255,0)",
 
   justifyContent: "center",
   alignItems: "center",
 },
-
 badgeRow: {
   position: "absolute",
-  top: 16,
-  left: 16,
-  right: 16,
+
+  top: SPACING.md,
+  left: SPACING.md,
+  right: SPACING.md,
+
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
@@ -1072,37 +1100,49 @@ badgeRow: {
 ratingPill: {
   flexDirection: "row",
   alignItems: "center",
+
   backgroundColor: "rgba(0,0,0,.55)",
-  paddingHorizontal: 10,
+
+  paddingHorizontal: SPACING.sm,
+
   height: 30,
+
   borderRadius: 15,
 },
 
 ratingPillText: {
   color: "#FFF",
   fontWeight: "700",
+
   marginLeft: 4,
+
+  fontSize: 13,
 },
 
 priceRow: {
-  marginTop: 8,
+  marginTop: SPACING.sm,
+
   flexDirection: "row",
   alignItems: "center",
 },
-
 arrowBtn: {
-  width: 50,
-  height: 50,
-  borderRadius: 25,
+  width: 40,
+  height: 40,
+
+  borderRadius: 20,
+
   backgroundColor: "#B6FF2E",
+
   justifyContent: "center",
   alignItems: "center",
-  marginLeft: 12,
+
+  marginLeft: SPACING.sm,
 },
+
 header: {
-  paddingHorizontal: 12,
-  paddingTop: 8,
-  paddingBottom: 6,
+  paddingHorizontal: SAFE.horizontal,
+  paddingTop: SPACING.sm,
+  paddingBottom: SPACING.xs,
 },
 
 topRow: {
@@ -1111,69 +1151,71 @@ topRow: {
   alignItems: "center",
 },
 
-
 menuButton: {
   width: 52,
   height: 52,
 
-  borderRadius: 18,
+  borderRadius: RADIUS.xl,
 
   backgroundColor: "#FFF",
 
   justifyContent: "center",
 
-  paddingHorizontal: 14,
+  paddingHorizontal: SPACING.md,
 
-  shadowColor: "#000",
-
-  shadowOpacity: 0.08,
-
-
-
-
-  elevation: 1,
+  ...SHADOW.xs,
 },
 
 menuLineTop: {
   width: 26,
-  height: 3,
+  height: hairline * 3,
+
   borderRadius: 2,
+
   backgroundColor: "#111",
 
-  marginBottom: 6,
+  marginBottom: SPACING.xs,
 },
 
 menuLineMiddle: {
   width: 20,
-  height: 3,
+  height: hairline * 3,
+
   borderRadius: 2,
+
   backgroundColor: "#B6FF2E",
 
-  marginBottom: 6,
+  marginBottom: SPACING.xs,
 },
 
 menuLineBottom: {
   width: 26,
-  height: 3,
+  height: hairline * 3,
+
   borderRadius: 2,
+
   backgroundColor: "#111",
 },
+
 profileBtn: {
   width: 52,
   height: 52,
-  borderRadius: 18,
+
+  borderRadius: RADIUS.xl,
+
   backgroundColor: "#B6FF2E",
+
   justifyContent: "center",
   alignItems: "center",
 },
 
 profileImage: {
-  width: width * 0.15,
-  height: "auto",
+  width: 64,
   aspectRatio: 1,
+
   borderRadius: 23,
+
   resizeMode: "contain",
-  filter: "hue-rotate(45deg) saturate(1.2) brightness(1.1)",
 },
 
 onlineDot: {
@@ -1185,12 +1227,11 @@ onlineDot: {
   width: 10,
   height: 10,
 
-  borderRadius: 8,
+  borderRadius: 5,
 
-  backgroundColor: "#000000",
+  backgroundColor: "#000",
 
-  borderWidth: 3,
-  // borderColor: "#FFF",
+  borderWidth: hairline * 3,
 
   shadowColor: "#B6FF2E",
   shadowOpacity: 0.45,
@@ -1202,83 +1243,106 @@ onlineDot: {
 
   elevation: 5,
 },
+
 pillRow: {
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "center",
 },
+
 explore: {
-  marginTop: height * 0.03,
-  color: "#000000",
-  fontSize: width * 0.058,
+  marginTop: SPACING.xxxl,
+
+  color: "#000",
+
+  fontSize: FONT.xxl,
+
   fontWeight: "500",
 },
 
 heroTitle: {
-  marginTop: 8,
-  fontSize:width * 0.158,
+  fontSize: FONT.hero,
+
   fontWeight: "900",
+
   color: "#111",
-  lineHeight: height * 0.075,
+
+  lineHeight: lineHeight(FONT.hero),
 },
 
 heroAccent: {
-  marginTop: -2,
-  fontSize: width * 0.158,
+  marginTop: -22,
+
+  fontSize: FONT.hero,
+
   fontWeight: "900",
+
   color: "#B6FF2E",
-  lineHeight: height * 0.075,
- 
+
+  lineHeight: lineHeight(FONT.hero),
 },
 
 searchBox: {
-  marginTop: height * 0.032,
-  height: height * 0.075,
-  borderRadius: 32,
+  marginTop: SPACING.lg,
+
+  height: 54,
+
+  borderRadius: RADIUS.full,
+
   backgroundColor: "#F5F5F5",
+
   flexDirection: "row",
+
   alignItems: "center",
-  paddingHorizontal: 20,
+
+  paddingHorizontal: SPACING.xl,
 },
 
 searchInput: {
   flex: 1,
-  marginLeft: 12,
+
+  marginLeft: SPACING.sm,
+
   color: "#111",
-  fontSize: 17,
+
+  fontSize: 13,
 },
+
 filterIcon: {
-  width: width * 0.12,
-  height: height * 0.055,
-  borderRadius: 8,
+  width: 36,
+  height: 36,
+
+  borderRadius: RADIUS.md,
+
   backgroundColor: "#000000ee",
 
   justifyContent: "center",
+
   alignItems: "center",
 
-  shadowColor: "#000",
-  shadowOpacity: 0.08,
-  shadowRadius: 8,
-  shadowOffset: {
-    width: 0,
-    height: 3,
-  },
- 
+  ...SHADOW.sm,
 },
+
 tabs: {
-  paddingTop: height * 0.02,
-  // paddingBottom: height * 0.01,
-  paddingRight: width * 0.05,
+  paddingTop: SPACING.xl,
+
+  paddingRight: SPACING.xxl,
 },
 
 pill: {
-  height: height * 0.045,
-  borderRadius: 21,
+  height: 44,
+
+  borderRadius: RADIUS.full,
+
   backgroundColor: "#F5F5F5",
+
   justifyContent: "center",
+
   alignItems: "center",
-  paddingHorizontal: 20,
-  marginRight: 12,
+
+  paddingHorizontal: SPACING.xl,
+
+  marginRight: SPACING.sm,
 },
 
 pillActive: {
@@ -1287,7 +1351,9 @@ pillActive: {
 
 pillText: {
   color: "#444",
+
   fontWeight: "700",
+
   fontSize: 15,
 },
 
@@ -1295,17 +1361,20 @@ pillTextActive: {
   color: "#FFF",
 },
 
-
 bundlePill: {
-  height: height * 0.045,
-  borderRadius: 21,
+  height: 44,
+
+  borderRadius: RADIUS.full,
+
   backgroundColor: "#B6FF2E",
 
   flexDirection: "row",
+
   alignItems: "center",
 
-  paddingHorizontal: 18,
-  marginRight: 12,
+  paddingHorizontal: SPACING.lg,
+
+  marginRight: SPACING.sm,
 
   shadowColor: "#B6FF2E",
   shadowOpacity: 0.35,
@@ -1320,9 +1389,9 @@ bundlePill: {
 
 bundlePillText: {
   color: "#111",
+
   fontSize: 15,
+
   fontWeight: "900",
 },
-
-
 });
