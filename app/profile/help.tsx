@@ -10,13 +10,12 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
-  Dimensions,
 } from "react-native";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "expo-router";
 import Octicons from "@expo/vector-icons/Octicons";
 import Screen from "@/components/Screen";
-const { width, height } = Dimensions.get("window");
+import { scale, verticalScale, normalize } from "@/utils/responsive";
 // Enable animation (Android)
 if (Platform.OS === "android") {
   UIManager.setLayoutAnimationEnabledExperimental?.(true);
@@ -254,7 +253,7 @@ return (
 
         <Octicons
           name="search"
-          size={height * 0.024}
+          size={verticalScale(20)}
           color="#666"
         />
 
@@ -397,7 +396,7 @@ return (
                           ? "chevron-up"
                           : "chevron-down"
                       }
-                      size={height * 0.02}
+                      size={verticalScale(17)}
                       color={
                         isOpen
                           ? "#111"

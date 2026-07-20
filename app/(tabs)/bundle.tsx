@@ -7,7 +7,6 @@ import {
   Image,
   ActivityIndicator,
   FlatList,
-  Dimensions,
   TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,7 +14,7 @@ import { useRouter } from "expo-router";
 import api from "@/utils/config";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-const { width } = Dimensions.get("window");
+import { normalize } from "@/utils/responsive";
 
 type Product = {
   _id: string;
@@ -364,7 +363,7 @@ includeWrap:{
 includeLabel:{
   color:"#CFCFCF",
 
-  fontSize:11,
+  fontSize:normalize(11),
 
   fontWeight:"700",
 
@@ -376,7 +375,7 @@ includeCount:{
 
   color:"#FFF",
 
-  fontSize:26,
+  fontSize:normalize(26),
 
   fontWeight:"900",
 },
@@ -406,7 +405,7 @@ ctaButton:{
 ctaText:{
   color:"#111",
 
-  fontSize:17,
+  fontSize:normalize(17),
 
   fontWeight:"900",
 
@@ -511,7 +510,7 @@ bundlePillText:{
 
   fontWeight:"900",
 
-  fontSize:11,
+  fontSize:normalize(11),
 
   letterSpacing:.8,
 },
@@ -531,7 +530,7 @@ discountText:{
 
   fontWeight:"900",
 
-  fontSize:11,
+  fontSize:normalize(11),
 },
 
 content:{
@@ -548,7 +547,7 @@ smallLabel:{
 
   letterSpacing:4,
 
-  fontSize:11,
+  fontSize:normalize(11),
 
   fontWeight:"700",
 },
@@ -556,7 +555,7 @@ smallLabel:{
 bundleTitle:{
   color:"#FFF",
 
-  fontSize:38,
+  fontSize:normalize(38),
 
   fontWeight:"900",
 
@@ -574,7 +573,7 @@ priceRow:{
 price:{
   color:"#FFF",
 
-  fontSize:40,
+  fontSize:normalize(40),
 
   fontWeight:"900",
 },
@@ -582,7 +581,7 @@ price:{
 oldPrice:{
   color:"#BDBDBD",
 
-  fontSize:18,
+  fontSize:normalize(18),
 
   textDecorationLine:"line-through",
 
@@ -606,7 +605,7 @@ saveBadgeText:{
 
   fontWeight:"900",
 
-  fontSize:11,
+  fontSize:normalize(11),
 },
 
 brandText:{
@@ -614,7 +613,7 @@ brandText:{
 
   marginTop:14,
 
-  fontSize:15,
+  fontSize:normalize(15),
 },
 
 
@@ -631,7 +630,7 @@ listHeader:{
 collectionLabel:{
   color:"#8F8F8F",
 
-  fontSize:12,
+  fontSize:normalize(12),
 
   fontWeight:"800",
 
@@ -641,9 +640,9 @@ collectionLabel:{
 collectionTitle:{
   marginTop:10,
 
-  fontSize:48,
+  fontSize:normalize(48),
 
-  lineHeight:50,
+  lineHeight:normalize(50),
 
   fontWeight:"900",
 
@@ -655,9 +654,9 @@ collectionSubtitle:{
 
   color:"#777",
 
-  fontSize:16,
+  fontSize:normalize(16),
 
-  lineHeight:24,
+  lineHeight:normalize(24),
 
   width:"80%",
 },
@@ -683,7 +682,7 @@ searchInput:{
 
   marginLeft:12,
 
-  fontSize:16,
+  fontSize:normalize(16),
 
   color:"#111",
 },

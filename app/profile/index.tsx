@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Dimensions,
   Linking,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -15,8 +14,7 @@ import Screen from "@/components/Screen";
 import { api } from "@/utils/config";
 import Toast from "react-native-toast-message";
 import { useWishlist } from "@/context/WishlistContext";
-
-const { width, height } = Dimensions.get("window");
+import { normalize } from "@/utils/responsive";
 
 export default function Profile() {
   const router = useRouter();
@@ -444,7 +442,7 @@ const styles = StyleSheet.create({
   },
 
   brandLabel: {
-    fontSize: 11,
+    fontSize: normalize(11),
     fontWeight: "900",
     letterSpacing: 3,
     color: "#777",
@@ -452,7 +450,7 @@ const styles = StyleSheet.create({
 
   heroTitle: {
     marginTop: 12,
-    fontSize: 38,
+    fontSize: normalize(38),
     fontWeight: "900",
     color: "#111",
     letterSpacing: -.8,
@@ -460,7 +458,7 @@ const styles = StyleSheet.create({
 
   heroSubtitle: {
     marginTop: 8,
-    fontSize: 15,
+    fontSize: normalize(15),
     color: "#666",
     lineHeight: 24,
   },
@@ -508,14 +506,14 @@ const styles = StyleSheet.create({
   memberTitle: {
     color: "#B6FF2E",
     fontWeight: "900",
-    fontSize: 11,
+    fontSize: normalize(11),
     letterSpacing: 2,
   },
 
   memberName: {
     color: "#FFF",
     marginTop: 8,
-    fontSize: 15,
+    fontSize: normalize(15),
     opacity: .8,
   },
 
@@ -542,7 +540,7 @@ const styles = StyleSheet.create({
   memberBadgeText: {
     color: "#FFF",
     fontWeight: "800",
-    fontSize: 10,
+    fontSize: normalize(10),
     letterSpacing: 1.4,
   },
 
@@ -564,7 +562,7 @@ const styles = StyleSheet.create({
   },
 
   statNumber: {
-    fontSize: 28,
+    fontSize: normalize(28),
     fontWeight: "900",
     color: "#111",
   },
@@ -573,10 +571,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: "center",
     color: "#666",
-    fontSize: 11,
+    fontSize: normalize(11),
     fontWeight: "800",
     letterSpacing: 1,
-    lineHeight: 16,
+    lineHeight: normalize(16),
   },
 
   /* ================= SECTION ================= */
@@ -603,7 +601,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     color: "#111",
     fontWeight: "900",
-    fontSize: 13,
+    fontSize: normalize(13),
     letterSpacing: 2,
   },
 
@@ -665,7 +663,7 @@ const styles = StyleSheet.create({
 
     color: "#111",
 
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "800",
   },
 
@@ -693,7 +691,7 @@ orderBadge: {
 orderBadgeText: {
   color: "#111",
 
-  fontSize: 11,
+  fontSize: normalize(11),
 
   fontWeight: "900",
 
@@ -701,7 +699,7 @@ orderBadgeText: {
 
   textAlign: "center",
 
-  lineHeight: 13,
+  lineHeight: normalize(13),
 },
 
   arrowWrap: {
@@ -751,7 +749,7 @@ orderBadgeText: {
 
     color: "#111",
 
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "900",
 
     letterSpacing: 1.4,
@@ -792,7 +790,7 @@ orderBadgeText: {
   badgeText: {
     color: "#111",
     fontWeight: "900",
-    fontSize: 10,
+    fontSize: normalize(10),
   },
 
   /* ================= OPTIONAL ================= */
@@ -805,8 +803,8 @@ orderBadgeText: {
 
   caption: {
     color: "#777",
-    fontSize: 13,
-    lineHeight: 22,
+    fontSize: normalize(13),
+    lineHeight: normalize(22),
   },
 
   /* ================= REMOVE OLD LOOK ================= */

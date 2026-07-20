@@ -9,7 +9,6 @@ import {
   TextInput,
   StyleSheet,
   Image,
-  Dimensions,
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,14 +20,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import api from "@/utils/config";
 import { useAuth } from "@/context/AuthContext";
+import { scale, verticalScale, normalize } from "@/utils/responsive";
 
-const { width, height } = Dimensions.get("window");
-
-const H_PADDING = width * 0.055;
+const H_PADDING = scale(21);
 
 const CARD_RADIUS = 24;
 
-const HERO_HEIGHT = height * 0.19;
+const HERO_HEIGHT = verticalScale(160);
 
 const STATUS_STEPS = [
   "pending",
@@ -1061,7 +1059,7 @@ locationCircle:{
 
 receiverName:{
 
-  fontSize:16,
+  fontSize:normalize(16),
 
   fontWeight:"900",
 
@@ -1073,7 +1071,7 @@ receiverPhone:{
 
   marginTop:2,
 
-  fontSize:13,
+  fontSize:normalize(13),
 
   color:"#666",
 
@@ -1091,7 +1089,7 @@ deliveryDivider:{
 
 fullAddress:{
 
-  fontSize:14,
+  fontSize:normalize(14),
 
   color:"#444",
 
@@ -1129,7 +1127,7 @@ billLabel:{
 
   color:"#888",
 
-  fontSize:13,
+  fontSize:normalize(13),
 
   fontWeight:"700",
 
@@ -1139,7 +1137,7 @@ billValue:{
 
   color:"#FFF",
 
-  fontSize:14,
+  fontSize:normalize(14),
 
   fontWeight:"700",
 
@@ -1169,7 +1167,7 @@ billTotalLabel:{
 
   color:"#888",
 
-  fontSize:13,
+  fontSize:normalize(13),
 
   fontWeight:"800",
 
@@ -1179,7 +1177,7 @@ billTotalPrice:{
 
   color:"#B6FF2E",
 
-  fontSize:32,
+  fontSize:normalize(32),
 
   fontWeight:"900",
 
@@ -1236,7 +1234,7 @@ productTitle:{
 
   flex:1,
 
-  fontSize:16,
+  fontSize:normalize(16),
 
   fontWeight:"900",
 
@@ -1262,7 +1260,7 @@ bundleBadge:{
 
 bundleBadgeText:{
 
-  fontSize:9,
+  fontSize:normalize(9),
 
   fontWeight:"900",
 

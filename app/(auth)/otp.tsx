@@ -7,7 +7,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Dimensions,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -18,8 +17,7 @@ import {
   Animated,
 } from "react-native";
 import Toast from "react-native-toast-message";
-
-const { height } = Dimensions.get("window");
+import { verticalScale, normalize } from "@/utils/responsive";
 
 export default function OTP() {
   const { setUser } = useAuth();
@@ -210,7 +208,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#eef1f7" },
 
   top: {
-    height: height * 0.4,
+    height: verticalScale(338),
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
     justifyContent: "center",
@@ -223,12 +221,12 @@ const styles = StyleSheet.create({
     left: 20,
   },
 
-  logo: { color: "#fff", fontSize: 28, fontWeight: "700" },
-  tag: { color: "#ccc", fontSize: 13, marginTop: 6 },
+  logo: { color: "#fff", fontSize: normalize(28), fontWeight: "700" },
+  tag: { color: "#ccc", fontSize: normalize(13), marginTop: 6 },
 
   sheet: {
     position: "absolute",
-    bottom: height * 0.05,
+    bottom: verticalScale(42),
     left: 0,
     right: 0,
     backgroundColor: "#fff",
@@ -237,7 +235,7 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
 
-  heading: { fontSize: 22, fontWeight: "700" },
+  heading: { fontSize: normalize(22), fontWeight: "700" },
   sub: { color: "#888", marginBottom: 20 },
 
   otpRow: {
@@ -252,7 +250,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: "#f7f8fc",
     textAlign: "center",
-    fontSize: 18,
+    fontSize: normalize(18),
     borderWidth: 1,
     borderColor: "#eee",
   },

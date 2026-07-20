@@ -5,7 +5,6 @@ import {
   StyleSheet,
   Pressable,
   ScrollView,
-  Dimensions,
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -14,8 +13,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import { useFilter } from "@/context/FilterContext";
-
-const { height, width } = Dimensions.get("window");
+import { SCREEN, hp, normalize } from "@/utils/responsive";
 
 type Screen =
   | "main"
@@ -41,10 +39,10 @@ export default function BottomFilterSheet({
   const { filters, setFilters, resetFilters, activeCount } = useFilter();
   const [screen, setScreen] = useState<Screen>("main");
 
-  const translateY = useSharedValue(height);
+  const translateY = useSharedValue(SCREEN.height);
 
   useEffect(() => {
-    translateY.value = withTiming(visible ? 0 : height, {
+    translateY.value = withTiming(visible ? 0 : SCREEN.height, {
       duration: visible ? 380 : 260,
     });
   }, [visible]);
@@ -840,8 +838,8 @@ const styles = StyleSheet.create({
   sheet: {
     position: "absolute",
     bottom: 0,
-    height: height * 0.8,
-    width: width * 1,
+    height: hp(80),
+    width: SCREEN.width,
     backgroundColor: "#fff",
     borderTopLeftRadius: 22,
     borderTopRightRadius: 22,
@@ -861,12 +859,12 @@ const styles = StyleSheet.create({
   },
 
   mainLabel: {
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "600",
   },
 
   mainValue: {
-    fontSize: 13,
+    fontSize: normalize(13),
     color: "#666",
     marginTop: 4,
   },
@@ -953,7 +951,7 @@ circleBtn:{
 
 headerTitle:{
 
-  fontSize:28,
+  fontSize:normalize(28),
 
   fontWeight:"900",
 
@@ -965,7 +963,7 @@ headerSub:{
 
   marginTop:3,
 
-  fontSize:13,
+  fontSize:normalize(13),
 
   color:"#7A7A7A",
 
@@ -993,7 +991,7 @@ resultText:{
 
   fontWeight:"900",
 
-  fontSize:12,
+  fontSize:normalize(12),
 
   letterSpacing:1,
 
@@ -1062,7 +1060,7 @@ filterIconActive:{
 
 filterTitle:{
 
-  fontSize:17,
+  fontSize:normalize(17),
 
   fontWeight:"800",
 
@@ -1076,7 +1074,7 @@ filterValue:{
 
   color:"#7A7A7A",
 
-  fontSize:13,
+  fontSize:normalize(13),
 
 },
 
@@ -1128,7 +1126,7 @@ categoryIconActive:{
 },
 
 categoryName:{
-  fontSize:17,
+  fontSize:normalize(17),
   fontWeight:"800",
   color:"#111",
 },
@@ -1181,7 +1179,7 @@ sizeChipActive:{
 
 sizeText:{
 
-  fontSize:22,
+  fontSize:normalize(22),
 
   fontWeight:"900",
 
@@ -1248,7 +1246,7 @@ colorName:{
 
   fontWeight:"700",
 
-  fontSize:14,
+  fontSize:normalize(14),
 
   color:"#111",
 
@@ -1313,7 +1311,7 @@ priceTitle:{
 
   marginTop:16,
 
-  fontSize:18,
+  fontSize:normalize(18),
 
   fontWeight:"900",
 
@@ -1325,7 +1323,7 @@ priceSubtitle:{
 
   marginTop:6,
 
-  fontSize:13,
+  fontSize:normalize(13),
 
   color:"#777",
 
@@ -1368,7 +1366,7 @@ toggleTitle:{
 
   marginTop:18,
 
-  fontSize:24,
+  fontSize:normalize(24),
 
   fontWeight:"900",
 
@@ -1384,9 +1382,9 @@ toggleSubtitle:{
 
   color:"#666",
 
-  fontSize:15,
+  fontSize:normalize(15),
 
-  lineHeight:22,
+  lineHeight:normalize(22),
 
 },
 footer:{
@@ -1421,7 +1419,7 @@ resetText:{
 
   marginTop:3,
 
-  fontSize:11,
+  fontSize:normalize(11),
 
   fontWeight:"700",
 
@@ -1453,7 +1451,7 @@ applyButtonText:{
 
   color:"#FFF",
 
-  fontSize:18,
+  fontSize:normalize(18),
 
   fontWeight:"900",
 
@@ -1483,7 +1481,7 @@ countText:{
 
   fontWeight:"900",
 
-  fontSize:14,
+  fontSize:normalize(14),
 
 },
 });

@@ -7,7 +7,6 @@ import React, { useEffect, useState ,useRef} from "react";
 import {
   ActivityIndicator,
   Alert,
-  Dimensions,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -21,7 +20,7 @@ import {
 import { Image } from "react-native";
 import Screen from "@/components/Screen";
 import Toast from "react-native-toast-message";
-const { height, width } = Dimensions.get("window");
+import { SCREEN, scale, verticalScale, normalize } from "@/utils/responsive";
 const slides = [
 
   {
@@ -45,7 +44,7 @@ export default function Login() {
   const router = useRouter();
   const { redirect } = useLocalSearchParams();
 
-  const isSmall = height < 700;
+  const isSmall = SCREEN.height < 700;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -460,7 +459,7 @@ content: {
 /* ================= HERO ================= */
 
 hero: {
-  height:  height * 0.45,
+  height: verticalScale(380),
   backgroundColor: "#111",
   overflow: "hidden",
   position: "relative",
@@ -502,16 +501,16 @@ backButton: {
 
 createAccountHero: {
   color: "#FFF",
-  fontSize: 12,
+  fontSize: normalize(12),
   fontWeight: "900",
   letterSpacing: 2,
 },
 
 heroContent: {
   position: "absolute",
-    left: width * 0.08,
-    right: width * 0.08,
-    top: height * 0.14,
+    left: scale(31),
+    right: scale(31),
+    top: verticalScale(118),
 },
 
 collectionTag: {
@@ -540,14 +539,14 @@ collectionDot: {
 
 collectionText: {
   color: "#FFF",
-  fontSize: 10,
+  fontSize: normalize(10),
   fontWeight: "800",
   letterSpacing: 2,
 },
 
 brand: {
   color: "#FFF",
-  fontSize: 54,
+  fontSize: normalize(54),
   fontWeight: "900",
   letterSpacing: 4,
 },
@@ -557,10 +556,10 @@ heroTitle: {
 
   color: "#FFF",
 
-  fontSize: 34,
+  fontSize: normalize(34),
   fontWeight: "900",
 
-  lineHeight: 40,
+  lineHeight: normalize(40),
 },
 
 heroSubtitle: {
@@ -570,8 +569,8 @@ heroSubtitle: {
 
   color: "rgba(255,255,255,.78)",
 
-  fontSize: 16,
-  lineHeight: 25,
+  fontSize: normalize(16),
+  lineHeight: normalize(25),
 },
 
 sliderRow: {
@@ -597,7 +596,7 @@ sliderDotActive: {
 /* ================= FORM CARD ================= */
 
 formCard: {
-  marginTop: -(height * 0.040),
+  marginTop: -(verticalScale(34)),
   backgroundColor: "#FFF",
 
   borderTopLeftRadius: 38,
@@ -635,7 +634,7 @@ sheetEyebrow: {
   color: "#888",
   fontWeight: "800",
   letterSpacing: 2,
-  fontSize: 11,
+  fontSize: normalize(11),
 },
 
 sheetTitle: {
@@ -643,10 +642,10 @@ sheetTitle: {
 
   color: "#111",
 
-  fontSize: 38,
+  fontSize: normalize(38),
   fontWeight: "900",
 
-  lineHeight: 42,
+  lineHeight: normalize(42),
 },
 
 sheetSubtitle: {
@@ -655,8 +654,8 @@ sheetSubtitle: {
 
   color: "#777",
 
-  fontSize: 15,
-  lineHeight: 24,
+  fontSize: normalize(15),
+  lineHeight: normalize(24),
 },
   /* ---------------- BACKGROUND ---------------- */
 
@@ -696,7 +695,7 @@ sheetSubtitle: {
 
 
   createAccount: {
-    fontSize: 12,
+    fontSize: normalize(12),
     color: "#111",
     fontWeight: "900",
     letterSpacing: 1.4,
@@ -718,7 +717,7 @@ sheetSubtitle: {
   },
 
   brandLabel: {
-    fontSize: 11,
+    fontSize: normalize(11),
     fontWeight: "800",
     color: "#777",
     letterSpacing: 2,
@@ -747,7 +746,7 @@ sheetSubtitle: {
   /* ---------------- FASHION CARD ---------------- */
 
   fashionCard: {
-    width: width * 0.33,
+    width: scale(129),
     aspectRatio: 0.82,
     borderRadius: 30,
     backgroundColor:"#111",
@@ -768,14 +767,14 @@ sheetSubtitle: {
     marginTop: 18,
     color: "#FFF",
     fontWeight: "900",
-    fontSize: 12,
+    fontSize: normalize(12),
     letterSpacing: 2,
   },
 
   cardSubtitle: {
     marginTop: 6,
     color: "#999",
-    fontSize: 11,
+    fontSize: normalize(11),
     letterSpacing: 1,
   },
 
@@ -790,7 +789,7 @@ sheetSubtitle: {
   /* ---------------- SHEET ---------------- */
 
 sheet: {
-    marginTop: -(height * 0.040),
+    marginTop: -(verticalScale(34)),
     backgroundColor:"#FFF",
     borderTopLeftRadius:42,
     borderTopRightRadius:42,
@@ -814,7 +813,7 @@ sheet: {
     color: "#999",
     fontWeight: "800",
     letterSpacing: 1.4,
-    fontSize: 11,
+    fontSize: normalize(11),
     marginBottom: 10,
   },
 
@@ -839,14 +838,14 @@ sheet: {
   input: {
     flex: 1,
     color: "#111",
-    fontSize: 16,
+    fontSize: normalize(16),
     fontWeight: "600",
   },
 
   forgot: {
     alignSelf: "flex-end",
     color: "#777",
-    fontSize: 13,
+    fontSize: normalize(13),
     fontWeight: "600",
     marginBottom: 28,
   },
@@ -865,7 +864,7 @@ sheet: {
   loginText: {
     color: "#111",
     fontWeight: "900",
-    fontSize: 15,
+    fontSize: normalize(15),
     letterSpacing: 1.5,
   },
 
@@ -887,7 +886,7 @@ sheet: {
 
   or: {
     color: "#999",
-    fontSize: 10,
+    fontSize: normalize(10),
     fontWeight: "800",
     letterSpacing: 2,
   },
@@ -929,7 +928,7 @@ sheet: {
     marginLeft: 16,
     color: "#111",
     fontWeight: "700",
-    fontSize: 15,
+    fontSize: normalize(15),
   },
     footer: {
     marginTop: 34,
@@ -938,7 +937,7 @@ sheet: {
 
   footerText: {
     color: "#888",
-    fontSize: 12,
+    fontSize: normalize(12),
     fontWeight: "600",
     letterSpacing: 1.2,
     marginBottom: 18,
@@ -968,7 +967,7 @@ sheet: {
 
   registerText: {
     color: "#FFF",
-    fontSize: 13,
+    fontSize: normalize(13),
     fontWeight: "900",
     letterSpacing: 1.4,
     marginRight: 18,
@@ -998,7 +997,7 @@ sheet: {
   bottomBrandText: {
     marginHorizontal: 14,
     color: "#999",
-    fontSize: 9,
+    fontSize: normalize(9),
     fontWeight: "800",
     letterSpacing: 1.8,
   },
@@ -1018,7 +1017,7 @@ sheet: {
 
   smallTop: {
     textAlign: "right",
-    fontSize: 12,
+    fontSize: normalize(12),
     color: "#AAA",
     marginBottom: 10,
   },
@@ -1029,13 +1028,13 @@ sheet: {
   },
 
   heading: {
-    fontSize: 22,
+    fontSize: normalize(22),
     fontWeight: "700",
     color: "#111",
   },
 
   sub: {
-    fontSize: 13,
+    fontSize: normalize(13),
     color: "#888",
     marginBottom: 20,
   },
@@ -1054,7 +1053,7 @@ sheet: {
   btnText: {
     color: "#FFF",
     fontWeight: "700",
-    fontSize: 15,
+    fontSize: normalize(15),
   },
 
   socialRow: {
@@ -1063,7 +1062,7 @@ sheet: {
   },
 
   socialBtn: {
-    width: width * 0.9,
+    width: scale(351),
     height: 58,
     flexDirection: "row",
     justifyContent: "center",

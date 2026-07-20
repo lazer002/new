@@ -7,16 +7,6 @@ import {
   useWindowDimensions,
   Text,
 } from "react-native";
-import {
-  FONT,
-  ICON,
-  BUTTON,
-  SPACING,
-  RADIUS,
-  SAFE,
-  SHADOW,
-  hairline,
-} from "@/theme/responsive";
 import { useEffect, useRef } from "react";
 import { useCart } from "@/context/CartContext";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -25,8 +15,12 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useWishlist } from "@/context/WishlistContext";
 import { useFilter } from "@/context/FilterContext";
 import { useUI } from "@/context/UIContext";
-const { height, width } = require("react-native").Dimensions.get("window");
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { scale, verticalScale, normalize } from "@/utils/responsive";
+
+const WRAPPER_HEIGHT = verticalScale(66);
+const PILL_HEIGHT = verticalScale(46);
+
 const Badge = ({ count }: { count: number }) => {
   if (!count) return null;
 
@@ -38,15 +32,13 @@ const Badge = ({ count }: { count: number }) => {
     </View>
   );
 };
-const WRAPPER_HEIGHT = 68;
-const PILL_HEIGHT = 46;
 
 function CustomTabBar({
   state,
   navigation,
 }: any) {
 const insets = useSafeAreaInsets();
-  const { width ,height} =
+  const { width } =
     useWindowDimensions();
 
   const { wishlist } =
@@ -69,7 +61,8 @@ const isCartScreen =
     state.routes.length;
 
     const HORIZONTAL_PADDING = 10;
-const navWidth = Math.min(width - 24, 380);
+  const navWidth =    width * 0.88;
+
 const tabWidth = (navWidth - HORIZONTAL_PADDING * 2) / tabCount;
 
 
@@ -259,7 +252,11 @@ const toValue =
                       ? "home-fill"
                       : "home"
                   }
-size={isFocused ? ICON.md : ICON.sm}
+                  size={
+                    isFocused
+                      ? 26
+                      : 21
+                  }
                   color={iconColor}
                 />
               );
@@ -279,7 +276,11 @@ size={isFocused ? ICON.md : ICON.sm}
                         ? "heart-fill"
                         : "heart"
                     }
-                 size={isFocused ? ICON.md : ICON.sm}
+                    size={
+                      isFocused
+                        ? 26
+                        : 21
+                    }
                     color={iconColor}
                   />
 
@@ -301,7 +302,7 @@ size={isFocused ? ICON.md : ICON.sm}
               icon = (
                 <MaterialIcons
                   name="inventory-2"
-                 size={isFocused ? ICON.md : ICON.sm}
+                  size={isFocused ? 26 : 21}
                   color={iconColor}
                 />
               );
@@ -317,7 +318,7 @@ size={isFocused ? ICON.md : ICON.sm}
 
       <MaterialIcons
         name="shopping-bag"
-       size={isFocused ? ICON.md : ICON.sm}
+        size={isFocused ? 26 : 21}
         color={iconColor}
       />
 
@@ -401,131 +402,141 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
-wrapper: {
-  position: "absolute",
 
-  alignSelf: "center",
+  wrapper: {
 
-  height: WRAPPER_HEIGHT,
+    position: "absolute",
 
-  borderRadius: 26,
+    // bottom: height * 0.026,
 
-  backgroundColor: "#0E0E0E",
+    alignSelf: "center",
 
-  flexDirection: "row",
+    height: WRAPPER_HEIGHT,
 
-  alignItems: "center",
+    // width: "90%",
 
-  paddingHorizontal: SPACING.sm,
+    borderRadius: 30,
 
-  borderWidth: hairline,
+    backgroundColor: "#0E0E0E",
 
-  borderColor: "#1D1D1D",
+    flexDirection: "row",
 
-  shadowColor: "#000",
+    alignItems: "center",
 
-  shadowOpacity: 0.32,
+    paddingHorizontal: 10,
 
-  shadowRadius: 22,
+    borderWidth: 1,
 
-  shadowOffset: {
-    width: 0,
-    height: 12,
+    borderColor: "#1D1D1D",
+
+    shadowColor: "#000",
+
+    shadowOpacity: 0.32,
+
+    shadowRadius: 26,
+
+    shadowOffset: {
+      width: 0,
+      height: 14,
+    },
+
+    elevation: 24,
+
   },
 
-  elevation: 22,
-},
-activePill: {
-  position: "absolute",
+  activePill: {
 
-  left: 0,
+    position: "absolute",
 
-  top: (WRAPPER_HEIGHT - PILL_HEIGHT) / 2,
+    left: 0,
+top: (WRAPPER_HEIGHT - PILL_HEIGHT) / 2,
+    borderRadius: 22,
 
-  borderRadius: 18,
+    backgroundColor: "#B6FF2E",
 
-  backgroundColor: "#B6FF2E",
+    borderWidth: 1,
 
-  borderWidth: hairline,
+    borderColor: "#D8FF77",
 
-  borderColor: "#D8FF77",
+    shadowColor: "#B6FF2E",
 
-  shadowColor: "#B6FF2E",
+    shadowOpacity: 0.65,
 
-  shadowOpacity: 0.6,
+    shadowRadius: 22,
 
-  shadowRadius: 18,
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
 
-  shadowOffset: {
-    width: 0,
-    height: 8,
+    elevation: 18,
+
   },
-
-  elevation: 16,
-},
-
 tab: {
-  flex: 1,
-  height: "100%",
-  justifyContent: "center",
-  alignItems: "center",
+    flex: 1,
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
 },
+  activeLabel: {
 
+    marginTop: 0,
+
+    fontSize: normalize(10),
+
+    fontWeight: "800",
+
+    color: "#111",
+
+    letterSpacing: .5,
+
+    textTransform: "uppercase",
+
+  },
+
+  badge: {
+
+    position: "absolute",
+
+    top: -6,
+
+    right: -10,
+
+    backgroundColor: "#9DFF00",
+
+    minWidth: scale(18),
+
+    height: verticalScale(15),
+
+    borderRadius: 9,
+
+    justifyContent: "center",
+
+    alignItems: "center",
+
+    paddingHorizontal: 4,
+
+  },
 tabContent: {
   width: "100%",
-  height: "100%",
+ height:"100%",
   justifyContent: "center",
   alignItems: "center",
 },
 
 labelContainer: {
-  height: 10,
-
+  height: 12,
   justifyContent: "center",
-
   alignItems: "center",
 },
+  badgeText: {
 
-activeLabel: {
-  marginTop: 0,
+    color: "#111",
 
-  fontSize: 8,
+    fontWeight: "900",
 
-  fontWeight: "800",
+    fontSize: normalize(10),
 
-  color: "#111",
-
-  letterSpacing: 0.3,
-
-  textTransform: "uppercase",
-},
-badge: {
-  position: "absolute",
-
-  top: 5,
-
-  right: -8,
-
-  backgroundColor: "#9DFF00",
-
-  minWidth: 18,
-
-  height: 16,
-
-  borderRadius: 8,
-
-  justifyContent: "center",
-
-  alignItems: "center",
-
-  paddingHorizontal: 3,
-},
-badgeText: {
-  color: "#111",
-
-  fontWeight: "900",
-
-  fontSize: 8,
-},
+  },
 
 });

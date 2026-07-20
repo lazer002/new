@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  Dimensions,
   useColorScheme,
   Pressable,
 } from "react-native";
@@ -34,9 +33,9 @@ import { useRouter } from "expo-router";
 import BundleDrawer from "@/components/cart/BundleDrawer";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { SCREEN, scale, verticalScale, normalize } from "@/utils/responsive";
 
-const { width, height } = Dimensions.get("window");
-const SUMMARY_HEIGHT = height * 0.35;
+const SUMMARY_HEIGHT = verticalScale(295);
 
 export default function CartScreen() {
   const { user } = useAuth();
@@ -600,7 +599,7 @@ const styles = StyleSheet.create({
 
     color: "#999",
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     letterSpacing: 2,
 
@@ -614,7 +613,7 @@ const styles = StyleSheet.create({
 
     color: "#111",
 
-    fontSize: 34,
+    fontSize: normalize(34),
 
     fontWeight: "900",
 
@@ -670,7 +669,7 @@ const styles = StyleSheet.create({
 
     color: "#111",
 
-    fontSize: 16,
+    fontSize: normalize(16),
 
     fontWeight: "900",
 
@@ -729,13 +728,13 @@ const styles = StyleSheet.create({
 
   productName: {
 
-    fontSize: 18,
+    fontSize: normalize(18),
 
     color: "#111",
 
     fontWeight: "900",
 
-    lineHeight: 24,
+    lineHeight: normalize(24),
 
   },
 
@@ -745,7 +744,7 @@ const styles = StyleSheet.create({
 
     color: "#888",
 
-    fontSize: 13,
+    fontSize: normalize(13),
 
     letterSpacing: .5,
 
@@ -758,7 +757,7 @@ const styles = StyleSheet.create({
 
     marginBottom: 18,
 
-    fontSize: 22,
+    fontSize: normalize(22),
 
     fontWeight: "900",
 
@@ -808,7 +807,7 @@ const styles = StyleSheet.create({
 
   qty: {
 
-    fontSize: 17,
+    fontSize: normalize(17),
 
     fontWeight: "900",
 
@@ -845,8 +844,8 @@ const styles = StyleSheet.create({
   },
   itemInfo: { flex: 1, marginLeft: 12 },
   itemHeader: { marginBottom: 4 },
-  itemTitle: { fontWeight: "700", fontSize: 15, maxWidth: width - 160 },
-  variant: { fontSize: 12, color: "#666" },
+  itemTitle: { fontWeight: "700", fontSize: normalize(15), maxWidth: SCREEN.width - scale(160) },
+  variant: { fontSize: normalize(12), color: "#666" },
 
   row: {
     flexDirection: "row",
@@ -854,7 +853,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 6,
   },
-  price: { fontWeight: "700", fontSize: 15 },
+  price: { fontWeight: "700", fontSize: normalize(15) },
 
   /* Qty */
   qtyControls: {
@@ -868,9 +867,9 @@ const styles = StyleSheet.create({
 
   qtyAdd: { backgroundColor: "#7CFC6A" },
   qtyBtnText: {
-    fontSize: 18,
+    fontSize: normalize(18),
     fontWeight: "700",
-    lineHeight: 18,
+    lineHeight: normalize(18),
   },
   qtyValue: {
     width: 26,
@@ -892,7 +891,7 @@ deleteBox: {
   justifyContent: "center",
   alignItems: "center",
 
-  marginBottom:  height * 0.018, // same as cartCard marginBottom
+  marginBottom: verticalScale(15), // same as cartCard marginBottom
 },
 deleteCircle: {
 
@@ -923,11 +922,11 @@ deleteCircle: {
 
 deleteTitle: {
 
-  marginTop: height * 0.018,
+  marginTop: verticalScale(15),
 
   color: "#FFF",
 
-  fontSize: width * 0.03,
+  fontSize: normalize(12),
 
   fontWeight: "900",
 
@@ -941,7 +940,7 @@ deleteSubtitle: {
 
   color: "#777",
 
-  fontSize: width * 0.028,
+  fontSize: normalize(11),
 
 },
   /* Summary */
@@ -953,9 +952,9 @@ deleteSubtitle: {
     padding: 16,
     elevation: 10,
   },
-  summaryTitle: { fontSize: 16, fontWeight: "700", marginBottom: 12 },
+  summaryTitle: { fontSize: normalize(16), fontWeight: "700", marginBottom: 12 },
 
-  summaryText: { fontSize: 14 },
+  summaryText: { fontSize: normalize(14) },
   bold: { fontWeight: "700" },
 
   /* Coupon */
@@ -989,7 +988,7 @@ deleteSubtitle: {
     alignItems: "center",
     padding: 24,
   },
-  emptyTitle: { fontSize: 18, fontWeight: "700", marginTop: 12 },
+  emptyTitle: { fontSize: normalize(18), fontWeight: "700", marginTop: 12 },
   emptySubtitle: {
     textAlign: "center",
     color: "#666",
@@ -1061,7 +1060,7 @@ deleteSubtitle: {
 
     color: "#777",
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
   },
 
@@ -1071,7 +1070,7 @@ deleteSubtitle: {
 
     fontWeight: "700",
 
-    fontSize: 15,
+    fontSize: normalize(15),
 
   },
 
@@ -1081,7 +1080,7 @@ deleteSubtitle: {
 
     fontWeight: "900",
 
-    fontSize: 15,
+    fontSize: normalize(15),
 
   },
 
@@ -1097,7 +1096,7 @@ deleteSubtitle: {
 
   totalLabel: {
 
-    fontSize: 18,
+    fontSize: normalize(18),
 
     color: "#111",
 
@@ -1107,7 +1106,7 @@ deleteSubtitle: {
 
   totalValue: {
 
-    fontSize: 26,
+    fontSize: normalize(26),
 
     color: "#111",
 
@@ -1139,7 +1138,7 @@ deleteSubtitle: {
 
     fontWeight: "900",
 
-    fontSize: 15,
+    fontSize: normalize(15),
 
     letterSpacing: .8,
 
@@ -1172,7 +1171,7 @@ deleteSubtitle: {
 
     fontWeight: "900",
 
-    fontSize: 12,
+    fontSize: normalize(12),
 
   },
   includeSection: {
@@ -1201,7 +1200,7 @@ deleteSubtitle: {
 
   includeTitle: {
 
-    fontSize: 12,
+    fontSize: normalize(12),
 
     fontWeight: "900",
 
@@ -1369,7 +1368,7 @@ deleteSubtitle: {
 
   bundleName: {
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     fontWeight: "800",
 
@@ -1381,7 +1380,7 @@ deleteSubtitle: {
 
     marginTop: 3,
 
-    fontSize: 12,
+    fontSize: normalize(12),
 
     color: "#777",
 

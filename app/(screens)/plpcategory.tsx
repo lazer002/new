@@ -6,7 +6,6 @@ import {
   Pressable,
   Image,
   FlatList,
-  Dimensions,
   Text,
   Animated,
   ActivityIndicator
@@ -19,8 +18,8 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useWishlist } from "@/context/WishlistContext";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
-const { width } = Dimensions.get("window");
-const CARD_WIDTH = (width - 48) / 2;
+import { SCREEN, scale, normalize } from "@/utils/responsive";
+const CARD_WIDTH = (SCREEN.width - scale(48)) / 2;
 const HERO_HEIGHT = 280;
 const AnimatedFlatList =
   Animated.FlatList
@@ -793,7 +792,7 @@ const styles = StyleSheet.create({
 
     fontWeight: "900",
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     letterSpacing: 1,
   },
@@ -819,7 +818,7 @@ const styles = StyleSheet.create({
 
     marginLeft: 5,
 
-    fontSize: 14,
+    fontSize: normalize(14),
   },
 
   buyCount: {
@@ -827,19 +826,19 @@ const styles = StyleSheet.create({
 
     marginLeft: 4,
 
-    fontSize: 12,
+    fontSize: normalize(12),
   },
 
   productTitle: {
     color: "#FFF",
 
-    fontSize: 22,
+    fontSize: normalize(22),
 
     fontWeight: "900",
 
     marginTop: 10,
 
-    lineHeight: 28,
+    lineHeight: normalize(28),
   },
 
   bottomRow: {
@@ -855,7 +854,7 @@ const styles = StyleSheet.create({
   price: {
     color: "#FFF",
 
-    fontSize: 28,
+    fontSize: normalize(28),
 
     fontWeight: "900",
   },
@@ -867,7 +866,7 @@ const styles = StyleSheet.create({
 
     textDecorationLine: "line-through",
 
-    fontSize: 15,
+    fontSize: normalize(15),
   },
 
   arrowCircle: {
@@ -960,7 +959,7 @@ const styles = StyleSheet.create({
 
     fontWeight: "900",
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     letterSpacing: 1.5,
   },
@@ -970,7 +969,7 @@ const styles = StyleSheet.create({
 
     color: "#DDD",
 
-    fontSize: 15,
+    fontSize: normalize(15),
 
     letterSpacing: 1.2,
 
@@ -994,7 +993,7 @@ const styles = StyleSheet.create({
   heroStatNumber: {
     color: "#FFF",
 
-    fontSize: 36,
+    fontSize: normalize(36),
 
     fontWeight: "900",
   },
@@ -1025,7 +1024,7 @@ const styles = StyleSheet.create({
 
   backBtn: {
     position: "absolute",
-    top: width > 600 ? 30 : 20,
+    top: SCREEN.width > 600 ? 30 : 20,
     left: 16,
     width: 56,
     height: 56,
@@ -1049,17 +1048,17 @@ const styles = StyleSheet.create({
 
     color: "#FFF",
 
-    fontSize: 34,
+    fontSize: normalize(34),
 
     fontWeight: "900",
 
     letterSpacing: -1,
 
-    lineHeight: 38,
+    lineHeight: normalize(38),
   },
   filterTopBtn: {
     position: "absolute",
-    top: width > 600 ? 30 : 20,
+    top: SCREEN.width > 600 ? 30 : 20,
     right: 16,
     width: 56,
     height: 56,
@@ -1099,12 +1098,12 @@ const styles = StyleSheet.create({
 
   ratingText: {
     marginLeft: 4,
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "600",
   },
 
   buyText: {
-    fontSize: 12,
+    fontSize: normalize(12),
     color: "#3f3e3eff",
   },
 
@@ -1169,13 +1168,13 @@ const styles = StyleSheet.create({
 
     color: "#111",
 
-    fontSize: 22,
+    fontSize: normalize(22),
 
     fontWeight: "900",
   }, collectionEyebrow: {
     color: "#999",
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     letterSpacing: 2,
   }, stickyHeader: {
@@ -1237,7 +1236,7 @@ const styles = StyleSheet.create({
   filterBadgeText: {
     color: "#B6FF2E",
 
-    fontSize: 10,
+    fontSize: normalize(10),
 
     fontWeight: "900",
   },
@@ -1282,7 +1281,7 @@ const styles = StyleSheet.create({
 
     color: "#111",
 
-    fontSize: 18,
+    fontSize: normalize(18),
 
     fontWeight: "900",
   },

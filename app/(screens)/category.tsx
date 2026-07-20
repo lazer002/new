@@ -8,15 +8,13 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Image,
-  Dimensions,
   Animated,
   FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import api from "@/utils/config";
 import { useRouter } from "expo-router";
-
-const { width } = Dimensions.get("window");
+import { SCREEN, scale, normalize } from "@/utils/responsive";
 
 /* ✅ TYPE */
 type Category = {
@@ -98,8 +96,8 @@ type Bundle = {
   };
 
   /* 📱 RESPONSIVE */
-  const numColumns = width > 900 ? 4 : width > 600 ? 3 : 2;
-  const cardSize = (width - 32 - (numColumns - 1) * 12) / numColumns;
+  const numColumns = SCREEN.width > 900 ? 4 : SCREEN.width > 600 ? 3 : 2;
+  const cardSize = (SCREEN.width - scale(32) - (numColumns - 1) * scale(12)) / numColumns;
 
   /* 🎯 ANIMATION */
   const getAnimatedStyle = (index: number) => ({
@@ -433,14 +431,14 @@ bundleStudioContent:{
 
 bundleStudioTitle:{
   color:"#FFF",
-  fontSize:28,
+  fontSize:normalize(28),
   fontWeight:"900",
 },
 
 bundleStudioPrice:{
   color:"#EEE",
   marginTop:8,
-  fontSize:16,
+  fontSize:normalize(16),
 },
 
 shopNowChip:{
@@ -492,7 +490,7 @@ categoryContent: {
 
 categoryTitle: {
   color: "#FFF",
-  fontSize: 22,
+  fontSize: normalize(22),
   fontWeight: "900",
 },
 
@@ -500,7 +498,7 @@ categorySubtitle: {
   color: "#EAEAEA",
   marginTop: 6,
   marginBottom: 18,
-  fontSize: 13,
+  fontSize: normalize(13),
 },
 
 categoryButton: {
@@ -514,7 +512,7 @@ categoryButton: {
 categoryButtonText: {
   color: "#111",
   fontWeight: "700",
-  fontSize: 13,
+  fontSize: normalize(13),
 },
 loader: {
   flex: 1,
@@ -533,13 +531,13 @@ header:{
 
 greeting:{
   color:"#8C8C8C",
-  fontSize:12,
+  fontSize:normalize(12),
   letterSpacing:2,
   fontWeight:"600",
 },
 
 brand:{
-  fontSize:34,
+  fontSize:normalize(34),
   fontWeight:"900",
   color:"#111",
   marginTop:4,
@@ -564,7 +562,7 @@ searchButton:{
 },
 
 searchIcon:{
-  fontSize:22,
+  fontSize:normalize(22),
 },
 
 heroContainer:{
@@ -604,19 +602,19 @@ newBadgeText:{
   fontWeight:"700",
   color:"#111",
   letterSpacing:1,
-  fontSize:12,
+  fontSize:normalize(12),
 },
 
 heroHeading:{
   color:"#fff",
-  fontSize:40,
+  fontSize:normalize(40),
   fontWeight:"900",
 },
 
 heroDescription:{
   color:"#F2F2F2",
-  fontSize:16,
-  lineHeight:25,
+  fontSize:normalize(16),
+  lineHeight:normalize(25),
   marginTop:12,
   marginBottom:24,
 },
@@ -632,7 +630,7 @@ heroButton:{
 heroButtonText:{
   color:"#111",
   fontWeight:"800",
-  fontSize:15,
+  fontSize:normalize(15),
 },
 
 infoRow:{
@@ -661,7 +659,7 @@ infoCard:{
 },
 
 infoValue:{
-  fontSize:22,
+  fontSize:normalize(22),
   fontWeight:"900",
   color:"#111",
 },
@@ -669,7 +667,7 @@ infoValue:{
 infoLabel:{
   marginTop:6,
   color:"#777",
-  fontSize:13,
+  fontSize:normalize(13),
 },
 
 sectionHeader:{
@@ -681,7 +679,7 @@ sectionHeader:{
 },
 
 sectionTitle:{
-  fontSize:26,
+  fontSize:normalize(26),
   fontWeight:"900",
   color:"#111",
 },
@@ -695,7 +693,7 @@ viewAll:{
 
 smallTitle: {
   color: "#777",
-  fontSize: 13,
+  fontSize: normalize(13),
   letterSpacing: 2,
   textTransform: "uppercase",
 },
@@ -734,7 +732,7 @@ searchBar: {
 searchPlaceholder: {
   marginLeft: 12,
   color: "#999",
-  fontSize: 15,
+  fontSize: normalize(15),
 },
 
 /* ================= PROMO ================= */
@@ -749,14 +747,14 @@ promoCard: {
 
 promoTitle: {
   color: "#fff",
-  fontSize: 24,
+  fontSize: normalize(24),
   fontWeight: "900",
 },
 
 promoSubtitle: {
   color: "#CCC",
   marginTop: 10,
-  lineHeight: 22,
+  lineHeight: normalize(22),
 },
 
 promoButton: {
@@ -776,7 +774,7 @@ promoButtonText: {
 /* ================= TRENDING ================= */
 
 trendingTitle: {
-  fontSize: 23,
+  fontSize: normalize(23),
   fontWeight: "800",
   paddingHorizontal: 20,
   marginBottom: 16,
@@ -822,7 +820,7 @@ iconButton: {
 },
 
 icon: {
-  fontSize: 20,
+  fontSize: normalize(20),
   color: "#111",
 },
 
@@ -851,20 +849,20 @@ badge: {
 badgeText: {
   fontWeight: "700",
   color: "#111",
-  fontSize: 12,
+  fontSize: normalize(12),
   letterSpacing: 1,
 },
 
 heroTitle: {
   color: "#fff",
-  fontSize: 34,
+  fontSize: normalize(34),
   fontWeight: "900",
 },
 
 heroSubtitle: {
   color: "#EEE",
-  fontSize: 15,
-  lineHeight: 23,
+  fontSize: normalize(15),
+  lineHeight: normalize(23),
   marginTop: 10,
   marginBottom: 22,
 },
@@ -880,7 +878,7 @@ shopButton: {
 shopButtonText: {
   color: "#111",
   fontWeight: "700",
-  fontSize: 15,
+  fontSize: normalize(15),
 },
 
 /* ================= FEATURE ================= */
@@ -911,7 +909,7 @@ featureCard: {
 },
 
 featureNumber: {
-  fontSize: 22,
+  fontSize: normalize(22),
   fontWeight: "900",
   color: "#111",
 },
@@ -919,7 +917,7 @@ featureNumber: {
 featureLabel: {
   marginTop: 6,
   color: "#777",
-  fontSize: 13,
+  fontSize: normalize(13),
 },
 
 /* ================= SECTION ================= */
@@ -936,7 +934,7 @@ sectionRow: {
 
 seeAll: {
   color: "#777",
-  fontSize: 14,
+  fontSize: normalize(14),
   fontWeight: "600",
 },
 
@@ -965,7 +963,7 @@ bundleCard: {
   elevation: 5,
 },
 sliderTitle: {
-  fontSize: 26,
+  fontSize: normalize(26),
   fontWeight: "900",
   paddingHorizontal: 20,
   marginBottom: 16,
@@ -996,7 +994,7 @@ sliderName: {
   right: 16,
   color: "#fff",
   fontWeight: "800",
-  fontSize: 18,
+  fontSize: normalize(18),
 },
 bundleImg: {
   width: "100%",
@@ -1014,7 +1012,7 @@ bundleOverlay: {
 
 bundleText: {
   color: "#fff",
-  fontSize: 16,
+  fontSize: normalize(16),
   fontWeight: "800",
 },
 
@@ -1052,7 +1050,7 @@ overlay: {
 text: {
   color: "#fff",
   fontWeight: "800",
-  fontSize: 16,
+  fontSize: normalize(16),
 },
 });
 

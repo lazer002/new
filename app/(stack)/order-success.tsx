@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Animated,
   Easing,
-  Dimensions,
   Platform,
   ActivityIndicator,
 } from "react-native";
@@ -20,20 +19,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/utils/config";
-const { width, height } =
-  Dimensions.get("window");
+import { SCREEN, scale, verticalScale, normalize } from "@/utils/responsive";
 
 const isSmall =
-  height < 700;
+  SCREEN.height < 700;
 
-const CARD_RADIUS =
-  width * 0.06;
+const CARD_RADIUS = scale(23);
 
-const IMAGE_SIZE =
-  width * 0.19;
+const IMAGE_SIZE = scale(74);
 
-const H_PADDING =
-  width * 0.055;
+const H_PADDING = scale(21);
 export default function OrderSuccessScreen() {
   const router = useRouter();
   const { orderNumber } = useLocalSearchParams();
@@ -1373,20 +1368,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
 
     marginBottom:
-      height * 0.04,
+      verticalScale(34),
 
   },
 
   successCircle: {
 
     width:
-      width * 0.29,
+      scale(113),
 
     height:
-      width * 0.29,
+      scale(113),
 
     borderRadius:
-      width,
+      999,
 
     backgroundColor: "#B6FF2E",
 
@@ -1403,10 +1398,10 @@ const styles = StyleSheet.create({
     position: "absolute",
 
     width:
-      width * 0.38,
+      scale(148),
 
     height:
-      width * 0.38,
+      scale(148),
 
     borderRadius: 999,
 
@@ -1419,7 +1414,7 @@ const styles = StyleSheet.create({
   heroTitle: {
 
     fontSize:
-      width * 0.085,
+      normalize(33),
 
     fontWeight: "900",
 
@@ -1436,9 +1431,9 @@ const styles = StyleSheet.create({
     marginTop: 12,
 
     fontSize:
-      width * 0.041,
+      normalize(16),
 
-    lineHeight: 24,
+    lineHeight: normalize(24),
 
     color: "#777",
 

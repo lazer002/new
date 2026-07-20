@@ -7,7 +7,6 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
 Image,
-  Dimensions,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -15,10 +14,10 @@ Image,
   TextInput,
   TouchableOpacity,
   View,
-  Animated,ScrollView 
+  Animated,ScrollView
 } from "react-native";
 import Toast from "react-native-toast-message";
-const { height,width } = Dimensions.get("window");
+import { scale, verticalScale, normalize } from "@/utils/responsive";
 
 /* 🔥 HEADER SLIDES */
 const slides = [
@@ -448,7 +447,7 @@ const styles = StyleSheet.create({
   /* ================= HERO ================= */
 
   hero: {
-    height: height * 0.45,
+    height: verticalScale(380),
     position: "relative",
     overflow: "hidden",
     backgroundColor: "#111",
@@ -491,15 +490,15 @@ const styles = StyleSheet.create({
   loginLink: {
     color: "#FFF",
     fontWeight: "900",
-    fontSize: 12,
+    fontSize: normalize(12),
     letterSpacing: 2,
   },
 
   heroContent: {
     position: "absolute",
-    left: width * 0.08,
-    right: width * 0.08,
-    top: height * 0.14,
+    left: scale(31),
+    right: scale(31),
+    top: verticalScale(118),
   },
 
   collectionTag: {
@@ -530,7 +529,7 @@ const styles = StyleSheet.create({
 
   collectionText: {
     color: "#FFF",
-    fontSize: 10,
+    fontSize: normalize(10),
     fontWeight: "800",
     letterSpacing: 2,
   },
@@ -538,7 +537,7 @@ const styles = StyleSheet.create({
   brand: {
     color: "#FFF",
     fontWeight: "900",
-    fontSize: 54,
+    fontSize: normalize(54),
     letterSpacing: 4,
   },
 
@@ -547,10 +546,10 @@ const styles = StyleSheet.create({
 
     color: "#FFF",
 
-    fontSize: 34,
+    fontSize: normalize(34),
     fontWeight: "900",
 
-    lineHeight: 40,
+    lineHeight: normalize(40),
   },
 
   heroSubtitle: {
@@ -558,8 +557,8 @@ const styles = StyleSheet.create({
 
     color: "rgba(255,255,255,.75)",
 
-    fontSize: 16,
-    lineHeight: 25,
+    fontSize: normalize(16),
+    lineHeight: normalize(25),
 
     width: "85%",
   },
@@ -587,7 +586,7 @@ const styles = StyleSheet.create({
   /* ================= FORM CARD ================= */
 
   formCard: {
-    marginTop: -(height * 0.040),
+    marginTop: -(verticalScale(34)),
 
     backgroundColor: "#FFF",
 
@@ -626,7 +625,7 @@ const styles = StyleSheet.create({
     color: "#888",
     fontWeight: "800",
     letterSpacing: 2,
-    fontSize: 11,
+    fontSize: normalize(11),
   },
 
   sheetTitle: {
@@ -634,10 +633,10 @@ const styles = StyleSheet.create({
 
     color: "#111",
 
-    fontSize: 38,
+    fontSize: normalize(38),
     fontWeight: "900",
 
-    lineHeight: 42,
+    lineHeight: normalize(42),
   },
 
   sheetSubtitle: {
@@ -646,14 +645,14 @@ const styles = StyleSheet.create({
 
     color: "#777",
 
-    fontSize: 15,
-    lineHeight: 24,
+    fontSize: normalize(15),
+    lineHeight: normalize(24),
   },
 
   fieldLabel: {
     color: "#999",
     fontWeight: "800",
-    fontSize: 11,
+    fontSize: normalize(11),
     letterSpacing: 1.5,
 
     marginBottom: 10,
@@ -682,7 +681,7 @@ const styles = StyleSheet.create({
 
     color: "#111",
 
-    fontSize: 16,
+    fontSize: normalize(16),
     fontWeight: "600",
   },
 
@@ -704,7 +703,7 @@ const styles = StyleSheet.create({
   primaryText: {
     color: "#111",
     fontWeight: "900",
-    fontSize: 15,
+    fontSize: normalize(15),
     letterSpacing: 1.4,
   },
     /* ================= TERMS ================= */
@@ -713,8 +712,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
     color: "#8A8A8A",
     textAlign: "center",
-    fontSize: 12,
-    lineHeight: 20,
+    fontSize: normalize(12),
+    lineHeight: normalize(20),
     paddingHorizontal: 8,
   },
 
@@ -732,7 +731,7 @@ const styles = StyleSheet.create({
 
   footerLabel: {
     color: "#888",
-    fontSize: 12,
+    fontSize: normalize(12),
     fontWeight: "700",
     letterSpacing: 1.6,
     marginBottom: 18,
@@ -764,7 +763,7 @@ const styles = StyleSheet.create({
 
   secondaryText: {
     color: "#FFF",
-    fontSize: 14,
+    fontSize: normalize(14),
     fontWeight: "900",
     letterSpacing: 1.5,
     marginRight: 18,
@@ -801,7 +800,7 @@ const styles = StyleSheet.create({
 
     color: "#999",
 
-    fontSize: 9,
+    fontSize: normalize(9),
     fontWeight: "800",
 
     letterSpacing: 2,
@@ -819,8 +818,8 @@ const styles = StyleSheet.create({
 
   caption: {
     color: "#666",
-    fontSize: 13,
-    lineHeight: 22,
+    fontSize: normalize(13),
+    lineHeight: normalize(22),
   },
 
   accent: {
@@ -837,7 +836,7 @@ const styles = StyleSheet.create({
 
   bottomText: {
     color: "#777",
-    fontSize: 14,
+    fontSize: normalize(14),
   },
 
   bottomLink: {
@@ -857,7 +856,7 @@ const styles = StyleSheet.create({
 
   registerText: {
     color: "#111",
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "900",
     letterSpacing: 1.4,
   },

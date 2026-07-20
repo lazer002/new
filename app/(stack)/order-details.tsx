@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Alert,
   Animated,
-  Dimensions,
   Platform,
     Modal,
 } from "react-native";
@@ -19,18 +18,13 @@ import Toast from "react-native-toast-message";
 import api from "@/utils/config";
 import { useAuth } from "@/context/AuthContext";
 import * as Clipboard from "expo-clipboard";
+import { scale, verticalScale, normalize } from "@/utils/responsive";
 
-const { width, height } =
-  Dimensions.get("window");
+const CARD_RADIUS = scale(25);
 
-const CARD_RADIUS =
-  width * 0.065;
+const PADDING = scale(21);
 
-const PADDING =
-  width * 0.055;
-
-const IMAGE_SIZE =
-  width * 0.19;
+const IMAGE_SIZE = scale(74);
 export default function OrderDetails() {
   const { orderNumber } = useLocalSearchParams();
   const { guestId, user } = useAuth();
@@ -223,7 +217,7 @@ const handleConfirmCancel = async () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={{ paddingBottom: height * 0.30, }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: verticalScale(253), }}>
 
         {/* HEADER */}
         <View
@@ -1357,7 +1351,7 @@ const styles = StyleSheet.create({
 
     marginTop: 30,
 
-    fontSize: 44,
+    fontSize: normalize(44),
 
     fontWeight: "900",
 
@@ -1371,9 +1365,9 @@ const styles = StyleSheet.create({
 
     marginTop: 10,
 
-    fontSize: 15,
+    fontSize: normalize(15),
 
-    lineHeight: 24,
+    lineHeight: normalize(24),
 
     color: "#777",
 
@@ -1417,8 +1411,8 @@ const styles = StyleSheet.create({
     borderColor: "#eee",
   },
 
-  orderId: { fontSize: 16, fontWeight: "700" },
-  date: { fontSize: 12, color: "#777", marginTop: 4 },
+  orderId: { fontSize: normalize(16), fontWeight: "700" },
+  date: { fontSize: normalize(12), color: "#777", marginTop: 4 },
 
   statusBadge: {
     marginTop: 8,
@@ -1429,10 +1423,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
 
-  statusText: { color: "#22c55e", fontSize: 11 },
+  statusText: { color: "#22c55e", fontSize: normalize(11) },
 
   section: {
-    fontSize: 12,
+    fontSize: normalize(12),
     color: "#999",
     marginBottom: 10,
     fontWeight: "600",
@@ -1451,7 +1445,7 @@ const styles = StyleSheet.create({
 
   summaryLabel: {
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     fontWeight: "800",
 
@@ -1473,7 +1467,7 @@ const styles = StyleSheet.create({
 
   summaryOrder: {
 
-    fontSize: 28,
+    fontSize: normalize(28),
 
     fontWeight: "900",
 
@@ -1495,7 +1489,7 @@ const styles = StyleSheet.create({
 
   statusPillText: {
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     fontWeight: "900",
 
@@ -1539,7 +1533,7 @@ const styles = StyleSheet.create({
  
   summarySmall: {
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     fontWeight: "800",
 
@@ -1553,7 +1547,7 @@ const styles = StyleSheet.create({
 
     marginTop: 8,
 
-    fontSize: 16,
+    fontSize: normalize(16),
 
     fontWeight: "700",
 
@@ -1566,7 +1560,7 @@ const styles = StyleSheet.create({
 
     marginTop: 8,
 
-    fontSize: 34,
+    fontSize: normalize(34),
 
     fontWeight: "900",
 
@@ -1579,7 +1573,7 @@ const styles = StyleSheet.create({
 
     marginBottom: 8,
 
-    fontSize: 28,
+    fontSize: normalize(28),
 
     fontWeight: "900",
 
@@ -1681,7 +1675,7 @@ const styles = StyleSheet.create({
 
   timelineTitle: {
 
-    fontSize: 18,
+    fontSize: normalize(18),
 
     fontWeight: "700",
 
@@ -1701,7 +1695,7 @@ const styles = StyleSheet.create({
 
     marginTop: 6,
 
-    fontSize: 13,
+    fontSize: normalize(13),
 
     color: "#999",
 
@@ -1746,9 +1740,9 @@ const styles = StyleSheet.create({
 
   productImage: {
 
-    width: width * 0.3,
+    width: scale(117),
 
-    height: height * 0.15,
+    height: verticalScale(127),
 
     borderRadius: 18,
 
@@ -1760,7 +1754,7 @@ const styles = StyleSheet.create({
 
     flex: 1,
 
-    marginLeft: width * 0.05,
+    marginLeft: scale(20),
 
     paddingVertical: 2,
 
@@ -1794,7 +1788,7 @@ const styles = StyleSheet.create({
 
     fontWeight: "900",
 
-    fontSize: 10,
+    fontSize: normalize(10),
 
     letterSpacing: 1,
 
@@ -1802,19 +1796,19 @@ const styles = StyleSheet.create({
 
   productTitle: {
 
-    fontSize: width * 0.04,
+    fontSize: normalize(16),
 
     fontWeight: "900",
 
     color: "#111",
 
-    lineHeight: 22,
+    lineHeight: normalize(22),
 
   },
 
   productMeta: {
 
-    marginTop: height * 0.018,
+    marginTop: verticalScale(15),
 
     flexDirection: "row",
 
@@ -1824,9 +1818,9 @@ const styles = StyleSheet.create({
 
     backgroundColor: "#F5F5F5",
 
-    paddingHorizontal: width * 0.02,
+    paddingHorizontal: scale(8),
 
-    paddingVertical: height * 0.005,
+    paddingVertical: verticalScale(4),
 
     borderRadius: 10,
 
@@ -1838,7 +1832,7 @@ const styles = StyleSheet.create({
 
     fontWeight: "700",
 
-    fontSize: 12,
+    fontSize: normalize(12),
 
     color: "#666",
 
@@ -1847,7 +1841,7 @@ const styles = StyleSheet.create({
   productFooter: {
 
 
-    marginTop: height * 0.018,
+    marginTop: verticalScale(15),
 
     flexDirection: "row",
 
@@ -1859,7 +1853,7 @@ const styles = StyleSheet.create({
 
   productPrice: {
 
-    fontSize: width * 0.06,
+    fontSize: normalize(23),
 
     fontWeight: "900",
 
@@ -1885,9 +1879,9 @@ const styles = StyleSheet.create({
 
   bundleDrawer: {
 
-    marginTop: height * 0.018,
+    marginTop: verticalScale(15),
 
-    paddingTop: height * 0.018,
+    paddingTop: verticalScale(15),
 
     borderTopWidth: 1,
 
@@ -1901,7 +1895,7 @@ const styles = StyleSheet.create({
 
   drawerTitle: {
 
-    fontSize: 12,
+    fontSize: normalize(12),
 
     fontWeight: "900",
 
@@ -1919,15 +1913,15 @@ const styles = StyleSheet.create({
 
     alignItems: "center",
 
-    marginBottom: height * 0.018,
+    marginBottom: verticalScale(15),
 
   },
 
   subImage: {
 
-    width: width * 0.15,
+    width: scale(59),
 
-    height: height * 0.06,
+    height: verticalScale(51),
 
     borderRadius: 14,
 
@@ -1937,7 +1931,7 @@ const styles = StyleSheet.create({
 
   subTitle: {
 
-    fontSize: width * 0.035,
+    fontSize: normalize(14),
 
     fontWeight: "700",
 
@@ -1986,7 +1980,7 @@ const styles = StyleSheet.create({
 
   deliveryName: {
 
-    fontSize: 18,
+    fontSize: normalize(18),
 
     fontWeight: "900",
 
@@ -1998,9 +1992,9 @@ const styles = StyleSheet.create({
 
     marginTop: 6,
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
-    lineHeight: 22,
+    lineHeight: normalize(22),
 
     color: "#777",
 
@@ -2010,7 +2004,7 @@ const styles = StyleSheet.create({
 
     marginTop: 10,
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     fontWeight: "700",
 
@@ -2044,7 +2038,7 @@ const styles = StyleSheet.create({
 
   paymentLabel: {
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     letterSpacing: 1,
 
@@ -2058,7 +2052,7 @@ const styles = StyleSheet.create({
 
     marginTop: 8,
 
-    fontSize: 24,
+    fontSize: normalize(24),
 
     fontWeight: "900",
 
@@ -2082,7 +2076,7 @@ const styles = StyleSheet.create({
 
     fontWeight: "900",
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     color: "#111",
 
@@ -2110,7 +2104,7 @@ const styles = StyleSheet.create({
 
   billLabel: {
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     color: "rgba(255,255,255,.55)",
 
@@ -2118,7 +2112,7 @@ const styles = StyleSheet.create({
 
   billValue: {
 
-    fontSize: 15,
+    fontSize: normalize(15),
 
     fontWeight: "700",
 
@@ -2128,7 +2122,7 @@ const styles = StyleSheet.create({
 
   discountText: {
 
-    fontSize: 15,
+    fontSize: normalize(15),
 
     fontWeight: "900",
 
@@ -2138,7 +2132,7 @@ const styles = StyleSheet.create({
 
   totalLabel: {
 
-    fontSize: 17,
+    fontSize: normalize(17),
 
     fontWeight: "900",
 
@@ -2148,7 +2142,7 @@ const styles = StyleSheet.create({
 
   totalPriceBottom: {
 
-    fontSize: 34,
+    fontSize: normalize(34),
 
     fontWeight: "900",
 
@@ -2202,7 +2196,7 @@ const styles = StyleSheet.create({
 
     fontWeight: "900",
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     letterSpacing: 1,
 
@@ -2216,7 +2210,7 @@ const styles = StyleSheet.create({
 
     fontWeight: "900",
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     letterSpacing: 1,
 
@@ -2227,7 +2221,7 @@ const styles = StyleSheet.create({
 
     marginTop: 5,
 
-    fontSize: width * 0.028,
+    fontSize: normalize(11),
 
     color: "#888",
 
@@ -2236,7 +2230,7 @@ const styles = StyleSheet.create({
 
     color: "#B6FF2E",
 
-    fontSize: width * 0.024,
+    fontSize: normalize(9),
 
     fontWeight: "900",
 
@@ -2244,8 +2238,8 @@ const styles = StyleSheet.create({
 
   },
 
-  value: { fontSize: 13, fontWeight: "500" },
-  sub: { fontSize: 12, color: "#666", marginTop: 2 },
+  value: { fontSize: normalize(13), fontWeight: "500" },
+  sub: { fontSize: normalize(12), color: "#666", marginTop: 2 },
 
   paymentRow: {
     flexDirection: "row",
@@ -2260,7 +2254,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
 
-  paymentBadgeText: { fontSize: 11 },
+  paymentBadgeText: { fontSize: normalize(11) },
 
   item: {
     flexDirection: "row",
@@ -2275,7 +2269,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
 
-  itemTitle: { fontSize: 13, fontWeight: "600" },
+  itemTitle: { fontSize: normalize(13), fontWeight: "600" },
 
   price: { fontWeight: "700" },
 
@@ -2338,7 +2332,7 @@ const styles = StyleSheet.create({
 
   bottomLabel: {
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     fontWeight: "800",
 
@@ -2352,7 +2346,7 @@ const styles = StyleSheet.create({
 
     marginTop: 6,
 
-    fontSize: 34,
+    fontSize: normalize(34),
 
     fontWeight: "900",
 
@@ -2404,7 +2398,7 @@ const styles = StyleSheet.create({
 
     marginLeft: 10,
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     fontWeight: "900",
 
@@ -2438,7 +2432,7 @@ const styles = StyleSheet.create({
 
     marginLeft: 10,
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     fontWeight: "900",
 
@@ -2463,7 +2457,7 @@ const styles = StyleSheet.create({
   },
 
   copyText: {
-    fontSize: 12,
+    fontSize: normalize(12),
     fontWeight: "600",
     color: "#000",
   },
@@ -2511,7 +2505,7 @@ cancelIcon: {
 },
 
 cancelLabel: {
-  fontSize: 10,
+  fontSize: normalize(10),
   fontWeight: "800",
   letterSpacing: 1.5,
   color: "#888",
@@ -2519,7 +2513,7 @@ cancelLabel: {
 },
 
 cancelTitle: {
-  fontSize: 30,
+  fontSize: normalize(30),
   fontWeight: "900",
   letterSpacing: -0.8,
   color: "#111",
@@ -2527,8 +2521,8 @@ cancelTitle: {
 
 cancelDescription: {
   marginTop: 10,
-  fontSize: 14,
-  lineHeight: 21,
+  fontSize: normalize(14),
+  lineHeight: normalize(21),
   color: "#777",
   maxWidth: 330,
 },
@@ -2549,7 +2543,7 @@ keepOrderButton: {
 },
 
 keepOrderText: {
-  fontSize: 11,
+  fontSize: normalize(11),
   fontWeight: "800",
   letterSpacing: 0.8,
   color: "#111",
@@ -2568,7 +2562,7 @@ confirmCancelButton: {
 },
 
 confirmCancelText: {
-  fontSize: 11,
+  fontSize: normalize(11),
   fontWeight: "800",
   letterSpacing: 0.8,
   color: "#FFF",

@@ -8,7 +8,7 @@ import {
   Animated,
   ActivityIndicator,
   ScrollView,
-  Dimensions,
+  useWindowDimensions,
   StatusBar,
   Modal,
   Pressable,
@@ -25,7 +25,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 import CartIcon from "@/components/CartIcon";
 import { useWishlist } from "@/context/WishlistContext";
-const { width, height } = Dimensions.get("window");
+import { SCREEN, scale, verticalScale, normalize } from "@/utils/responsive";
 
 const COLORS = {
   bg: "#F7F7F5",
@@ -53,6 +53,7 @@ type Bundle = {
 
 export default function BundlePDP() {
   const router = useRouter();
+  const { width, height } = useWindowDimensions();
   const { id } = useLocalSearchParams();
   const { addBundleToCart } = useCart();
   const { isInWishlist, addToWishlist, removeFromWishlist } =
@@ -1286,7 +1287,7 @@ const styles = StyleSheet.create({
   },
 
   handle: {
-    width: width * 0.155,
+    width: scale(60),
     height: 5,
     borderRadius: 3,
     backgroundColor: "#DDD",
@@ -1297,10 +1298,10 @@ const styles = StyleSheet.create({
   },
 bundleCard: {
   
-  height: height * 0.380,
+  height: verticalScale(321),
   borderRadius: 34,
   overflow: "hidden",
-  marginBottom: height * 0.024,
+  marginBottom: verticalScale(20),
   backgroundColor: "#eee",
 },
 
@@ -1321,7 +1322,7 @@ tag: {
   left: 18,
   backgroundColor: "#fff",
   paddingHorizontal: 18,
-  height: height * 0.042,
+  height: verticalScale(35),
   borderRadius: 21,
   justifyContent: "center",
 },
@@ -1338,7 +1339,7 @@ discount: {
   right: 18,
   backgroundColor: "#B6FF2E",
   paddingHorizontal: 18,
-  height: height * 0.042,
+  height: verticalScale(35),
   borderRadius: 21,
   justifyContent: "center",
 },
@@ -1356,7 +1357,7 @@ content: {
 
 title: {
   color: "#fff",
-  fontSize: width * 0.082,
+  fontSize: normalize(32),
   fontWeight: "900",
   // marginBottom: 12,
 },
@@ -1369,7 +1370,7 @@ priceRow: {
 
 price: {
   color: "#fff",
-  fontSize:  width * 0.080,
+  fontSize: normalize(31),
   fontWeight: "900",
 },
 
@@ -1377,7 +1378,7 @@ oldPrice: {
   marginLeft: 12,
   color: "#8d8d8d",
   textDecorationLine: "line-through",
-  fontSize: 18,
+  fontSize: normalize(18),
 },
 
 savePill: {
@@ -1395,7 +1396,7 @@ saveText: {
 
 description: {
   color: "#ddd",
-  fontSize: 17,
+  fontSize: normalize(17),
   marginBottom: 18,
 },
 
@@ -1420,14 +1421,14 @@ avatar: {
 
 included: {
   color: "#bfbfbf",
-  fontSize: 13,
+  fontSize: normalize(13),
   letterSpacing: 3,
   fontWeight: "700",
 },
 
 count: {
   color: "#fff",
-  fontSize: 24,
+  fontSize: normalize(24),
   fontWeight: "900",
 },
   drawerHeader: {
@@ -1446,7 +1447,7 @@ count: {
   },
 
   drawerLabel: {
-    fontSize: 12,
+    fontSize: normalize(12),
 
     letterSpacing: 2,
 
@@ -1458,7 +1459,7 @@ count: {
   drawerTitle: {
     marginTop: 6,
 
-    fontSize: width  * 0.12,
+    fontSize: normalize(47),
 
     fontWeight: "900",
 
@@ -1482,7 +1483,7 @@ count: {
 
     borderRadius: 24,
 
-    padding: width  * 0.014,
+    padding: scale(5),
 
     marginBottom: 16,
 
@@ -1494,18 +1495,18 @@ count: {
   },
 
   drawerImage: {
-    width: width  * 0.25,
-    height: height * 0.125,
+    width: scale(98),
+    height: verticalScale(106),
 
     borderRadius: 18,
 
-    marginRight:width *  0.0116,
+    marginRight:scale(5),
   },
 
   drawerProductTitle: {
     flex: 1,
 
-    fontSize: 18,
+    fontSize: normalize(18),
 
     fontWeight: "800",
 
@@ -1515,7 +1516,7 @@ count: {
   drawerPrice: {
     marginTop: 8,
 
-    fontSize: 24,
+    fontSize: normalize(24),
 
     fontWeight: "900",
 
@@ -1523,13 +1524,13 @@ count: {
   },
 
   drawerSize: {
-    height:  height * 0.045,
+    height:  verticalScale(38),
 
     backgroundColor: "#000000",
 
     borderRadius: 14,
 
-    paddingHorizontal: width * 0.024,
+    paddingHorizontal: scale(9),
 
     flexDirection: "row",
 
@@ -1537,11 +1538,11 @@ count: {
 
     alignItems: "center",
 
-    marginRight: width * 0.020,
+    marginRight: scale(8),
   },
 
   drawerFooter: {
-    padding: width *0.020,
+    padding: scale(8),
 
     borderTopWidth: 1,
 
@@ -1549,7 +1550,7 @@ count: {
   },
 
   drawerButton: {
-    height:  height * 0.065,
+    height:  verticalScale(55),
 
     borderRadius: 30,
 
@@ -1574,7 +1575,7 @@ count: {
   bottomSheet: {
     width: "100%",
 
-    maxWidth: width   * 0.920,
+    maxWidth: scale(359),
 
     backgroundColor: "#F7F7F5",
 
@@ -1582,9 +1583,9 @@ count: {
 
     paddingHorizontal: 24,
 
-    paddingTop: height   * 0.020,
+    paddingTop: verticalScale(17),
 
-    paddingBottom: height   * 0.024,
+    paddingBottom: verticalScale(20),
 
     shadowColor: "#000",
 
@@ -1600,7 +1601,7 @@ count: {
     elevation: 25,
   },
   sheetHandle: {
-    width: width   * 0.055,
+    width: scale(21),
     height: 5,
 
     borderRadius: 3,
@@ -1609,11 +1610,11 @@ count: {
 
     alignSelf: "center",
 
-    marginBottom:  height   * 0.020,
+    marginBottom:  verticalScale(17),
   },
 
   sheetTitle: {
-    fontSize:  height   * 0.028,
+    fontSize: normalize(24),
 
     fontWeight: "900",
 
@@ -1625,9 +1626,9 @@ count: {
 
     color: "#777",
 
-    fontSize: 15,
+    fontSize: normalize(15),
 
-    marginBottom:  height   * 0.024,
+    marginBottom:  verticalScale(20),
   },
 
   sizeGrid: {
@@ -1641,9 +1642,9 @@ count: {
   sheetSize: {
     width: "30%",
 
-    height:  height   * 0.060,
+    height:  verticalScale(51),
 
-    marginBottom:  height   * 0.014,
+    marginBottom:  verticalScale(12),
 
     borderRadius: 18,
 
@@ -1665,7 +1666,7 @@ count: {
   },
 
   sheetSizeText: {
-    fontSize:  height   * 0.018,
+    fontSize: normalize(15),
 
     fontWeight: "900",
 
@@ -1677,9 +1678,9 @@ count: {
   },
 
   doneButton: {
-    marginTop:  height   * 0.018,
+    marginTop:  verticalScale(15),
 
-    height:  height   * 0.058,
+    height:  verticalScale(49),
 
     borderRadius: 30,
 
@@ -1693,7 +1694,7 @@ count: {
   doneText: {
     color: "#FFF",
 
-    fontSize:  height   * 0.017,
+    fontSize: normalize(14),
 
     fontWeight: "900",
   },
@@ -1708,14 +1709,14 @@ count: {
     backgroundColor: "#F7F7F5",
   },
   section: {
-    marginTop:  height   * 0.024,
-    paddingHorizontal: width  * 0.074,
+    marginTop:  verticalScale(20),
+    paddingHorizontal: scale(29),
     backgroundColor: "#F7F7F5",
   },
   similarSection: {
-    marginTop:  height   * 0.020,
+    marginTop:  verticalScale(17),
      backgroundColor: "#F7F7F5",
-    paddingLeft:  width   * 0.074,
+    paddingLeft:  scale(29),
   },
 
   similarHeader: {
@@ -1727,7 +1728,7 @@ count: {
   },
 
   similarHeading: {
-    fontSize:  width * 0.074,
+    fontSize: normalize(29),
     fontWeight: "900",
     color: "#000000",
   },
@@ -1735,11 +1736,11 @@ count: {
   viewAll: {
     color: "#B6FF2E",
     fontWeight: "800",
-    fontSize:  width * 0.044,
+    fontSize: normalize(17),
   },
 
   similarCard: {
-    width:  width * 0.640,
+    width:  scale(250),
     backgroundColor: "#FFF",
     borderColor: "#ECECEC",
     borderRadius: 28,
@@ -1751,7 +1752,7 @@ count: {
 
   similarImage: {
     width: "100%",
-    height:height * 0.260,
+    height:verticalScale(219),
   },
 
   similarInfo: {
@@ -1759,20 +1760,20 @@ count: {
   },
 
   similarTitle: {
-    fontSize: height * 0.0260,
+    fontSize: normalize(22),
     fontWeight: "900",
     color: "#000000",
   },
 
   similarPrice: {
     marginTop: 10,
-    fontSize:  height * 0.0260,
+    fontSize: normalize(22),
     fontWeight: "900",
     color: "#000000",
   },
 
   similarBottom: {
-    marginTop:  height * 0.018,
+    marginTop:  verticalScale(15),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -1788,11 +1789,11 @@ count: {
   discountText: {
     fontWeight: "900",
     color: "#000",
-    fontSize: 12,
+    fontSize: normalize(12),
   },
 
   similarArrow: {
-    fontSize: 26,
+    fontSize: normalize(26),
     fontWeight: "900",
     color: "#000000",
   },
@@ -1801,15 +1802,15 @@ count: {
     position: "absolute",
     left: 14,
     right: 14,
-    bottom: height * 0.020,
+    bottom: verticalScale(17),
 
-    height:  height * 0.076,
+    height:  verticalScale(64),
 
     borderRadius: 38,
 
     backgroundColor: "#050505",
 
-    paddingHorizontal:  width * 0.038,
+    paddingHorizontal:  scale(15),
 
     flexDirection: "row",
 
@@ -1836,16 +1837,16 @@ count: {
   },
 
   imageStack: {
-    width:  width * 0.182,
-    height: height * 0.046,
+    width:  scale(71),
+    height: verticalScale(39),
     position: "relative",
   },
 
   stackImage: {
     position: "absolute",
 
-    width:   width * 0.081,
-    height:  height * 0.042,
+    width:   scale(32),
+    height:  verticalScale(35),
 
     borderRadius: 21,
 
@@ -1862,16 +1863,16 @@ count: {
 
   itemCount: {
     color: "#ffffff",
-    fontSize: 22,
+    fontSize: normalize(22),
     fontWeight: "900",
   },
 
 
   priceButton: {
-    height:  height * 0.056,
+    height:  verticalScale(47),
 
-    paddingLeft:  width * 0.018,
-    paddingRight:  width * 0.012,
+    paddingLeft:  scale(7),
+    paddingRight:  scale(5),
 
     borderRadius: 28,
 
@@ -1887,13 +1888,13 @@ count: {
 
   priceText: {
     color: "#FFF",
-    fontSize:  width *0.080,
+    fontSize: normalize(31),
     fontWeight: "900",
   },
 
   arrowContainer: {
-    width: width *0.058,
-    height: height * 0.028,
+    width: scale(23),
+    height: verticalScale(24),
 
     marginLeft: 10,
 
@@ -1904,7 +1905,7 @@ count: {
   arrow: {
     color: "#9EFF32",
 
-    fontSize: 30,
+    fontSize: normalize(30),
 
     fontWeight: "900",
 
@@ -1919,13 +1920,13 @@ count: {
 
 
   lookSection: {
-    marginTop:  height * 0.025,
+    marginTop:  verticalScale(21),
     paddingHorizontal: 24, backgroundColor: "#F7F7F5",
     position: "relative",
   },
 
   lookHeading: {
-    fontSize:  height * 0.032,
+    fontSize: normalize(27),
     fontWeight: "900",
     color: "#000000",
   },
@@ -1933,11 +1934,11 @@ count: {
   lookSub: {
     color: "#8A8A8A",
     marginTop: 8,
-    marginBottom:  height * 0.020,
+    marginBottom:  verticalScale(17),
   },
 
   lookCard: {
-    height: height * 0.470,
+    height: verticalScale(397),
     borderRadius: 32,
     overflow: "hidden",
     backgroundColor: "#111",
@@ -1959,8 +1960,8 @@ count: {
 
   lookBubble: {
     position: "absolute",
-    width: height * 0.088,
-    height: height * 0.088,
+    width: verticalScale(74),
+    height: verticalScale(74),
     borderRadius: 44,
     backgroundColor: "#FFF",
     padding: 4,
@@ -1974,12 +1975,12 @@ count: {
 
   lookBottom: {
     position: "absolute",
-    left: width  * 0.044,
-    bottom:  height * 0.024,
+    left: scale(17),
+    bottom:  verticalScale(20),
   },
 
   lookTitle: {
-    fontSize:  height * 0.032,
+    fontSize: normalize(27),
     fontWeight: "900",
     color: "#ffffff",
   },
@@ -1990,15 +1991,15 @@ count: {
   },
 
   whySection: {
-    marginTop:  height * 0.025,
+    marginTop:  verticalScale(21),
     paddingHorizontal: 24, backgroundColor: "#F7F7F5",
   },
 
   whyHeading: {
-    fontSize:  height * 0.032,
+    fontSize: normalize(27),
     fontWeight: "900",
     color: "#000000",
-    marginBottom:  height * 0.024,
+    marginBottom:  verticalScale(20),
   },
 
   whyGrid: {
@@ -2019,18 +2020,18 @@ count: {
   },
 
   whyIcon: {
-    fontSize:  height * 0.034,
+    fontSize: normalize(29),
   },
 
   whyTitle: {
-    marginTop:  height * 0.018,
-    fontSize:  height * 0.018,
+    marginTop:  verticalScale(15),
+    fontSize: normalize(15),
     fontWeight: "900",
     color: "#000000",
   },
 
   whyDesc: {
-    marginTop:  height * 0.010,
+    marginTop:  verticalScale(8),
     color: "#888",
     lineHeight: 22,
   },
@@ -2042,15 +2043,15 @@ count: {
   },
 
   sectionHeading: {
-    fontSize:  height * 0.030,
+    fontSize: normalize(25),
     fontWeight: "900",
     color: "#000000",
   },
   bundlePreviewCard: {
-    marginTop:  height * 0.016,
+    marginTop:  verticalScale(14),
     backgroundColor: "#FFF",
     borderRadius: 28,
-    padding:  width * 0.022,
+    padding:  scale(9),
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
@@ -2058,15 +2059,15 @@ count: {
   },
 
   previewStack: {
-    width: width * 0.280,
-    height:  height * 0.070,
+    width: scale(109),
+    height:  verticalScale(59),
     position: "relative",
   },
 
   previewImage: {
     position: "absolute",
-    width:  width * 0.122,
-    height:  height * 0.062,
+    width:  scale(48),
+    height:  verticalScale(52),
     borderRadius: 18,
     borderWidth: 3,
     borderColor: "#FFF",
@@ -2078,7 +2079,7 @@ count: {
   },
 
   previewTitle: {
-    fontSize:  width * 0.060,
+    fontSize: normalize(23),
     fontWeight: "900",
     color: "#111",
   },
@@ -2109,10 +2110,10 @@ count: {
   sectionAction: {
     color: "#B6FF2E",
     fontWeight: "800",
-    fontSize: 15,
+    fontSize: normalize(15),
   },
   sectionCount: {
-    fontSize: 12,
+    fontSize: normalize(12),
     letterSpacing: 2,
     fontWeight: "800",
     color: "#000000",
@@ -2146,12 +2147,12 @@ count: {
 
   includeText: {
     fontWeight: "900",
-    fontSize: 18,
+    fontSize: normalize(18),
     color: "#000",
   },
 
   bundleItemPrice: {
-    fontSize: 24,
+    fontSize: normalize(24),
     fontWeight: "900",
     color: "#000000",
     marginTop: 10,
@@ -2173,12 +2174,12 @@ count: {
 
   sizeArrow: {
     color: "#B6FF2E",
-    fontSize: 18,
+    fontSize: normalize(18),
   },
 
   previewBtn: {
-    width: width * 0.262,
-    height: height * 0.042,
+    width: scale(102),
+    height: verticalScale(35),
     backgroundColor: "#B6FF2E",
     borderRadius: 14,
     justifyContent: "center",
@@ -2191,13 +2192,13 @@ count: {
   },
 
   savingSection: {
-    marginTop: height * 0.026,
+    marginTop: verticalScale(22),
     paddingHorizontal: 24,
     backgroundColor: "#F7F7F5",
   },
 
   savingTitle: {
-    fontSize: height * 0.030,
+    fontSize: normalize(25),
     fontWeight: "900",
     color: "#000000",
     marginBottom: 18,
@@ -2220,14 +2221,14 @@ count: {
   },
 
   label: {
-    fontSize: 12,
+    fontSize: normalize(12),
     letterSpacing: 2,
     color: "#888",
     fontWeight: "700",
   },
 
   whitePrice: {
-    fontSize: 32,
+    fontSize: normalize(32),
     fontWeight: "900",
     color: "#000000",
     marginTop: 8,
@@ -2244,7 +2245,7 @@ count: {
   },
 
   arrowIcon: {
-    fontSize: 28,
+    fontSize: normalize(28),
     fontWeight: "900",
     color: "#B6FF2E",
   },
@@ -2265,7 +2266,7 @@ count: {
 
   greenPrice: {
     marginTop: 6,
-    fontSize: 34,
+    fontSize: normalize(34),
     fontWeight: "900",
     color: "#000",
   },
@@ -2277,14 +2278,14 @@ count: {
   },
 
   bundleTitle: {
-    fontSize: width  * 0.096,
+    fontSize: normalize(37),
     fontWeight: "900",
     color: "#000000",
   },
 
   bundleDesc: {
     color: "#999",
-    fontSize: 15,
+    fontSize: normalize(15),
     lineHeight: 25,
     marginTop: 5,
     paddingRight: 10,
@@ -2305,13 +2306,13 @@ count: {
   },
 
   priceCard: {
-    marginTop: height * 0.032,
+    marginTop: verticalScale(27),
 
     backgroundColor: "#FFF",
 
     borderRadius: 28,
 
-    padding: width * 0.052,
+    padding: scale(20),
 
     flexDirection: "row",
 
@@ -2359,7 +2360,7 @@ count: {
   saveBadgeText: {
     color: "#B6FF2E",
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     fontWeight: "900",
 
@@ -2367,7 +2368,7 @@ count: {
   },
 
   currentPrice: {
-    fontSize:width   * 0.104,
+    fontSize: normalize(41),
 
     fontWeight: "900",
 
@@ -2394,9 +2395,9 @@ count: {
   },
 
   rightSaving: {
-    width: width   * 0.420,
+    width: scale(164),
 
-    height: height   * 0.120,
+    height: verticalScale(101),
 
     borderRadius: 24,
 
@@ -2408,7 +2409,7 @@ count: {
   },
 
   youSave: {
-    fontSize: 11,
+    fontSize: normalize(11),
 
     fontWeight: "800",
 
@@ -2420,7 +2421,7 @@ count: {
   saveAmount: {
     marginTop: 6,
 
-    fontSize: width  * 0.068,
+    fontSize: normalize(27),
 
     fontWeight: "900",
 
@@ -2428,7 +2429,7 @@ count: {
   },
 
   greenLine: {
-    width:  width  * 0.080,
+    width:  scale(31),
 
     height: 1,
 
@@ -2442,7 +2443,7 @@ count: {
 
     color: "#111",
 
-    fontSize: 12,
+    fontSize: normalize(12),
   },
 
 
@@ -2456,19 +2457,19 @@ count: {
 
   saveLabel: {
     fontWeight: "800",
-    fontSize: 11,
+    fontSize: normalize(11),
     color: "#000",
   },
 
   savePrice: {
     marginTop: 6,
     fontWeight: "900",
-    fontSize: 26,
+    fontSize: normalize(26),
     color: "#000",
   },
   topBar: {
     position: "absolute",
-    top: height   * 0.038,
+    top: verticalScale(32),
     left: 20,
     right: 20,
 
@@ -2479,13 +2480,13 @@ count: {
   },
 
   leftAction: {
-    width: width * 0.12,
-    height: height * 0.06,
+    width: scale(47),
+    height: verticalScale(51),
     justifyContent: "flex-start",
   },
 
   rightActions: {
-    width: width * 0.12,
+    width: scale(47),
     alignItems: "center",
   },
 
@@ -2496,9 +2497,9 @@ count: {
 
     marginTop: 12,
     backgroundColor: "#B6FF2E",
-    borderRadius: width * 0.03,
-    width: width * 0.12,
-    height: height * 0.05,
+    borderRadius: scale(12),
+    width: scale(47),
+    height: verticalScale(42),
   },
 
   topBtnWrapper: {
@@ -2506,9 +2507,9 @@ count: {
   },
 
   blurButton: {
-    width: width * 0.12,
-    height: height * 0.06,
-    borderRadius: width * 0.03,
+    width: scale(47),
+    height: verticalScale(51),
+    borderRadius: scale(12),
 
     overflow: "hidden",
 
@@ -2557,7 +2558,7 @@ count: {
   },
 
   buildLookText: {
-    fontSize: 17,
+    fontSize: normalize(17),
     fontWeight: "900",
     color: "#000",
     letterSpacing: 1,
@@ -2611,14 +2612,14 @@ count: {
 
 
   heroContainer: {
-    height: height * 0.82,
+    height: verticalScale(692),
     justifyContent: "center",
     alignItems: "center",
   },
 
   imageWrapper: {
-    width: width,
-    height: height * 0.78,
+    width: SCREEN.width,
+    height: verticalScale(658),
   },
 
   heroImage: {
@@ -2636,8 +2637,8 @@ count: {
   },
 
   thumbCard: {
-    width: width * 0.162,
-    height: height * 0.082,
+    width: scale(63),
+    height: verticalScale(69),
     borderRadius: 18,
     overflow: "hidden",
     marginBottom: 14,
@@ -2672,7 +2673,7 @@ count: {
 
   icon: {
     color: "#FFF",
-    fontSize: 20,
+    fontSize: normalize(20),
     fontWeight: "700",
   },
 
@@ -2689,7 +2690,7 @@ count: {
   imageCountText: {
     color: "#FFF",
     fontWeight: "800",
-    fontSize: 13,
+    fontSize: normalize(13),
   },
 
   bundleChip: {
@@ -2718,7 +2719,7 @@ count: {
     color: "#FFF",
     fontWeight: "800",
     letterSpacing: 1,
-    fontSize: 11,
+    fontSize: normalize(11),
   },
 
 });

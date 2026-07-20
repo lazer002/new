@@ -7,7 +7,6 @@ import {
   Image,
   FlatList,
   ScrollView,
-  Dimensions,
   TextInput,
 } from "react-native";
 import { Ionicons,AntDesign  } from "@expo/vector-icons";
@@ -20,20 +19,7 @@ import { useWishlist } from "@/context/WishlistContext";
 import { LinearGradient } from "expo-linear-gradient";
 import PremiumDrawer from "@/components/PremiumDrawer";
 import FloatingHeader from "@/components/FloatingHeader";
-import {
-  FONT,
-  ICON,
-  BUTTON,
-  SPACING,
-  RADIUS,
-  SAFE,
-  SHADOW,
-  PRODUCT,
-  productCardWidth,
-  hairline,
-  lineHeight,
-  SCREEN,
-} from "@/theme/responsive";
+
 
 import Animated, {
   useAnimatedScrollHandler,
@@ -43,11 +29,16 @@ import Animated, {
     withTiming,
 } from "react-native-reanimated";
 import { useUI } from "@/context/UIContext";
-const CARD_WIDTH = productCardWidth;
-const CARD_HEIGHT = CARD_WIDTH * PRODUCT.imageRatio;
+import {
+  SCREEN,
+  scale,
+  verticalScale,
+  normalize,
+} from "@/utils/responsive";
 
+const CARD_WIDTH = (SCREEN.width - scale(60)) / 2;
 
-
+/* ───────────────── PRODUCT CARD ───────────────── */
 const getProductMeta = (id: string) => {
   let hash = 0;
 
@@ -57,10 +48,13 @@ const getProductMeta = (id: string) => {
 
   const positiveHash = Math.abs(hash);
 
-  return {
-    rating: (4 + (positiveHash % 10) / 10).toFixed(1),
-    buyCount: 50 + (positiveHash % 51),
-  };
+  // ⭐ Rating between 4.0 - 4.9
+  const rating = (4 + (positiveHash % 10) / 10).toFixed(1);
+
+  // 🛒 Buy count between 50 - 100
+  const buyCount = 50 + (positiveHash % 51); // 50 to 100
+
+  return { rating, buyCount };
 };
 
 
@@ -209,7 +203,7 @@ function ProductCard({ item }: { item: any }) {
           ? "heart"
           : "heart-outline"
       }
-    size={ICON.md}
+      size={22}
       color={
         isFav
           ? "#000000"
@@ -265,7 +259,7 @@ function ProductCard({ item }: { item: any }) {
       {item.title}
     </Text>
 
-<View style={styles.priceRow} >
+<View style={styles.priceRow}>
   <Text style={styles.price}>₹{item.price}</Text>
 
   <View style={styles.oldPriceContainer}>
@@ -279,7 +273,7 @@ function ProductCard({ item }: { item: any }) {
 
   </View>
 
-  {/* <Pressable style={styles.arrowBtn} onPress={onOpenPDP}>
+  <Pressable style={styles.arrowBtn} onPress={onOpenPDP}>
 
     <Ionicons
       name="arrow-forward"
@@ -287,7 +281,7 @@ function ProductCard({ item }: { item: any }) {
       color="#111"
     />
 
-  </Pressable> */}
+  </Pressable>
 
 </View>
 
@@ -480,7 +474,7 @@ if (offset < 10) {
           <SectionHeader onSeeAll={() => router.push("/category")} />
             </>
         }
-        contentContainerStyle={{   paddingTop:10,
+        contentContainerStyle={{   paddingTop: 10,
   paddingBottom: 120, }}
 renderItem={({ item, index }) => {
 
@@ -492,13 +486,13 @@ renderItem={({ item, index }) => {
       style={{
         width: CARD_WIDTH,
 
-        marginBottom: -6,
+        marginBottom: 2,
 
-        marginTop: isLeft ? 0 : 32,
+        marginTop: isLeft ? 0 : 34,
 
-        marginLeft: isLeft ? SPACING.md : SPACING.sm,
+        marginLeft: isLeft ? 12  : 8,
 
-        marginRight: isLeft ? SPACING.sm : SPACING.lg,
+        marginRight: isLeft ? 8 : 16,
       }}
     >
 
@@ -563,7 +557,7 @@ function SectionHeader({
 
         <Ionicons
           name="arrow-forward"
-          size={ICON.xs}
+          size={16}
           color="#B6FF2E"
           style={{
             marginLeft: 6,
@@ -654,7 +648,7 @@ const scrollToCategory = (key: string) => {
 >
   <Ionicons
     name="person-outline"
-   size={ICON.md}
+    size={24}
     color="#000000"
   />
   <View style={styles.onlineDot} />
@@ -686,14 +680,14 @@ const scrollToCategory = (key: string) => {
 
   <Ionicons
     name="search-outline"
-    size={ICON.md}
+    size={23}
     color="#8A8A8A"
   />
 
   <TextInput
     value={searchQuery}
     onChangeText={setSearchQuery}
-    placeholder="Search sneakers..."
+    placeholder="Search sneakers, apparel..."
     placeholderTextColor="#9A9A9A"
     style={styles.searchInput}
   />
@@ -705,7 +699,7 @@ const scrollToCategory = (key: string) => {
 
     <Ionicons
       name="options-outline"
-     size={ICON.md}
+      size={22}
       color="#ffffffc0"
       
     />
@@ -746,7 +740,7 @@ const scrollToCategory = (key: string) => {
 
         <Ionicons
           name="sparkles"
-          size={ICON.xs}
+          size={14}
           color="#9dff00"
           style={{
             marginRight: 6,
@@ -776,7 +770,7 @@ const scrollToCategory = (key: string) => {
 >
   <Ionicons
     name="sparkles"
-    size={ICON.xs}
+    size={14}
     color="#111"
     style={{ marginRight: 6 }}
   />
@@ -816,7 +810,7 @@ const scrollToCategory = (key: string) => {
 
             <Ionicons
               name="sparkles"
-              size={ICON.xs}
+              size={14}
               color="#9dff00"
               style={{
                 marginRight: 6,
@@ -859,60 +853,148 @@ const styles = StyleSheet.create({
 
 
 
+headerTop: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+},
+
+headerLabel: {
+  fontSize: normalize(12),
+  fontWeight: "700",
+  color: "#9A9A9A",
+  letterSpacing: 2,
+  textTransform: "uppercase",
+},
+
+headerTitle: {
+  marginTop: 4,
+  fontSize: normalize(36),
+  fontWeight: "900",
+  color: "#111",
+  letterSpacing: -.8,
+}
+
+,
+search: {
+  flex: 1,
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#f2f2f2",
+  borderRadius: 30,
+  paddingHorizontal: 16,
+  paddingTop: 1,
+  height: 46,
+},
+
+
+
+tab: {
+  paddingHorizontal: 24,
+  paddingVertical: 10,
+  backgroundColor: "#eee",
+  borderRadius: 20,
+  marginRight: 10,
+},
+
+tabActive: {
+  backgroundColor: "#000000ff", // green like your design
+},
+
+tabText: {
+  fontSize: normalize(16),
+  color: "#000",
+  fontWeight: "500",
+},
+
+tabTextActive: {
+  color: "#fff",
+  fontWeight: "600",
+},
+
+tabContent: {
+  flexDirection: "row",
+  alignItems: "center",
+},
+
+
+
+
+
+  category: {
+    fontSize: normalize(14),
+    color: "#999",
+    marginTop: 6,
+  },
+
+  title: {
+    fontSize: normalize(8),
+    fontWeight: "600",
+    marginTop: 2,
+  },
+
+  searchRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 10, // if not supported use marginRight
+},
+
+
+
 sectionHeader: {
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "flex-end",
 
-paddingHorizontal: SAFE.horizontal,
-marginTop: SPACING.xl,
-marginBottom: SPACING.xxl,
+  paddingHorizontal: 20,
+
+  marginTop: 18,
+  marginBottom: 24,
 },
 
 sectionLabel: {
+  fontSize: normalize(11),
   fontWeight: "800",
   color: "#A1A1A1",
-fontSize: FONT.xs,
-letterSpacing: 2,
+  letterSpacing: 2,
   textTransform: "uppercase",
-  marginBottom: -SPACING.md,
 },
 
 sectionTitle: {
-marginTop: SPACING.sm,
-fontSize: 27,
-letterSpacing: -0.5,
+  marginTop: 6,
+  fontSize: normalize(32),
   fontWeight: "900",
   color: "#111",
+  letterSpacing: -.5,
 },
 
 sectionBtn: {
   flexDirection: "row",
   alignItems: "center",
 
-paddingHorizontal: SPACING.lg,
+  paddingHorizontal: 16,
+  height: verticalScale(38),
 
-height: BUTTON.sm,
-
-borderRadius: RADIUS.full,
+  borderRadius: 21,
 
   backgroundColor: "#111",
 },
 
 sectionBtnText: {
   color: "#FFF",
-fontSize: FONT.sm,
+  fontSize: normalize(14),
   fontWeight: "700",
 },
 
+
 oldPriceWrapper: {
-  marginLeft: SPACING.xs,
+  marginLeft: 8,
   position: "relative",
   justifyContent: "center",
 },
 
 oldPriceText: {
-  fontSize: FONT.md,
+  fontSize: normalize(16),
   fontWeight: "500",
   color: "#272727ff",
 },
@@ -922,25 +1004,24 @@ strikeLine: {
   left: 0,
   right: -2,
   top: "55%",
-  height: hairline * 2,
+  height: 2,
   backgroundColor: "red",
-  transform: [{ rotate: "-12deg" }],
+  transform: [{ rotate: "-12deg" }], // 👈 diagonal slash
 },
+
 
 seeAll: {
-  fontSize: 18,
-  color: "#464747ff",
+  fontSize: normalize(18),
+  color: "#464747ff", // green accent
   fontWeight: "600",
 },
-
 card: {
   width: CARD_WIDTH,
-  height: CARD_HEIGHT ,
-  borderRadius: RADIUS.xxl,
+  height: CARD_WIDTH * 1.55,
+  borderRadius: 30,
   overflow: "hidden",
-  marginBottom: SPACING.xxl,
+  marginBottom: 26,
   backgroundColor: "#111",
-
   shadowColor: "#000",
   shadowOpacity: 0.22,
   shadowRadius: 18,
@@ -948,7 +1029,6 @@ card: {
     width: 0,
     height: 10,
   },
-
   elevation: 12,
 },
 
@@ -964,48 +1044,38 @@ cardGradient: {
 
 newBadge: {
   position: "absolute",
-  top: SPACING.md,
-  left: SPACING.md,
-
+  top: 16,
+  left: 16,
   backgroundColor: "#000000",
-
-  borderRadius: RADIUS.xl,
-
-  paddingHorizontal: SPACING.md,
-  paddingVertical: SPACING.xs,
+  borderRadius: 18,
+  paddingHorizontal: 14,
+  paddingVertical: 8,
 },
 
 newText: {
   color: "#ffffff",
-  fontSize:FONT.xs,
+  fontSize: normalize(11),
   fontWeight: "900",
   letterSpacing: 1.2,
 },
 
 heart: {
   position: "absolute",
-
-   top: SPACING.sm,
-
-  right: SPACING.sm,
-
+  top: 14,
+  right: 14,
   width: 42,
   height: 42,
-
   borderRadius: 21,
-
-  backgroundColor: "rgba(255,255,255,0)",
-
+  backgroundColor: "rgba(255, 255, 255, 0)",
   justifyContent: "center",
   alignItems: "center",
 },
 
 cardContent: {
   position: "absolute",
-
-  left: SPACING.lg,
-  right: SPACING.lg,
-  bottom: SPACING.lg,
+  left: 18,
+  right: 18,
+  bottom: 18,
 },
 
 ratingRow: {
@@ -1014,36 +1084,36 @@ ratingRow: {
 },
 
 ratingText: {
-  marginLeft: SPACING.xs,
+  marginLeft: 5,
   color: "#FFF",
-  fontSize: 15,
+  fontSize: normalize(15),
   fontWeight: "800",
 },
 
 buyText: {
   marginLeft: 4,
   color: "#D5D5D5",
-  fontSize: 13,
+  fontSize: normalize(13),
 },
 
 cardTitle: {
-  marginTop: SPACING.sm,
+  marginTop: 12,
   color: "#FFF",
-  fontSize: FONT.md,
+  fontSize: normalize(12),
   fontWeight: "900",
- lineHeight: lineHeight(FONT.md),
+  lineHeight: normalize(28),
 },
 
 bottomRow: {
-  marginTop: SPACING.lg,
+  marginTop: 18,
   flexDirection: "row",
   justifyContent: "space-between",
-  // alignItems: "flex-end",
+  alignItems: "flex-end",
 },
 
 price: {
   color: "#FFF",
-  fontSize: 23,
+  fontSize: normalize(28),
   fontWeight: "900",
 },
 
@@ -1056,7 +1126,7 @@ oldPriceContainer: {
 
 oldPrice: {
   color: "#9A9A9A",
-  fontSize: 17,
+  fontSize: normalize(17),
   paddingHorizontal: 2,
 },
 
@@ -1064,34 +1134,27 @@ oldPriceStrike: {
   position: "absolute",
   left: 0,
   right: 0,
-
-  top: 12,
-
-  height: hairline * 3,
-
+  top: 11, // Adjust between 8-10 if needed
+  height: 1,
   backgroundColor: "#B6FF2E",
-
   borderRadius: 2,
 },
 
 heartGlass: {
   width: 46,
   height: 46,
-
   borderRadius: 23,
-
-  backgroundColor: "rgba(255,255,255,0)",
+  backgroundColor: "rgba(255, 255, 255, 0)",
 
   justifyContent: "center",
   alignItems: "center",
 },
+
 badgeRow: {
   position: "absolute",
-
-  top: SPACING.md,
-  left: SPACING.md,
-  right: SPACING.md,
-
+  top: 16,
+  left: 16,
+  right: 16,
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
@@ -1100,49 +1163,37 @@ badgeRow: {
 ratingPill: {
   flexDirection: "row",
   alignItems: "center",
-
   backgroundColor: "rgba(0,0,0,.55)",
-
-  paddingHorizontal: SPACING.sm,
-
+  paddingHorizontal: 10,
   height: 30,
-
   borderRadius: 15,
 },
 
 ratingPillText: {
   color: "#FFF",
   fontWeight: "700",
-
   marginLeft: 4,
-
-  fontSize: 13,
 },
 
 priceRow: {
-  marginTop: SPACING.sm,
-
+  marginTop: 8,
   flexDirection: "row",
   alignItems: "center",
 },
+
 arrowBtn: {
-  width: 40,
-  height: 40,
-
-  borderRadius: 20,
-
+  width: 50,
+  height: 50,
+  borderRadius: 25,
   backgroundColor: "#B6FF2E",
-
   justifyContent: "center",
   alignItems: "center",
-
-  marginLeft: SPACING.sm,
+  marginLeft: 12,
 },
-
 header: {
-  paddingHorizontal: SAFE.horizontal,
-  paddingTop: SPACING.sm,
-  paddingBottom: SPACING.xs,
+  paddingHorizontal: 12,
+  paddingTop: 8,
+  paddingBottom: 6,
 },
 
 topRow: {
@@ -1151,71 +1202,69 @@ topRow: {
   alignItems: "center",
 },
 
+
 menuButton: {
   width: 52,
   height: 52,
 
-  borderRadius: RADIUS.xl,
+  borderRadius: 18,
 
   backgroundColor: "#FFF",
 
   justifyContent: "center",
 
-  paddingHorizontal: SPACING.md,
+  paddingHorizontal: 14,
 
-  ...SHADOW.xs,
+  shadowColor: "#000",
+
+  shadowOpacity: 0.08,
+
+
+
+
+  elevation: 1,
 },
 
 menuLineTop: {
   width: 26,
-  height: hairline * 3,
-
+  height: 3,
   borderRadius: 2,
-
   backgroundColor: "#111",
 
-  marginBottom: SPACING.xs,
+  marginBottom: 6,
 },
 
 menuLineMiddle: {
   width: 20,
-  height: hairline * 3,
-
+  height: 3,
   borderRadius: 2,
-
   backgroundColor: "#B6FF2E",
 
-  marginBottom: SPACING.xs,
+  marginBottom: 6,
 },
 
 menuLineBottom: {
   width: 26,
-  height: hairline * 3,
-
+  height: 3,
   borderRadius: 2,
-
   backgroundColor: "#111",
 },
-
 profileBtn: {
   width: 52,
   height: 52,
-
-  borderRadius: RADIUS.xl,
-
+  borderRadius: 18,
   backgroundColor: "#B6FF2E",
-
   justifyContent: "center",
   alignItems: "center",
 },
 
 profileImage: {
-  width: 64,
+  width: scale(58),
+  height: "auto",
   aspectRatio: 1,
-
   borderRadius: 23,
-
   resizeMode: "contain",
+  filter: "hue-rotate(45deg) saturate(1.2) brightness(1.1)",
 },
 
 onlineDot: {
@@ -1227,11 +1276,12 @@ onlineDot: {
   width: 10,
   height: 10,
 
-  borderRadius: 5,
+  borderRadius: 8,
 
-  backgroundColor: "#000",
+  backgroundColor: "#000000",
 
-  borderWidth: hairline * 3,
+  borderWidth: 3,
+  // borderColor: "#FFF",
 
   shadowColor: "#B6FF2E",
   shadowOpacity: 0.45,
@@ -1243,106 +1293,83 @@ onlineDot: {
 
   elevation: 5,
 },
-
 pillRow: {
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "center",
 },
-
 explore: {
-  marginTop: SPACING.xxxl,
-
-  color: "#000",
-
-  fontSize: FONT.xxl,
-
+  marginTop: verticalScale(25),
+  color: "#000000",
+  fontSize: normalize(22),
   fontWeight: "500",
 },
 
 heroTitle: {
-  fontSize: FONT.hero,
-
+  marginTop: 8,
+  fontSize: normalize(58),
   fontWeight: "900",
-
   color: "#111",
-
-  lineHeight: lineHeight(FONT.hero),
+  lineHeight: normalize(62),
 },
 
 heroAccent: {
-  marginTop: -22,
-
-  fontSize: FONT.hero,
-
+  marginTop: -2,
+  fontSize: normalize(58),
   fontWeight: "900",
-
   color: "#B6FF2E",
+  lineHeight: normalize(62),
 
-  lineHeight: lineHeight(FONT.hero),
 },
 
 searchBox: {
-  marginTop: SPACING.lg,
-
-  height: 54,
-
-  borderRadius: RADIUS.full,
-
+  marginTop: verticalScale(27),
+  height: verticalScale(63),
+  borderRadius: 32,
   backgroundColor: "#F5F5F5",
-
   flexDirection: "row",
-
   alignItems: "center",
-
-  paddingHorizontal: SPACING.xl,
+  paddingHorizontal: 20,
 },
 
 searchInput: {
   flex: 1,
-
-  marginLeft: SPACING.sm,
-
+  marginLeft: 12,
   color: "#111",
-
-  fontSize: 13,
+  fontSize: normalize(17),
 },
-
 filterIcon: {
-  width: 36,
-  height: 36,
-
-  borderRadius: RADIUS.md,
-
+  width: scale(47),
+  height: verticalScale(46),
+  borderRadius: 8,
   backgroundColor: "#000000ee",
 
   justifyContent: "center",
-
   alignItems: "center",
 
-  ...SHADOW.sm,
+  shadowColor: "#000",
+  shadowOpacity: 0.08,
+  shadowRadius: 8,
+  shadowOffset: {
+    width: 0,
+    height: 3,
+  },
+
 },
-
 tabs: {
-  paddingTop: SPACING.xl,
-
-  paddingRight: SPACING.xxl,
+  paddingTop: verticalScale(17),
+  // paddingBottom: height * 0.01,
+  paddingRight: scale(20),
 },
 
 pill: {
-  height: 44,
-
-  borderRadius: RADIUS.full,
-
+  height: verticalScale(38),
+  borderRadius: 21,
   backgroundColor: "#F5F5F5",
-
   justifyContent: "center",
-
   alignItems: "center",
-
-  paddingHorizontal: SPACING.xl,
-
-  marginRight: SPACING.sm,
+  paddingHorizontal: 20,
+  marginRight: 12,
 },
 
 pillActive: {
@@ -1351,30 +1378,25 @@ pillActive: {
 
 pillText: {
   color: "#444",
-
   fontWeight: "700",
-
-  fontSize: 15,
+  fontSize: normalize(15),
 },
 
 pillTextActive: {
   color: "#FFF",
 },
 
+
 bundlePill: {
-  height: 44,
-
-  borderRadius: RADIUS.full,
-
+  height: verticalScale(38),
+  borderRadius: 21,
   backgroundColor: "#B6FF2E",
 
   flexDirection: "row",
-
   alignItems: "center",
 
-  paddingHorizontal: SPACING.lg,
-
-  marginRight: SPACING.sm,
+  paddingHorizontal: 18,
+  marginRight: 12,
 
   shadowColor: "#B6FF2E",
   shadowOpacity: 0.35,
@@ -1389,9 +1411,9 @@ bundlePill: {
 
 bundlePillText: {
   color: "#111",
-
-  fontSize: 15,
-
+  fontSize: normalize(15),
   fontWeight: "900",
 },
+
+
 });

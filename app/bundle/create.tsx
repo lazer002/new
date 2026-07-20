@@ -7,7 +7,6 @@ import {
   FlatList,
   Image,
   ScrollView,
-  Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,8 +15,7 @@ import { useRouter } from "expo-router";
 import api from "@/utils/config";
 import { useCart } from "@/context/CartContext";
 import CartIcon from "@/components/CartIcon";
-
-const { width } = Dimensions.get("window");
+import { SCREEN, scale, normalize } from "@/utils/responsive";
 
 export default function BuildYourLook() {
   const router = useRouter();
@@ -748,7 +746,7 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    fontSize: 22,
+    fontSize: normalize(22),
     fontWeight: "800",
     letterSpacing: 1,
     color: "#111",
@@ -776,7 +774,7 @@ const styles = StyleSheet.create({
   },
 
   badgeText: {
-    fontSize: 10,
+    fontSize: normalize(10),
     fontWeight: "700",
     color: "#111",
   },
@@ -836,20 +834,20 @@ const styles = StyleSheet.create({
 
   statNumber: {
     color: "#95FF00",
-    fontSize: 24,
+    fontSize: normalize(24),
     fontWeight: "800",
   },
 
   statLabel: {
     marginTop: 4,
     color: "#aaa",
-    fontSize: 12,
+    fontSize: normalize(12),
   },
 
   /* ---------- PRODUCT ---------- */
 
   productCard: {
-    width: (width - 44) / 2,
+    width: (SCREEN.width - scale(44)) / 2,
     borderRadius: 24,
     overflow: "hidden",
     backgroundColor: "#fff",
@@ -878,7 +876,7 @@ const styles = StyleSheet.create({
   selectedBadgeText: {
     color: "#111",
     fontWeight: "700",
-    fontSize: 10,
+    fontSize: normalize(10),
   },
 
   productBody: {
@@ -886,7 +884,7 @@ const styles = StyleSheet.create({
   },
 
   productTitle: {
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "700",
     color: "#111",
     minHeight: 40,
@@ -894,7 +892,7 @@ const styles = StyleSheet.create({
 
   price: {
     marginTop: 6,
-    fontSize: 20,
+    fontSize: normalize(20),
     fontWeight: "800",
     color: "#111",
   },
@@ -931,7 +929,7 @@ const styles = StyleSheet.create({
   sizeText: {
     fontWeight: "700",
     color: "#111",
-    fontSize: 12,
+    fontSize: normalize(12),
   },
 
   activeSizeText: {
@@ -1012,7 +1010,7 @@ topBtnWrapper: {
 
   floatSub: {
     color: "#aaa",
-    fontSize: 12,
+    fontSize: normalize(12),
     marginTop: 2,
   },
 
@@ -1023,7 +1021,7 @@ topBtnWrapper: {
 
   floatPrice: {
     color: "#95FF00",
-    fontSize: 18,
+    fontSize: normalize(18),
     fontWeight: "800",
     marginRight: 10,
   },
@@ -1071,7 +1069,7 @@ topBtnWrapper: {
   },
 
   drawerSmall: {
-    fontSize: 11,
+    fontSize: normalize(11),
     letterSpacing: 2,
     color: "#888",
     fontWeight: "600",
@@ -1079,7 +1077,7 @@ topBtnWrapper: {
 
   drawerTitle: {
     marginTop: 4,
-    fontSize: 28,
+    fontSize: normalize(28),
     fontWeight: "800",
     color: "#111",
   },
@@ -1103,7 +1101,7 @@ topBtnWrapper: {
   },
 
   drawerProduct: {
-    fontSize: 16,
+    fontSize: normalize(16),
     fontWeight: "700",
     color: "#111",
   },
@@ -1111,12 +1109,12 @@ topBtnWrapper: {
   drawerSize: {
     marginTop: 6,
     color: "#777",
-    fontSize: 13,
+    fontSize: normalize(13),
   },
 
   drawerPrice: {
     marginTop: 10,
-    fontSize: 20,
+    fontSize: normalize(20),
     fontWeight: "800",
     color: "#111",
   },
@@ -1145,7 +1143,7 @@ topBtnWrapper: {
 
   total: {
     color: "#fff",
-    fontSize: 24,
+    fontSize: normalize(24),
     fontWeight: "800",
   },
 
@@ -1166,7 +1164,7 @@ topBtnWrapper: {
 
   checkoutText: {
     color: "#111",
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "800",
     letterSpacing: 1,
   },
