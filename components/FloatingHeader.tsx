@@ -14,7 +14,11 @@ import Animated, {
 } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-const { height } = require("react-native").Dimensions.get("window");
+import { theme } from "@/utils/theme";
+import {
+  verticalScale,
+  scale,
+} from "@/utils/responsive";
 
 type Props = {
   visible: boolean;
@@ -83,15 +87,15 @@ pointerEvents={
 
         <Ionicons
           name="search-outline"
-          size={22}
-          color="#888"
+         size={theme.icon.md}
+          color={theme.colors.textMuted}
         />
 
         <TextInput
           value={searchQuery}
           onChangeText={setSearchQuery}
           placeholder="Search"
-          placeholderTextColor="#999"
+          placeholderTextColor={theme.colors.textMuted}
           style={styles.input}
         />
 
@@ -101,8 +105,8 @@ pointerEvents={
         >
           <Ionicons
             name="options-outline"
-            color="#FFF"
-            size={20}
+            color={theme.colors.white}
+         size={theme.icon.sm}
           />
         </Pressable>
 
@@ -124,9 +128,9 @@ pointerEvents={
     {activeCategory === null  && (
       <Ionicons
         name="sparkles"
-        size={14}
-        color="#B6FF2E"
-        style={{ marginRight: 6 }}
+     size={theme.icon.xs}
+        color={theme.colors.primary}
+       style={ styles.sparkleIcon}
       />
     )}
 
@@ -155,9 +159,9 @@ pointerEvents={
 
     <Ionicons
       name="sparkles"
-      size={14}
-      color="#000000"
-      style={{ marginRight: 6 }}
+   size={theme.icon.xs}
+      color={theme.colors.black}
+      style={styles.sparkleIcon}
     />
 
 
@@ -165,7 +169,7 @@ pointerEvents={
     style={[
       styles.bundlePillText,
       activeCategory === "bundle" && {
-        color: "#FFF",
+        color: theme.colors.white,
       },
     ]}
   >
@@ -189,9 +193,9 @@ pointerEvents={
         {active && (
           <Ionicons
             name="sparkles"
-            size={14}
-            color="#B6FF2E"
-            style={{ marginRight: 6 }}
+           size={theme.icon.xs}
+            color={theme.colors.primary}
+               style={styles.sparkleIcon}
           />
         )}
 
@@ -229,13 +233,11 @@ const styles = StyleSheet.create({
 
     zIndex: 999,
 
-    backgroundColor: "#FAFAFA",
+    backgroundColor: theme.colors.background,
 
-    paddingTop: 50,
-
-    paddingHorizontal: 14,
-
-    paddingBottom: 12,
+paddingTop: verticalScale(50),
+paddingHorizontal: theme.spacing.md,
+// paddingBottom: theme.spacing.sm,
 
   },
 pillRow: {
@@ -245,27 +247,26 @@ pillRow: {
 },
 
 pillText: {
-  color: "#444",
+  color: theme.colors.textSecondary,
   fontWeight: "700",
-  fontSize: 15,
+fontSize: theme.typography.md,
 },
 
 pillTextActive: {
-  color: "#FFF",
+  color: theme.colors.white,
 },
   searchBox: {
 
-    height: 58,
+   height: verticalScale(50),
+borderRadius: theme.radius.full,
+paddingHorizontal: theme.spacing.lg,
 
-    borderRadius: 30,
-
-    backgroundColor: "#F5F5F5",
+    backgroundColor:theme.colors.surface,
 
     flexDirection: "row",
 
     alignItems: "center",
 
-    paddingHorizontal: 18,
 
   },
 
@@ -273,21 +274,20 @@ pillTextActive: {
 
     flex: 1,
 
-    marginLeft: 12,
+   marginLeft: theme.spacing.md,
 
-    color: "#111",
+    color: theme.colors.black
 
   },
 
   filter: {
 
-    width: 42,
+width: theme.layout.filterButton,
+height: theme.layout.filterButton,
+borderRadius: theme.radius.md,
+...theme.shadow.sm,
 
-    height: 42,
-
-    borderRadius: 8,
-
-    backgroundColor: "#111",
+    backgroundColor: theme.colors.black,
 
     justifyContent: "center",
 
@@ -297,54 +297,46 @@ pillTextActive: {
 
   tabs: {
 
-    paddingTop: 18,
-
-    paddingBottom: 6,
+paddingVertical: verticalScale(theme.spacing.lg),
 
   },
 
 pill: {
-  minHeight: 42,
-  borderRadius: 21,
-  backgroundColor: "#F5F5F5",
+height: theme.layout.pillHeight,
+borderRadius: theme.radius.full,
+paddingHorizontal: theme.spacing.xl,
+marginRight: theme.spacing.md,
+  backgroundColor: theme.colors.surface,
 
   justifyContent: "center",
   alignItems: "center",
 
-  paddingHorizontal: 20,
-  marginRight: 12,
 },
 
   active: {
 
-    backgroundColor: "#111",
+    backgroundColor: theme.colors.black,
 
   },
 bundlePill: {
-  height: height * 0.045,
-  borderRadius: 21,
-  backgroundColor: "#B6FF2E",
+height: theme.layout.pillHeight,
+  borderRadius: theme.radius.full,
+  backgroundColor: theme.colors.primary,
 
   flexDirection: "row",
   alignItems: "center",
 
-  paddingHorizontal: 18,
-  marginRight: 12,
+  paddingHorizontal: theme.spacing.lg,
+  marginRight: theme.spacing.md,
 
-  shadowColor: "#B6FF2E",
-  shadowOpacity: 0.35,
-  shadowRadius: 10,
-  shadowOffset: {
-    width: 0,
-    height: 4,
-  },
-
-  elevation: 6,
+// ...theme.shadow.md
 },
-
+sparkleIcon: {
+  marginRight: theme.spacing.xs,
+},
 bundlePillText: {
-  color: "#111",
-  fontSize: 15,
+ color: theme.colors.black,
+fontSize: theme.typography.md,
   fontWeight: "900",
 },
 });

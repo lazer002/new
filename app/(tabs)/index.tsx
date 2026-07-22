@@ -9,7 +9,7 @@ import {
   ScrollView,
   TextInput,
 } from "react-native";
-import { Ionicons,AntDesign  } from "@expo/vector-icons";
+import { Ionicons, AntDesign } from "@expo/vector-icons";
 import Screen from "@/components/Screen";
 import api from "@/utils/config";
 import { router, useRouter } from "expo-router";
@@ -23,12 +23,14 @@ import FloatingHeader from "@/components/FloatingHeader";
 
 import Animated, {
   useAnimatedScrollHandler,
-    useAnimatedStyle,
-    useSharedValue,
-    withSpring,
-    withTiming,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import { useUI } from "@/context/UIContext";
+import { theme } from "@/utils/theme";
+// or from responsive if you merge them
 import {
   SCREEN,
   scale,
@@ -36,7 +38,11 @@ import {
   normalize,
 } from "@/utils/responsive";
 
-const CARD_WIDTH = (SCREEN.width - scale(60)) / 2;
+const GRID_PADDING = theme.spacing.lg;
+const GRID_GAP = theme.spacing.md;
+
+const CARD_WIDTH =
+  (SCREEN.width - GRID_PADDING * 2 - GRID_GAP) / 2;
 
 /* ───────────────── PRODUCT CARD ───────────────── */
 const getProductMeta = (id: string) => {
@@ -185,37 +191,37 @@ function ProductCard({ item }: { item: any }) {
 
 
 
-<Pressable
-  hitSlop={15}
-  style={styles.heart}
-  onPress={() =>
-    isFav
-      ? removeFromWishlist(item._id)
-      : addToWishlist(item._id)
-  }
->
+      <Pressable
+        hitSlop={15}
+        style={styles.heart}
+        onPress={() =>
+          isFav
+            ? removeFromWishlist(item._id)
+            : addToWishlist(item._id)
+        }
+      >
 
-  <View style={styles.heartGlass}>
+        <View style={styles.heartGlass}>
 
-    <Ionicons
-      name={
-        isFav
-          ? "heart"
-          : "heart-outline"
-      }
-      size={22}
-      color={
-        isFav
-          ? "#000000"
-          : "#000000"
-      }
-    />
+          <Ionicons
+            name={
+              isFav
+                ? "heart"
+                : "heart-outline"
+            }
+            size={theme.icon.sm}
+            color={
+              isFav
+                ? theme.colors.black
+                : theme.colors.black
+            }
+          />
 
-  </View>
+        </View>
 
-</Pressable>
+      </Pressable>
 
-{/* ---------- PREMIUM BADGE ---------- */}
+      {/* ---------- PREMIUM BADGE ---------- */}
 
 
       {/* CONTENT */}
@@ -223,13 +229,13 @@ function ProductCard({ item }: { item: any }) {
       <View style={styles.cardContent}>
 
         {/* RATING */}
-{/* 
+        {/* 
         <View style={styles.ratingRow}>
 
           <Ionicons
             name="star"
-            size={16}
-            color="#B6FF2E"
+            size={theme.icon.xs}
+            color=theme.colors.primary
           />
 
           <Text style={styles.ratingText}>
@@ -244,46 +250,46 @@ function ProductCard({ item }: { item: any }) {
 
     */}
 
-      
 
-  
 
-<View style={styles.bottomRow}>
 
-  <View style={{ flex: 1 }}>
 
-    <Text
-      numberOfLines={2}
-      style={styles.cardTitle}
-    >
-      {item.title}
-    </Text>
+        <View style={styles.bottomRow}>
 
-<View style={styles.priceRow}>
-  <Text style={styles.price}>₹{item.price}</Text>
+          <View style={{ flex: 1 }}>
 
-  <View style={styles.oldPriceContainer}>
-    <Text style={styles.oldPrice}>
-      ₹{Math.round(item.price * 1.3)}
-    </Text>
+            <Text
+              numberOfLines={2}
+              style={styles.cardTitle}
+            >
+              {item.title}
+            </Text>
 
-    <View style={styles.oldPriceStrike} />
-  </View>
-</View>
+            <View style={styles.priceRow}>
+              <Text style={styles.price}>₹{item.price}</Text>
 
-  </View>
+              <View style={styles.oldPriceContainer}>
+                <Text style={styles.oldPrice}>
+                  ₹{Math.round(item.price * 1.3)}
+                </Text>
 
+                <View style={styles.oldPriceStrike} />
+              </View>
+            </View>
+
+          </View>
+
+{SCREEN.height >= 420 && (
   <Pressable style={styles.arrowBtn} onPress={onOpenPDP}>
-
     <Ionicons
       name="arrow-forward"
-      size={20}
-      color="#111"
+      size={theme.icon.sm}
+      color={theme.colors.black}
     />
-
   </Pressable>
+)}
 
-</View>
+        </View>
 
       </View>
 
@@ -298,17 +304,17 @@ export default function Home() {
   const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-const [showFloatingHeader, setShowFloatingHeader] = useState(false);
-const [headerHeight, setHeaderHeight] = useState(0);
+  const [showFloatingHeader, setShowFloatingHeader] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(0);
 
 
 
-const { setTabBarVisible } = useUI();
-const {
-  drawerOpen,
-  setDrawerOpen,
-} = useUI();
-  const { filters, setFilters,isFilterOpen, setIsFilterOpen } = useFilter();
+  const { setTabBarVisible } = useUI();
+  const {
+    drawerOpen,
+    setDrawerOpen,
+  } = useUI();
+  const { filters, setFilters, isFilterOpen, setIsFilterOpen } = useFilter();
   useEffect(() => {
     api.get("/api/categories").then((res) =>
       setCategories(res.data.categories || [])
@@ -318,72 +324,72 @@ const {
     );
   }, []);
 
-const scrollY = useSharedValue(0);
+  const scrollY = useSharedValue(0);
 
-const scrollHandler = useAnimatedScrollHandler({
-  onScroll: (event) => {
-    scrollY.value = event.contentOffset.y;
-  },
-});
-const lastOffset = useRef(0);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+  const lastOffset = useRef(0);
 
-const scrollingDown = useRef(false);
+  const scrollingDown = useRef(false);
 
 
-const handleScroll = (
-  event: any
-) => {
+  const handleScroll = (
+    event: any
+  ) => {
 
-  const offset =
-    event.nativeEvent
-      .contentOffset.y;
-      
-const SHOW_AT = Math.max(headerHeight - 10, 120);
-const HIDE_AT = Math.max(headerHeight - 70, 80);
+    const offset =
+      event.nativeEvent
+        .contentOffset.y;
 
-if (!showFloatingHeader && offset >= SHOW_AT) {
-  setShowFloatingHeader(true);
-} else if (showFloatingHeader && offset <= HIDE_AT) {
-  setShowFloatingHeader(false);
-}
+    const SHOW_AT = Math.max(headerHeight - 10, 120);
+    const HIDE_AT = Math.max(headerHeight - 70, 80);
 
-if (offset < 10) {
+    if (!showFloatingHeader && offset >= SHOW_AT) {
+      setShowFloatingHeader(true);
+    } else if (showFloatingHeader && offset <= HIDE_AT) {
+      setShowFloatingHeader(false);
+    }
 
-  setTabBarVisible(true);
+    if (offset < 10) {
 
-  lastOffset.current = offset;
+      setTabBarVisible(true);
 
-  return;
+      lastOffset.current = offset;
 
-}
+      return;
 
-  if (
-    offset >
+    }
+
+    if (
+      offset >
       lastOffset.current + 8 &&
-    !scrollingDown.current
-  ) {
+      !scrollingDown.current
+    ) {
 
-    scrollingDown.current = true;
+      scrollingDown.current = true;
 
-    setTabBarVisible(false);
+      setTabBarVisible(false);
 
-  }
+    }
 
-  else if (
-    offset <
+    else if (
+      offset <
       lastOffset.current - 8 &&
-    scrollingDown.current
-  ) {
+      scrollingDown.current
+    ) {
 
-    scrollingDown.current = false;
+      scrollingDown.current = false;
 
-    setTabBarVisible(true);
+      setTabBarVisible(true);
 
-  }
+    }
 
-  lastOffset.current = offset;
+    lastOffset.current = offset;
 
-};
+  };
 
 
   /* ───────── FILTER LOGIC (INVENTORY SAFE) ───────── */
@@ -430,79 +436,77 @@ if (offset < 10) {
   return (
     <Screen style={styles.screen}>
       <FloatingHeader
-  visible={showFloatingHeader}
-  categories={categories}
-  activeCategory={filters.category}
-  setActiveCategory={(id) =>
-    setFilters((f) => ({
-      ...f,
-      category: id === "all" ? null : id,
-    }))
-  }
-  searchQuery={searchQuery}
-  setSearchQuery={setSearchQuery}
-  openFilter={() => setIsFilterOpen(true)}
-/>
+        visible={showFloatingHeader}
+        categories={categories}
+        activeCategory={filters.category}
+        setActiveCategory={(id) =>
+          setFilters((f) => ({
+            ...f,
+            category: id === "all" ? null : id,
+          }))
+        }
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        openFilter={() => setIsFilterOpen(true)}
+      />
       <FlatList
         data={filteredProducts}
         keyExtractor={(item) => item._id}
         numColumns={2}
-     columnWrapperStyle={{
-  justifyContent: "space-between",
-}}
-  onScroll={handleScroll}
-  scrollEventThrottle={16}
+        columnWrapperStyle={{
+          justifyContent: "space-between",
+        }}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
 
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
-          <> 
-       <Header
-  categories={categories}
-  activeCategory={filters.category}
-  setActiveCategory={(id) =>
-    setFilters((f) => ({
-      ...f,
-      category: id === "all" ? null : id,
-    }))
-  }
-  searchQuery={searchQuery}
-  setSearchQuery={setSearchQuery}
-  openFilter={() => setIsFilterOpen(true)}
-  openMenu={() => setDrawerOpen(true)}
-  setHeaderHeight={setHeaderHeight}
-/>
-          <SectionHeader onSeeAll={() => router.push("/category")} />
-            </>
+          <>
+            <Header
+              categories={categories}
+              activeCategory={filters.category}
+              setActiveCategory={(id) =>
+                setFilters((f) => ({
+                  ...f,
+                  category: id === "all" ? null : id,
+                }))
+              }
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              openFilter={() => setIsFilterOpen(true)}
+              openMenu={() => setDrawerOpen(true)}
+              setHeaderHeight={setHeaderHeight}
+            />
+            <SectionHeader onSeeAll={() => router.push("/category")} />
+          </>
         }
-        contentContainerStyle={{   paddingTop: 10,
-  paddingBottom: 120, }}
-renderItem={({ item, index }) => {
+        contentContainerStyle={{
+          paddingTop: theme.spacing.md,
+          paddingBottom: verticalScale(120),
+        }}
+        renderItem={({ item, index }) => {
 
-  const isLeft = index % 2 === 0;
+          const isLeft = index % 2 === 0;
 
-  return (
+          return (
 
-    <View
-      style={{
-        width: CARD_WIDTH,
+            <View
+              style={{
+                width: CARD_WIDTH,
+                marginBottom: theme.spacing.xs,
+                marginTop: isLeft ? 0 : verticalScale(34),
+                marginLeft: theme.spacing.sm,
+                marginRight: theme.spacing.sm,
+              }}
+            >
 
-        marginBottom: 2,
+              <ProductCard item={item} />
 
-        marginTop: isLeft ? 0 : 34,
+            </View>
 
-        marginLeft: isLeft ? 12  : 8,
+          );
 
-        marginRight: isLeft ? 8 : 16,
-      }}
-    >
-
-      <ProductCard item={item} />
-
-    </View>
-
-  );
-
-}}
+        }}
 
       />
 
@@ -512,11 +516,11 @@ renderItem={({ item, index }) => {
         categories={categories}
         onClose={() => setIsFilterOpen(false)}
       />
-<PremiumDrawer
-  visible={drawerOpen}
-  categories={categories}
-  onClose={() => setDrawerOpen(false)}
-/>
+      <PremiumDrawer
+        visible={drawerOpen}
+        categories={categories}
+        onClose={() => setDrawerOpen(false)}
+      />
     </Screen>
   );
 }
@@ -557,10 +561,10 @@ function SectionHeader({
 
         <Ionicons
           name="arrow-forward"
-          size={16}
-          color="#B6FF2E"
+          size={theme.icon.xs}
+          color={theme.colors.primary}
           style={{
-            marginLeft: 6,
+            marginLeft: theme.spacing.xs,
           }}
         />
 
@@ -579,9 +583,9 @@ function Header({
   searchQuery,
   setSearchQuery,
   openFilter,
-    openMenu,
-    setHeaderHeight
-    
+  openMenu,
+  setHeaderHeight
+
 }: {
   categories: any[];
   activeCategory: string | null;
@@ -593,66 +597,66 @@ function Header({
   setHeaderHeight: (height: number) => void;
 }) {
 
-const categoryScrollRef = useRef<ScrollView>(null);
+  const categoryScrollRef = useRef<ScrollView>(null);
 
-const categoryRefs = useRef<
-  Record<string, View | null>
->({});
+  const categoryRefs = useRef<
+    Record<string, View | null>
+  >({});
 
-const scrollToCategory = (key: string) => {
-  const pill = categoryRefs.current[key];
-  const scroll = categoryScrollRef.current;
+  const scrollToCategory = (key: string) => {
+    const pill = categoryRefs.current[key];
+    const scroll = categoryScrollRef.current;
 
-  if (!pill || !scroll) return;
+    if (!pill || !scroll) return;
 
-  requestAnimationFrame(() => {
-    pill.measureLayout(
-      scroll as any,
-      (x, y, w) => {
-        scroll.scrollTo({
-          x: Math.max(0, x - SCREEN.width / 2 + w / 2),
-          animated: true,
-        });
-      },
-      () => {}
-    );
-  });
-};
+    requestAnimationFrame(() => {
+      pill.measureLayout(
+        scroll as any,
+        (x, y, w) => {
+          scroll.scrollTo({
+            x: Math.max(0, x - SCREEN.width / 2 + w / 2),
+            animated: true,
+          });
+        },
+        () => { }
+      );
+    });
+  };
   return (
 
     <View style={styles.header}
       onLayout={(e) =>
-    setHeaderHeight(e.nativeEvent.layout.height)
-  }>
+        setHeaderHeight(e.nativeEvent.layout.height)
+      }>
 
       {/* ---------- TOP ---------- */}
 
       <View style={styles.topRow}>
 
-<Pressable
-  style={styles.menuButton}
-  onPress={openMenu}
->
+        <Pressable
+          style={styles.menuButton}
+          onPress={openMenu}
+        >
 
-  <View style={styles.menuLineTop} />
+          <View style={styles.menuLineTop} />
 
-  <View style={styles.menuLineMiddle} />
+          <View style={styles.menuLineMiddle} />
 
-  <View style={styles.menuLineBottom} />
+          <View style={styles.menuLineBottom} />
 
-</Pressable>
+        </Pressable>
 
-<Pressable
-  style={styles.profileBtn}
-  onPress={() => router.push("/profile")}
->
-  <Ionicons
-    name="person-outline"
-    size={24}
-    color="#000000"
-  />
-  <View style={styles.onlineDot} />
-</Pressable>
+        <Pressable
+          style={styles.profileBtn}
+          onPress={() => router.push("/profile")}
+        >
+          <Ionicons
+            name="person-outline"
+            size={theme.icon.md}
+            color={theme.colors.black}
+          />
+          <View style={styles.onlineDot} />
+        </Pressable>
 
       </View>
 
@@ -676,169 +680,169 @@ const scrollToCategory = (key: string) => {
 
       {/* ---------- SEARCH ---------- */}
 
-<View style={styles.searchBox}>
+      <View style={styles.searchBox}>
 
-  <Ionicons
-    name="search-outline"
-    size={23}
-    color="#8A8A8A"
-  />
+        <Ionicons
+          name="search-outline"
+          size={theme.icon.md}
+          color="#8A8A8A"
+        />
 
-  <TextInput
-    value={searchQuery}
-    onChangeText={setSearchQuery}
-    placeholder="Search sneakers, apparel..."
-    placeholderTextColor="#9A9A9A"
-    style={styles.searchInput}
-  />
+        <TextInput
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Search sneakers, apparel..."
+          placeholderTextColor={theme.colors.textMuted}
+          style={styles.searchInput}
+        />
 
-  <Pressable
-    onPress={openFilter}
-    style={styles.filterIcon}
-  >
+        <Pressable
+          onPress={openFilter}
+          style={styles.filterIcon}
+        >
 
-    <Ionicons
-      name="options-outline"
-      size={22}
-      color="#ffffffc0"
-      
-    />
+          <Ionicons
+            name="options-outline"
+            size={theme.icon.sm}
+            color={theme.colors.white}
 
-  </Pressable>
+          />
 
-</View>
+        </Pressable>
+
+      </View>
 
       {/* ---------- CATEGORY ---------- */}
 
-   <ScrollView
-    ref={categoryScrollRef}
-  horizontal
-  showsHorizontalScrollIndicator={false}
-  contentContainerStyle={styles.tabs}
->
-
-  {/* ALL */}
-
-<Pressable
-  ref={(ref) => {
-    categoryRefs.current["all"] = ref;
-  }}
-  onPress={() => {
-    setActiveCategory("all");
-    scrollToCategory("all");
-  }}
-  style={[
-    styles.pill,
-    activeCategory === null &&
-      styles.pillActive,
-  ]}
->
-
-    <View style={styles.pillRow}>
-
-      {activeCategory === null && (
-
-        <Ionicons
-          name="sparkles"
-          size={14}
-          color="#9dff00"
-          style={{
-            marginRight: 6,
-          }}
-        />
-
-      )}
-
-      <Text
-        style={[
-          styles.pillText,
-          activeCategory === null &&
-            styles.pillTextActive,
-        ]}
+      <ScrollView
+        ref={categoryScrollRef}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tabs}
       >
-        All
-      </Text>
 
-    </View>
+        {/* ALL */}
 
-  </Pressable>
+        <Pressable
+          ref={(ref) => {
+            categoryRefs.current["all"] = ref;
+          }}
+          onPress={() => {
+            setActiveCategory("all");
+            scrollToCategory("all");
+          }}
+          style={[
+            styles.pill,
+            activeCategory === null &&
+            styles.pillActive,
+          ]}
+        >
 
-  {/* CATEGORIES */}
-<Pressable
-  onPress={() => router.push("/bundle")}
-  style={styles.bundlePill}
->
-  <Ionicons
-    name="sparkles"
-    size={14}
-    color="#111"
-    style={{ marginRight: 6 }}
-  />
+          <View style={styles.pillRow}>
 
-  <Text style={styles.bundlePillText}>
-    Bundle
-  </Text>
+            {activeCategory === null && (
 
- 
-</Pressable>
-  {categories.map((cat) => {
+              <Ionicons
+                name="sparkles"
+                size={theme.icon.xs}
+                color={theme.colors.primary}
+                style={{
+                  marginRight: theme.spacing.xs,
+                }}
+              />
 
-    const active =
-      activeCategory === cat._id;
+            )}
 
-    return (
-
-<Pressable
-  ref={(ref) => {
-    categoryRefs.current[cat._id] = ref;
-  }}
-  key={cat._id}
-  onPress={() => {
-    setActiveCategory(cat._id);
-    scrollToCategory(cat._id);
-  }}
-  style={[
-    styles.pill,
-    active &&
-      styles.pillActive,
-  ]}
->
-
-        <View style={styles.pillRow}>
-
-          {active && (
-
-            <Ionicons
-              name="sparkles"
-              size={14}
-              color="#9dff00"
-              style={{
-                marginRight: 6,
-              }}
-            />
-
-          )}
-
-          <Text
-            numberOfLines={1}
-            style={[
-              styles.pillText,
-              active &&
+            <Text
+              style={[
+                styles.pillText,
+                activeCategory === null &&
                 styles.pillTextActive,
-            ]}
-          >
-            {cat.name}
+              ]}
+            >
+              All
+            </Text>
+
+          </View>
+
+        </Pressable>
+
+        {/* CATEGORIES */}
+        <Pressable
+          onPress={() => router.push("/bundle")}
+          style={styles.bundlePill}
+        >
+          <Ionicons
+            name="sparkles"
+            size={theme.icon.xs}
+            color={theme.colors.black}
+            style={{ marginRight: theme.spacing.xs }}
+          />
+
+          <Text style={styles.bundlePillText}>
+            Bundle
           </Text>
 
-        </View>
 
-      </Pressable>
+        </Pressable>
+        {categories.map((cat) => {
 
-    );
+          const active =
+            activeCategory === cat._id;
 
-  })}
+          return (
 
-</ScrollView>
+            <Pressable
+              ref={(ref) => {
+                categoryRefs.current[cat._id] = ref;
+              }}
+              key={cat._id}
+              onPress={() => {
+                setActiveCategory(cat._id);
+                scrollToCategory(cat._id);
+              }}
+              style={[
+                styles.pill,
+                active &&
+                styles.pillActive,
+              ]}
+            >
+
+              <View style={styles.pillRow}>
+
+                {active && (
+
+                  <Ionicons
+                    name="sparkles"
+                    size={theme.icon.xs}
+                    color={theme.colors.primary}
+                    style={{
+                      marginRight: theme.spacing.xs,
+                    }}
+                  />
+
+                )}
+
+                <Text
+                  numberOfLines={1}
+                  style={[
+                    styles.pillText,
+                    active &&
+                    styles.pillTextActive,
+                  ]}
+                >
+                  {cat.name}
+                </Text>
+
+              </View>
+
+            </Pressable>
+
+          );
+
+        })}
+
+      </ScrollView>
 
     </View>
 
@@ -849,571 +853,475 @@ const scrollToCategory = (key: string) => {
 /* ───────────────── STYLES ───────────────── */
 
 const styles = StyleSheet.create({
-  screen: { backgroundColor: "#fafafa" },
-
-
-
-headerTop: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-},
-
-headerLabel: {
-  fontSize: normalize(12),
-  fontWeight: "700",
-  color: "#9A9A9A",
-  letterSpacing: 2,
-  textTransform: "uppercase",
-},
-
-headerTitle: {
-  marginTop: 4,
-  fontSize: normalize(36),
-  fontWeight: "900",
-  color: "#111",
-  letterSpacing: -.8,
-}
-
-,
-search: {
-  flex: 1,
-  flexDirection: "row",
-  alignItems: "center",
-  backgroundColor: "#f2f2f2",
-  borderRadius: 30,
-  paddingHorizontal: 16,
-  paddingTop: 1,
-  height: 46,
+screen: {
+  backgroundColor: theme.colors.background,
 },
 
 
 
-tab: {
-  paddingHorizontal: 24,
-  paddingVertical: 10,
-  backgroundColor: "#eee",
-  borderRadius: 20,
-  marginRight: 10,
-},
+  headerTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
 
-tabActive: {
-  backgroundColor: "#000000ff", // green like your design
-},
+  headerLabel: {
+    fontSize: theme.typography.sm,
+    fontWeight: "700",
+    color: theme.colors.textMuted,
+    letterSpacing: theme.spacing.xs,
+    textTransform: "uppercase",
+  },
 
-tabText: {
-  fontSize: normalize(16),
-  color: "#000",
-  fontWeight: "500",
-},
+  headerTitle: {
+    marginTop: theme.spacing.xs,
+    fontSize: theme.typography.h6,
+    fontWeight: "900",
+    color: theme.colors.text,
+    letterSpacing: -.8,
+  }
 
-tabTextActive: {
-  color: "#fff",
-  fontWeight: "600",
-},
+  ,
+  search: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.xl,
+    paddingHorizontal: theme.spacing.lg,
+    paddingTop: theme.spacing.xs,
+    height: theme.spacing.xl,
+  },
 
-tabContent: {
-  flexDirection: "row",
-  alignItems: "center",
-},
+
 
 
 
 
 
   category: {
-    fontSize: normalize(14),
-    color: "#999",
-    marginTop: 6,
+    fontSize: theme.typography.md,
+    color: theme.colors.textMuted,
+    marginTop: theme.spacing.xs,
   },
 
   title: {
-    fontSize: normalize(8),
+    fontSize: theme.typography.xs,
     fontWeight: "600",
-    marginTop: 2,
+    marginTop: theme.spacing.xs,
   },
 
   searchRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  gap: 10, // if not supported use marginRight
-},
-
-
-
-sectionHeader: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "flex-end",
-
-  paddingHorizontal: 20,
-
-  marginTop: 18,
-  marginBottom: 24,
-},
-
-sectionLabel: {
-  fontSize: normalize(11),
-  fontWeight: "800",
-  color: "#A1A1A1",
-  letterSpacing: 2,
-  textTransform: "uppercase",
-},
-
-sectionTitle: {
-  marginTop: 6,
-  fontSize: normalize(32),
-  fontWeight: "900",
-  color: "#111",
-  letterSpacing: -.5,
-},
-
-sectionBtn: {
-  flexDirection: "row",
-  alignItems: "center",
-
-  paddingHorizontal: 16,
-  height: verticalScale(38),
-
-  borderRadius: 21,
-
-  backgroundColor: "#111",
-},
-
-sectionBtnText: {
-  color: "#FFF",
-  fontSize: normalize(14),
-  fontWeight: "700",
-},
-
-
-oldPriceWrapper: {
-  marginLeft: 8,
-  position: "relative",
-  justifyContent: "center",
-},
-
-oldPriceText: {
-  fontSize: normalize(16),
-  fontWeight: "500",
-  color: "#272727ff",
-},
-
-strikeLine: {
-  position: "absolute",
-  left: 0,
-  right: -2,
-  top: "55%",
-  height: 2,
-  backgroundColor: "red",
-  transform: [{ rotate: "-12deg" }], // 👈 diagonal slash
-},
-
-
-seeAll: {
-  fontSize: normalize(18),
-  color: "#464747ff", // green accent
-  fontWeight: "600",
-},
-card: {
-  width: CARD_WIDTH,
-  height: CARD_WIDTH * 1.55,
-  borderRadius: 30,
-  overflow: "hidden",
-  marginBottom: 26,
-  backgroundColor: "#111",
-  shadowColor: "#000",
-  shadowOpacity: 0.22,
-  shadowRadius: 18,
-  shadowOffset: {
-    width: 0,
-    height: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.spacing.lg, // if not supported use marginRight
   },
-  elevation: 12,
-},
-
-image: {
-  width: "100%",
-  height: "100%",
-  resizeMode: "cover",
-},
-
-cardGradient: {
-  ...StyleSheet.absoluteFillObject,
-},
-
-newBadge: {
-  position: "absolute",
-  top: 16,
-  left: 16,
-  backgroundColor: "#000000",
-  borderRadius: 18,
-  paddingHorizontal: 14,
-  paddingVertical: 8,
-},
-
-newText: {
-  color: "#ffffff",
-  fontSize: normalize(11),
-  fontWeight: "900",
-  letterSpacing: 1.2,
-},
-
-heart: {
-  position: "absolute",
-  top: 14,
-  right: 14,
-  width: 42,
-  height: 42,
-  borderRadius: 21,
-  backgroundColor: "rgba(255, 255, 255, 0)",
-  justifyContent: "center",
-  alignItems: "center",
-},
-
-cardContent: {
-  position: "absolute",
-  left: 18,
-  right: 18,
-  bottom: 18,
-},
-
-ratingRow: {
-  flexDirection: "row",
-  alignItems: "center",
-},
-
-ratingText: {
-  marginLeft: 5,
-  color: "#FFF",
-  fontSize: normalize(15),
-  fontWeight: "800",
-},
-
-buyText: {
-  marginLeft: 4,
-  color: "#D5D5D5",
-  fontSize: normalize(13),
-},
-
-cardTitle: {
-  marginTop: 12,
-  color: "#FFF",
-  fontSize: normalize(12),
-  fontWeight: "900",
-  lineHeight: normalize(28),
-},
-
-bottomRow: {
-  marginTop: 18,
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "flex-end",
-},
-
-price: {
-  color: "#FFF",
-  fontSize: normalize(28),
-  fontWeight: "900",
-},
-
-oldPriceContainer: {
-  position: "relative",
-  marginLeft: 4,
-  justifyContent: "center",
-  alignSelf: "center",
-},
-
-oldPrice: {
-  color: "#9A9A9A",
-  fontSize: normalize(17),
-  paddingHorizontal: 2,
-},
-
-oldPriceStrike: {
-  position: "absolute",
-  left: 0,
-  right: 0,
-  top: 11, // Adjust between 8-10 if needed
-  height: 1,
-  backgroundColor: "#B6FF2E",
-  borderRadius: 2,
-},
-
-heartGlass: {
-  width: 46,
-  height: 46,
-  borderRadius: 23,
-  backgroundColor: "rgba(255, 255, 255, 0)",
-
-  justifyContent: "center",
-  alignItems: "center",
-},
-
-badgeRow: {
-  position: "absolute",
-  top: 16,
-  left: 16,
-  right: 16,
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-},
-
-ratingPill: {
-  flexDirection: "row",
-  alignItems: "center",
-  backgroundColor: "rgba(0,0,0,.55)",
-  paddingHorizontal: 10,
-  height: 30,
-  borderRadius: 15,
-},
-
-ratingPillText: {
-  color: "#FFF",
-  fontWeight: "700",
-  marginLeft: 4,
-},
-
-priceRow: {
-  marginTop: 8,
-  flexDirection: "row",
-  alignItems: "center",
-},
-
-arrowBtn: {
-  width: 50,
-  height: 50,
-  borderRadius: 25,
-  backgroundColor: "#B6FF2E",
-  justifyContent: "center",
-  alignItems: "center",
-  marginLeft: 12,
-},
-header: {
-  paddingHorizontal: 12,
-  paddingTop: 8,
-  paddingBottom: 6,
-},
-
-topRow: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-},
-
-
-menuButton: {
-  width: 52,
-  height: 52,
-
-  borderRadius: 18,
-
-  backgroundColor: "#FFF",
-
-  justifyContent: "center",
-
-  paddingHorizontal: 14,
-
-  shadowColor: "#000",
-
-  shadowOpacity: 0.08,
 
 
 
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
 
-  elevation: 1,
-},
+    paddingHorizontal: theme.spacing.xl,
+
+    marginTop: theme.spacing.lg,
+    marginBottom: theme.spacing.xl,
+  },
+
+  sectionLabel: {
+    fontSize: theme.typography.xs,
+    fontWeight: "800",
+    color: theme.colors.textSecondary,
+    letterSpacing: theme.spacing.xs,
+    textTransform: "uppercase",
+  },
+
+  sectionTitle: {
+    marginTop: theme.spacing.xs,
+    fontSize: theme.typography.h3,
+    fontWeight: "900",
+    color: theme.colors.text,
+    letterSpacing: -.5,
+  },
+
+  sectionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+
+    paddingHorizontal: theme.spacing.md,
+    height: verticalScale(38),
+
+    borderRadius: theme.radius.full,
+
+    backgroundColor: theme.colors.black,
+  },
+
+  sectionBtnText: {
+    color: theme.colors.white,
+    fontSize: theme.typography.xs,
+    fontWeight: "700",
+  },
+
+
+  oldPriceWrapper: {
+    marginLeft: theme.spacing.sm,
+    position: "relative",
+    justifyContent: "center",
+  },
+
+  oldPriceText: {
+    fontSize: theme.typography.lg,
+    fontWeight: "500",
+      color: theme.colors.text,
+  },
+
+
+
+  seeAll: {
+    fontSize: theme.typography.xs,
+     color: theme.colors.textSecondary,
+    fontWeight: "600",
+  },
+  card: {
+    width: CARD_WIDTH,
+    height: CARD_WIDTH * 1.55,
+    borderRadius: theme.radius.xl,
+    overflow: "hidden",
+    marginBottom: theme.spacing.xl,
+    backgroundColor: theme.colors.black,
+    ...theme.shadow.lg
+  },
+
+  image: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+
+  cardGradient: {
+    ...StyleSheet.absoluteFillObject,
+  },
+
+  newBadge: {
+    position: "absolute",
+    top: theme.spacing.md,
+    left: theme.spacing.md,
+    backgroundColor: theme.colors.black,
+    borderRadius: theme.radius.lg,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+  },
+  newText: {
+    color: theme.colors.white,
+    fontSize: theme.typography.xs,
+    fontWeight: theme.fontWeight.black,
+    letterSpacing: theme.spacing.xs,
+  },
+
+  heart: {
+    position: "absolute",
+    top: theme.spacing.sm,
+    right: theme.spacing.sm,
+    width: theme.layout.iconButton,
+    height: theme.layout.iconButton,
+    borderRadius: theme.radius.lg,
+    backgroundColor: "transparent",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  cardContent: {
+    position: "absolute",
+    left: theme.spacing.lg,
+    right: theme.spacing.lg,
+    bottom: theme.spacing.lg,
+  },
+
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  ratingText: {
+    marginLeft: theme.spacing.xs,
+    color: theme.colors.white,
+    fontSize: theme.typography.md,
+    fontWeight: theme.fontWeight.bold,
+  },
+
+  buyText: {
+    marginLeft: theme.spacing.xs,
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.sm,
+  },
+
+  cardTitle: {
+    marginTop: theme.spacing.md,
+    color: theme.colors.white,
+    fontSize: theme.typography.sm,
+    fontWeight: theme.fontWeight.black,
+    lineHeight: theme.typography.h6,
+  },
+  bottomRow: {
+    marginTop: theme.spacing.lg,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+  },
+
+  price: {
+    color: theme.colors.white,
+    fontSize: theme.typography.h6,
+    fontWeight: "900",
+  },
+
+  oldPriceContainer: {
+    position: "relative",
+    marginLeft: theme.spacing.xs,
+    justifyContent: "center",
+    alignSelf: "center",
+  },
+
+  oldPrice: {
+    color: theme.colors.textMuted,
+    fontSize: theme.typography.lg,
+    paddingHorizontal: theme.spacing.xxs,
+  },
+
+  oldPriceStrike: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: theme.spacing.sm,
+    height: 1,
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.radius.xs,
+  },
+
+  heartGlass: {
+    width: theme.layout.iconButton,
+    height: theme.layout.iconButton,
+    borderRadius: theme.radius.lg,
+    backgroundColor: "transparent",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  badgeRow: {
+    position: "absolute",
+    top: theme.spacing.md,
+    left: theme.spacing.md,
+    right: theme.spacing.md,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  ratingPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: theme.colors.overlay,
+    paddingHorizontal: theme.spacing.sm,
+    height: theme.layout.pillHeight,
+    borderRadius: theme.radius.full,
+  },
+
+  ratingPillText: {
+    color: theme.colors.white,
+    fontWeight: "700",
+    marginLeft: theme.spacing.xs,
+  },
+
+  priceRow: {
+    marginTop: theme.spacing.sm,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  arrowBtn: {
+    width: theme.layout.iconButtonLg,
+    height: theme.layout.iconButtonLg,
+    borderRadius: theme.radius.full,
+    backgroundColor: theme.colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: theme.spacing.md,
+  },
+  header: {
+    paddingHorizontal: theme.spacing.md,
+    paddingTop: theme.spacing.sm,
+    paddingBottom: theme.spacing.xs,
+  },
+  topRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+
+  menuButton: {
+    width: theme.layout.headerButton,
+    height: theme.layout.headerButton,
+    borderRadius: theme.radius.lg,
+    backgroundColor: theme.colors.white,
+    justifyContent: "center",
+    paddingHorizontal: theme.spacing.md,
+    ...theme.shadow.sm,
+  },
 
 menuLineTop: {
-  width: 26,
-  height: 3,
-  borderRadius: 2,
-  backgroundColor: "#111",
-
-  marginBottom: 6,
+  width: scale(26),
+  height: verticalScale(3),
+  borderRadius: theme.radius.xs,
+  backgroundColor: theme.colors.black,
+  marginBottom: theme.spacing.xs,
 },
 
 menuLineMiddle: {
-  width: 20,
-  height: 3,
-  borderRadius: 2,
-  backgroundColor: "#B6FF2E",
-
-  marginBottom: 6,
+  width: scale(20),
+  height: verticalScale(3),
+  borderRadius: theme.radius.xs,
+  backgroundColor: theme.colors.primary,
+  marginBottom: theme.spacing.xs,
 },
 
 menuLineBottom: {
-  width: 26,
-  height: 3,
-  borderRadius: 2,
-  backgroundColor: "#111",
+  width: scale(26),
+  height: verticalScale(3),
+  borderRadius: theme.radius.xs,
+  backgroundColor: theme.colors.black,
 },
-profileBtn: {
-  width: 52,
-  height: 52,
-  borderRadius: 18,
-  backgroundColor: "#B6FF2E",
-  justifyContent: "center",
-  alignItems: "center",
-},
-
-profileImage: {
-  width: scale(58),
-  height: "auto",
-  aspectRatio: 1,
-  borderRadius: 23,
-  resizeMode: "contain",
-  filter: "hue-rotate(45deg) saturate(1.2) brightness(1.1)",
-},
-
-onlineDot: {
-  position: "absolute",
-
-  top: 4,
-  right: 4,
-
-  width: 10,
-  height: 10,
-
-  borderRadius: 8,
-
-  backgroundColor: "#000000",
-
-  borderWidth: 3,
-  // borderColor: "#FFF",
-
-  shadowColor: "#B6FF2E",
-  shadowOpacity: 0.45,
-  shadowRadius: 6,
-  shadowOffset: {
-    width: 0,
-    height: 2,
+  profileBtn: {
+    width: theme.layout.headerButton,
+  height: theme.layout.headerButton,
+    borderRadius: theme.radius.lg,
+    backgroundColor: theme.colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
-  elevation: 5,
-},
-pillRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "center",
-},
-explore: {
-  marginTop: verticalScale(25),
-  color: "#000000",
-  fontSize: normalize(22),
-  fontWeight: "500",
-},
-
-heroTitle: {
-  marginTop: 8,
-  fontSize: normalize(58),
-  fontWeight: "900",
-  color: "#111",
-  lineHeight: normalize(62),
-},
-
-heroAccent: {
-  marginTop: -2,
-  fontSize: normalize(58),
-  fontWeight: "900",
-  color: "#B6FF2E",
-  lineHeight: normalize(62),
-
-},
-
-searchBox: {
-  marginTop: verticalScale(27),
-  height: verticalScale(63),
-  borderRadius: 32,
-  backgroundColor: "#F5F5F5",
-  flexDirection: "row",
-  alignItems: "center",
-  paddingHorizontal: 20,
-},
-
-searchInput: {
-  flex: 1,
-  marginLeft: 12,
-  color: "#111",
-  fontSize: normalize(17),
-},
-filterIcon: {
-  width: scale(47),
-  height: verticalScale(46),
-  borderRadius: 8,
-  backgroundColor: "#000000ee",
-
-  justifyContent: "center",
-  alignItems: "center",
-
-  shadowColor: "#000",
-  shadowOpacity: 0.08,
-  shadowRadius: 8,
-  shadowOffset: {
-    width: 0,
-    height: 3,
+  profileImage: {
+    width: scale(58),
+    height: "auto",
+    aspectRatio: 1,
+    borderRadius: theme.radius.lg,
+    resizeMode: "contain",
+    filter: "hue-rotate(45deg) saturate(1.2) brightness(1.1)",
   },
 
-},
-tabs: {
-  paddingTop: verticalScale(17),
-  // paddingBottom: height * 0.01,
-  paddingRight: scale(20),
-},
-
-pill: {
-  height: verticalScale(38),
-  borderRadius: 21,
-  backgroundColor: "#F5F5F5",
-  justifyContent: "center",
-  alignItems: "center",
-  paddingHorizontal: 20,
-  marginRight: 12,
-},
-
-pillActive: {
-  backgroundColor: "#111",
-},
-
-pillText: {
-  color: "#444",
-  fontWeight: "700",
-  fontSize: normalize(15),
-},
-
-pillTextActive: {
-  color: "#FFF",
-},
-
-
-bundlePill: {
-  height: verticalScale(38),
-  borderRadius: 21,
-  backgroundColor: "#B6FF2E",
-
-  flexDirection: "row",
-  alignItems: "center",
-
-  paddingHorizontal: 18,
-  marginRight: 12,
-
-  shadowColor: "#B6FF2E",
-  shadowOpacity: 0.35,
-  shadowRadius: 10,
-  shadowOffset: {
-    width: 0,
-    height: 4,
+  onlineDot: {
+    position: "absolute",
+    top: theme.spacing.xxs,
+    right: theme.spacing.xxs,
+    width: theme.layout.onlineDot,
+    height: theme.layout.onlineDot,
+    borderRadius: theme.radius.full,
+    backgroundColor: theme.colors.black,
+    borderWidth: theme.spacing.xxs,
+    ...theme.shadow.md,
+  },
+  pillRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  explore: {
+    marginTop: verticalScale(25),
+    color: theme.colors.black,
+    fontSize: theme.typography.h6,
+    fontWeight: "500",
   },
 
-  elevation: 6,
-},
+  heroTitle: {
+    marginTop: theme.spacing.sm,
+    fontSize: theme.typography.display,
+    fontWeight: "900",
+    color: theme.colors.text,
+    lineHeight: theme.typography.h1,
+  },
 
-bundlePillText: {
-  color: "#111",
-  fontSize: normalize(15),
-  fontWeight: "900",
-},
+  heroAccent: {
+    marginTop: -2,
+    fontSize: theme.typography.display,
+    fontWeight: "900",
+    color: theme.colors.primary,
+    lineHeight: theme.typography.display,
+
+  },
+
+  searchBox: {
+    marginTop: verticalScale(27),
+    height: verticalScale(63),
+    borderRadius: theme.radius.full,
+    backgroundColor: theme.colors.surface,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: theme.spacing.xl,
+  },
+
+  searchInput: {
+    flex: 1,
+    marginLeft: theme.spacing.md,
+    color: theme.colors.text,
+    fontSize: theme.typography.lg,
+  },
+  filterIcon: {
+    width: theme.layout.filterButton,
+    height: theme.layout.filterButton,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.black,
+    justifyContent: "center",
+    alignItems: "center",
+    ...theme.shadow.sm,
+  },
+  tabs: {
+    paddingVertical: verticalScale(theme.spacing.lg),
+
+    paddingRight: theme.spacing.xl,
+  },
+
+  pill: {
+    height: theme.layout.pillHeight,
+    borderRadius: theme.radius.full,
+    backgroundColor: theme.colors.surface,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: theme.spacing.xl,
+    marginRight: theme.spacing.md,
+  },
+
+  pillActive: {
+    backgroundColor: theme.colors.black,
+  },
+
+  pillText: {
+    color: theme.colors.textSecondary,
+    fontWeight: "700",
+    fontSize: theme.typography.md,
+  },
+
+  pillTextActive: {
+    color: theme.colors.white,
+  },
+
+
+  bundlePill: {
+    height: theme.layout.pillHeight,
+    borderRadius: theme.radius.full,
+    backgroundColor: theme.colors.primary,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: theme.spacing.lg,
+    marginRight: theme.spacing.md,
+    // ...theme.shadow.sm,
+  },
+  bundlePillText: {
+    color: theme.colors.text,
+    fontSize: theme.typography.md,
+    fontWeight: "900",
+  },
 
 
 });
