@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: normalize(15),
     color: "#666",
-    lineHeight: 24,
+    lineHeight: normalize(24),
   },
 
   settingsButton: {

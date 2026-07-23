@@ -1909,7 +1909,7 @@ count: {
 
     fontWeight: "900",
 
-    lineHeight: 30,
+    lineHeight: normalize(30),
 
     textAlign: "center",
 
@@ -2033,7 +2033,7 @@ count: {
   whyDesc: {
     marginTop:  verticalScale(8),
     color: "#888",
-    lineHeight: 22,
+    lineHeight: normalize(22),
   },
   sectionRow: {
     flexDirection: "row",
@@ -2087,7 +2087,7 @@ count: {
   previewSubtitle: {
     marginTop: 6,
     color: "#777",
-    lineHeight: 22,
+    lineHeight: normalize(22),
   },
 
   previewButton: {
@@ -2286,7 +2286,7 @@ count: {
   bundleDesc: {
     color: "#999",
     fontSize: normalize(15),
-    lineHeight: 25,
+    lineHeight: normalize(25),
     marginTop: 5,
     paddingRight: 10,
   },

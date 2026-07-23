@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   KeyboardTypeOptions,
 } from "react-native";
+import { normalize } from "@/utils/responsive";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -556,7 +557,7 @@ const styles = StyleSheet.create({
   },
 
   headerLabel: {
-    fontSize: 10,
+    fontSize: normalize(10),
     fontWeight: "700",
     letterSpacing: 1.6,
     color: MUTED,
@@ -564,7 +565,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 27,
+    fontSize: normalize(27),
     fontWeight: "800",
     letterSpacing: -0.8,
     color: BLACK,
@@ -597,15 +598,15 @@ const styles = StyleSheet.create({
 
   introTitle: {
     color: "#FFFFFF",
-    fontSize: 17,
+    fontSize: normalize(17),
     fontWeight: "800",
     letterSpacing: 0.5,
   },
 
   introDescription: {
     color: "#AFAFAF",
-    fontSize: 12,
-    lineHeight: 19,
+    fontSize: normalize(12),
+    lineHeight: normalize(19),
     marginTop: 8,
     maxWidth: 290,
   },
@@ -633,13 +634,13 @@ const styles = StyleSheet.create({
   },
 
   sectionNumberText: {
-    fontSize: 9,
+    fontSize: normalize(9),
     fontWeight: "900",
     color: BLACK,
   },
 
   sectionTitle: {
-    fontSize: 11,
+    fontSize: normalize(11),
     fontWeight: "800",
     letterSpacing: 1.2,
     color: BLACK,
@@ -652,7 +653,7 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    fontSize: 9,
+    fontSize: normalize(9),
     fontWeight: "800",
     letterSpacing: 1.2,
     color: MUTED,
@@ -683,7 +684,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: 56,
-    fontSize: 14,
+    fontSize: normalize(14),
     fontWeight: "500",
     color: BLACK,
     paddingVertical: 0,
@@ -734,15 +735,15 @@ const styles = StyleSheet.create({
   },
 
   infoTitle: {
-    fontSize: 9,
+    fontSize: normalize(9),
     fontWeight: "800",
     letterSpacing: 0.8,
     color: BLACK,
   },
 
   infoText: {
-    fontSize: 11,
-    lineHeight: 16,
+    fontSize: normalize(11),
+    lineHeight: normalize(16),
     color: MUTED,
     marginTop: 4,
   },
@@ -781,7 +782,7 @@ const styles = StyleSheet.create({
 
   saveText: {
     color: "#FFFFFF",
-    fontSize: 11,
+    fontSize: normalize(11),
     fontWeight: "800",
     letterSpacing: 1.3,
   },

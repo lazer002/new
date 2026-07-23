@@ -471,7 +471,7 @@ return (
 
             <Octicons
               name="arrow-right"
-              size={height * 0.024}
+              size={verticalScale(20)}
               color="#111"
             />
 
@@ -484,7 +484,7 @@ return (
           style={[
             styles.contactCard,
             {
-              marginTop: height * 0.018,
+              marginTop: verticalScale(15),
             },
           ]}
         >
@@ -505,7 +505,7 @@ return (
 
             <Octicons
               name="device-mobile"
-              size={height * 0.024}
+              size={verticalScale(20)}
               color="#111"
             />
 
@@ -540,7 +540,7 @@ const QuickItem = ({
     <View style={styles.quickIconCircle}>
       <Octicons
         name={icon}
-        size={height * 0.026}
+        size={verticalScale(22)}
         color="#111"
       />
     </View>
@@ -566,47 +566,47 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    paddingBottom: height * 0.06,
+    paddingBottom: verticalScale(51),
   },
 
   /* ---------------- HERO ---------------- */
 
   hero: {
     backgroundColor: "#111",
-    borderBottomLeftRadius: width * 0.09,
-    borderBottomRightRadius: width * 0.09,
-    paddingHorizontal: width * 0.06,
-    paddingTop: height * 0.075,
-    paddingBottom: height * 0.05,
+    borderBottomLeftRadius: scale(35),
+    borderBottomRightRadius: scale(35),
+    paddingHorizontal: scale(23),
+    paddingTop: verticalScale(63),
+    paddingBottom: verticalScale(42),
   },
 
   label: {
     color: "#B6FF2E",
-    fontSize: width * 0.03,
+    fontSize: normalize(12),
     fontWeight: "900",
     letterSpacing: 3,
   },
 
   heroTitle: {
-    marginTop: height * 0.015,
+    marginTop: verticalScale(13),
     color: "#FFF",
-    fontSize: width * 0.12,
-    lineHeight: width * 0.12,
+    fontSize: normalize(47),
+    lineHeight: normalize(47),
     fontWeight: "900",
     letterSpacing: -2,
   },
 
   heroSubtitle: {
-    marginTop: height * 0.02,
+    marginTop: verticalScale(17),
     color: "#999",
-    fontSize: width * 0.038,
-    lineHeight: height * 0.03,
+    fontSize: normalize(15),
+    lineHeight: normalize(25),
     width: "88%",
   },
 
   greenLine: {
-    marginTop: height * 0.03,
-    width: width * 0.22,
+    marginTop: verticalScale(25),
+    width: scale(86),
     height: 4,
     borderRadius: 20,
     backgroundColor: "#B6FF2E",
@@ -615,14 +615,14 @@ const styles = StyleSheet.create({
   /* ---------------- SEARCH ---------------- */
 
   searchContainer: {
-    marginHorizontal: width * 0.06,
-    marginTop: -height * 0.028,
+    marginHorizontal: scale(23),
+    marginTop: -verticalScale(24),
     backgroundColor: "#FFF",
-    borderRadius: width * 0.045,
+    borderRadius: scale(18),
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: width * 0.05,
-    height: height * 0.07,
+    paddingHorizontal: scale(20),
+    height: verticalScale(59),
 
     shadowColor: "#000",
     shadowOpacity: 0.08,
@@ -637,23 +637,23 @@ const styles = StyleSheet.create({
 
   searchInput: {
     flex: 1,
-    marginLeft: width * 0.03,
+    marginLeft: scale(12),
     color: "#111",
-    fontSize: width * 0.04,
+    fontSize: normalize(16),
     fontWeight: "600",
   },
 
   /* ---------------- SECTION ---------------- */
 
   sectionHeader: {
-    marginTop: height * 0.045,
-    marginHorizontal: width * 0.06,
-    marginBottom: height * 0.022,
+    marginTop: verticalScale(38),
+    marginHorizontal: scale(23),
+    marginBottom: verticalScale(19),
   },
 
   sectionLabel: {
     color: "#73D01C",
-    fontSize: width * 0.028,
+    fontSize: normalize(11),
     fontWeight: "900",
     letterSpacing: 2,
   },
@@ -661,7 +661,7 @@ const styles = StyleSheet.create({
   sectionHeading: {
     marginTop: 4,
     color: "#111",
-    fontSize: width * 0.075,
+    fontSize: normalize(29),
     fontWeight: "900",
     letterSpacing: -1,
   },
@@ -669,7 +669,7 @@ const styles = StyleSheet.create({
   /* ---------------- QUICK GRID ---------------- */
 
   quickGrid: {
-    marginHorizontal: width * 0.06,
+    marginHorizontal: scale(23),
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
@@ -678,32 +678,32 @@ const styles = StyleSheet.create({
   quickCard: {
     width: "48%",
     backgroundColor: "#111",
-    borderRadius: width * 0.07,
-    paddingVertical: height * 0.03,
-    paddingHorizontal: width * 0.05,
-    marginBottom: height * 0.02,
+    borderRadius: scale(27),
+    paddingVertical: verticalScale(25),
+    paddingHorizontal: scale(20),
+    marginBottom: verticalScale(17),
   },
 
   quickIconCircle: {
-    width: width * 0.13,
-    height: width * 0.13,
-    borderRadius: width * 0.065,
+    width: scale(51),
+    height: scale(51),
+    borderRadius: scale(25),
     backgroundColor: "#B6FF2E",
     justifyContent: "center",
     alignItems: "center",
   },
 
   quickTitle: {
-    marginTop: height * 0.02,
+    marginTop: verticalScale(17),
     color: "#FFF",
-    fontSize: width * 0.045,
+    fontSize: normalize(18),
     fontWeight: "800",
   },
 
   quickSubtitle: {
     marginTop: 5,
     color: "#888",
-    fontSize: width * 0.03,
+    fontSize: normalize(12),
     fontWeight: "600",
     letterSpacing: 1,
   },
@@ -711,31 +711,31 @@ const styles = StyleSheet.create({
   /* ---------------- CATEGORY ---------------- */
 
   categorySection: {
-    marginTop: height * 0.02,
-    marginHorizontal: width * 0.06,
+    marginTop: verticalScale(17),
+    marginHorizontal: scale(23),
   },
 
   categoryHeader: {
-    marginBottom: height * 0.018,
+    marginBottom: verticalScale(15),
   },
 
   categoryLabel: {
     color: "#73D01C",
-    fontSize: width * 0.027,
+    fontSize: normalize(11),
     fontWeight: "900",
     letterSpacing: 2,
   },
 
   categoryTitle: {
     marginTop: 4,
-    fontSize: width * 0.065,
+    fontSize: normalize(25),
     fontWeight: "900",
     color: "#111",
   },
 
   categoryLine: {
-    marginTop: height * 0.015,
-    width: width * 0.12,
+    marginTop: verticalScale(13),
+    width: scale(47),
     height: 3,
     borderRadius: 10,
     backgroundColor: "#B6FF2E",
@@ -745,12 +745,12 @@ const styles = StyleSheet.create({
 
   faqCard: {
     backgroundColor: "#FFF",
-    borderRadius: width * 0.06,
+    borderRadius: scale(23),
     borderWidth: 1,
     borderColor: "#ECECEC",
-    paddingVertical: height * 0.024,
-    paddingHorizontal: width * 0.05,
-    marginBottom: height * 0.018,
+    paddingVertical: verticalScale(20),
+    paddingHorizontal: scale(20),
+    marginBottom: verticalScale(15),
   },
 
   faqCardOpen: {
@@ -766,16 +766,16 @@ const styles = StyleSheet.create({
   question: {
     flex: 1,
     color: "#111",
-    fontSize: width * 0.042,
+    fontSize: normalize(16),
     fontWeight: "800",
-    lineHeight: height * 0.03,
-    paddingRight: width * 0.04,
+    lineHeight: normalize(25),
+    paddingRight: scale(16),
   },
 
   arrowCircle: {
-    width: width * 0.1,
-    height: width * 0.1,
-    borderRadius: width * 0.05,
+    width: scale(39),
+    height: scale(39),
+    borderRadius: scale(20),
     backgroundColor: "#111",
     justifyContent: "center",
     alignItems: "center",
@@ -786,36 +786,36 @@ const styles = StyleSheet.create({
   },
 
   answerContainer: {
-    marginTop: height * 0.02,
+    marginTop: verticalScale(17),
   },
 
   answerDivider: {
     width: "100%",
     height: 1,
     backgroundColor: "#ECECEC",
-    marginBottom: height * 0.018,
+    marginBottom: verticalScale(15),
   },
 
   answer: {
     color: "#777",
-    fontSize: width * 0.037,
-    lineHeight: height * 0.03,
+    fontSize: normalize(14),
+    lineHeight: normalize(25),
     fontWeight: "500",
   },
 
   /* ---------------- CONTACT ---------------- */
 
   contactSection: {
-    marginTop: height * 0.055,
-    marginHorizontal: width * 0.06,
-    marginBottom: height * 0.05,
+    marginTop: verticalScale(46),
+    marginHorizontal: scale(23),
+    marginBottom: verticalScale(42),
   },
 
   contactCard: {
     backgroundColor: "#111",
-    borderRadius: width * 0.07,
-    paddingVertical: height * 0.028,
-    paddingHorizontal: width * 0.055,
+    borderRadius: scale(27),
+    paddingVertical: verticalScale(24),
+    paddingHorizontal: scale(21),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -823,22 +823,22 @@ const styles = StyleSheet.create({
 
   contactTitle: {
     color: "#B6FF2E",
-    fontSize: width * 0.03,
+    fontSize: normalize(12),
     fontWeight: "900",
     letterSpacing: 2,
   },
 
   contactText: {
-    marginTop: height * 0.01,
+    marginTop: verticalScale(8),
     color: "#FFF",
-    fontSize: width * 0.043,
+    fontSize: normalize(17),
     fontWeight: "700",
   },
 
   contactArrow: {
-    width: width * 0.13,
-    height: width * 0.13,
-    borderRadius: width * 0.065,
+    width: scale(51),
+    height: scale(51),
+    borderRadius: scale(25),
     backgroundColor: "#B6FF2E",
     justifyContent: "center",
     alignItems: "center",

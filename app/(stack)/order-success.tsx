@@ -1463,10 +1463,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: H_PADDING,
 
     paddingTop:
-      height * 0.035,
+      verticalScale(30),
 
     paddingBottom:
-      height * 0.22,
+      verticalScale(186),
 
   },
 
@@ -1480,10 +1480,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  title: { fontSize: 22, fontWeight: "700", textAlign: "center" },
+  title: { fontSize: normalize(22), fontWeight: "700", textAlign: "center" },
 
   subtitle: {
-    fontSize: 14,
+    fontSize: normalize(14),
     color: "#666",
     marginBottom: 10,
     textAlign: "center",
@@ -1500,7 +1500,7 @@ const styles = StyleSheet.create({
 
   statusText: {
     color: "#f59e0b",
-    fontSize: 12,
+    fontSize: normalize(12),
     fontWeight: "600",
   },
 
@@ -1513,7 +1513,7 @@ const styles = StyleSheet.create({
   },
 
   section: {
-    fontSize: 12,
+    fontSize: normalize(12),
     color: "#999",
     marginBottom: 8,
     fontWeight: "600",
@@ -1525,11 +1525,11 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
 
-  label: { fontSize: 12, color: "#777" },
+  label: { fontSize: normalize(12), color: "#777" },
 
-  value: { fontSize: 13, fontWeight: "500" },
+  value: { fontSize: normalize(13), fontWeight: "500" },
 
-  sub: { fontSize: 12, color: "#666", marginTop: 2 },
+  sub: { fontSize: normalize(12), color: "#666", marginTop: 2 },
   summaryCard: {
 
     width: "100%",
@@ -1556,7 +1556,7 @@ const styles = StyleSheet.create({
 
   summaryLabel: {
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     fontWeight: "800",
 
@@ -1570,7 +1570,7 @@ const styles = StyleSheet.create({
 
     marginTop: 8,
 
-    fontSize: 26,
+    fontSize: normalize(26),
 
     fontWeight: "900",
 
@@ -1583,7 +1583,7 @@ const styles = StyleSheet.create({
 
     marginBottom: 18,
 
-    fontSize: 28,
+    fontSize: normalize(28),
 
     fontWeight: "900",
 
@@ -1617,7 +1617,7 @@ productImage:{
 
   width:88,
 
-  height: height * 0.12,
+  height: verticalScale(101),
 
   borderRadius:18,
 
@@ -1659,7 +1659,7 @@ productImage:{
 
   bundleBadgeText: {
 
-    fontSize: 10,
+    fontSize: normalize(10),
 
     fontWeight: "900",
 
@@ -1671,13 +1671,13 @@ productImage:{
 
 productTitle:{
 
-  fontSize:17,
+  fontSize:normalize(17),
 
   fontWeight:"900",
 
   color:"#111",
 
-  lineHeight:22,
+  lineHeight:normalize(22),
 
 },
 
@@ -1707,7 +1707,7 @@ productTitle:{
 
     fontWeight: "700",
 
-    fontSize: 12,
+    fontSize: normalize(12),
 
     color: "#777",
 
@@ -1727,7 +1727,7 @@ productTitle:{
 
   productPrice: {
 
-    fontSize: 22,
+    fontSize: normalize(22),
 
     fontWeight: "900",
 
@@ -1787,7 +1787,7 @@ productTitle:{
 
   subTitle: {
 
-    fontSize: 13,
+    fontSize: normalize(13),
 
     fontWeight: "700",
 
@@ -1799,7 +1799,7 @@ productTitle:{
 
   marginTop:2,
 
-  fontSize:11,
+  fontSize:normalize(11),
 
     color: "#888",
 
@@ -1830,7 +1830,7 @@ productTitle:{
 
   summarySmall: {
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     fontWeight: "800",
 
@@ -1844,7 +1844,7 @@ productTitle:{
 
     marginTop: 8,
 
-    fontSize: 15,
+    fontSize: normalize(15),
 
     fontWeight: "700",
 
@@ -1856,7 +1856,7 @@ productTitle:{
 
     marginTop: 8,
 
-    fontSize: 30,
+    fontSize: normalize(30),
 
     fontWeight: "900",
 
@@ -1868,7 +1868,7 @@ productTitle:{
 
     marginTop: 8,
 
-    fontSize: 15,
+    fontSize: normalize(15),
 
     fontWeight: "800",
 
@@ -1934,7 +1934,7 @@ productTitle:{
 
   deliveryName: {
 
-    fontSize: 18,
+    fontSize: normalize(18),
 
     fontWeight: "900",
 
@@ -1946,9 +1946,9 @@ productTitle:{
 
     marginTop: 6,
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
-    lineHeight: 22,
+    lineHeight: normalize(22),
 
     color: "#777",
 
@@ -1958,7 +1958,7 @@ productTitle:{
 
     marginTop: 12,
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     fontWeight: "700",
 
@@ -1996,7 +1996,7 @@ productTitle:{
 
   billLabel: {
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     color: "rgba(255,255,255,.55)",
 
@@ -2004,7 +2004,7 @@ productTitle:{
 
   billValue: {
 
-    fontSize: 15,
+    fontSize: normalize(15),
 
     fontWeight: "700",
 
@@ -2014,7 +2014,7 @@ productTitle:{
 
   discountText: {
 
-    fontSize: 15,
+    fontSize: normalize(15),
 
     fontWeight: "900",
 
@@ -2034,7 +2034,7 @@ productTitle:{
 
   totalLabel: {
 
-    fontSize: 16,
+    fontSize: normalize(16),
 
     fontWeight: "900",
 
@@ -2044,7 +2044,7 @@ productTitle:{
 
   totalValue: {
 
-    fontSize: 34,
+    fontSize: normalize(34),
 
     fontWeight: "900",
 
@@ -2072,7 +2072,7 @@ productTitle:{
 
   savedTitle: {
 
-    fontSize: 12,
+    fontSize: normalize(12),
 
     fontWeight: "900",
 
@@ -2086,7 +2086,7 @@ productTitle:{
 
     marginTop: 4,
 
-    fontSize: 28,
+    fontSize: normalize(28),
 
     fontWeight: "900",
 
@@ -2105,7 +2105,7 @@ productTitle:{
 
   statusPillText: {
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     fontWeight: "900",
 
@@ -2133,14 +2133,14 @@ productTitle:{
     marginRight: 10,
   },
 
-  itemTitle: { fontSize: 13, fontWeight: "600" },
+  itemTitle: { fontSize: normalize(13), fontWeight: "600" },
 
-  itemSub: { fontSize: 11, color: "#666" },
+  itemSub: { fontSize: normalize(11), color: "#666" },
 
   itemPrice: { fontWeight: "600" },
 
   info: {
-    fontSize: 12,
+    fontSize: normalize(12),
     color: "#777",
     textAlign: "center",
     marginTop: 10,
@@ -2202,7 +2202,7 @@ productTitle:{
 
     marginTop: 18,
 
-    fontSize: 15,
+    fontSize: normalize(15),
 
     fontWeight: "700",
 
@@ -2215,7 +2215,7 @@ productTitle:{
 
     marginTop: 8,
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     fontWeight: "700",
 
@@ -2244,7 +2244,7 @@ productTitle:{
 
     marginLeft: 10,
 
-    fontSize: 13,
+    fontSize: normalize(13),
 
     fontWeight: "800",
 
@@ -2326,7 +2326,7 @@ productTitle:{
 
   etaLabel: {
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     fontWeight: "800",
 
@@ -2372,7 +2372,7 @@ timelineRight: {
 },
 
 timelineTitle: {
-  fontSize: 17,
+  fontSize: normalize(17),
   fontWeight: "700",
   color: "#777",
 },
@@ -2384,14 +2384,14 @@ timelineTitleActive: {
 
 timelineSubtitle: {
   marginTop: 4,
-  fontSize: 13,
+  fontSize: normalize(13),
   color: "#999",
 },
   etaDate: {
 
     marginTop: 6,
 
-    fontSize: 20,
+    fontSize: normalize(20),
 
     fontWeight: "900",
 
@@ -2427,7 +2427,7 @@ timelineSubtitle: {
 
     marginLeft: 10,
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     fontWeight: "900",
 
@@ -2483,7 +2483,7 @@ backgroundColor:"#B6FF2E",
 
     marginLeft: 10,
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     fontWeight: "900",
 

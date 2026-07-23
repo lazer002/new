@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { normalize } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 
 const BasePill = ({ icon, bg, text, color = "#111" }: any) => (
@@ -76,7 +77,7 @@ const styles = StyleSheet.create({
   },
 
   text: {
-    fontSize: 13,
+    fontSize: normalize(13),
     fontFamily: "RobotoCondensed-Bold",
   },
 });

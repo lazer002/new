@@ -17,6 +17,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { normalize } from "@/utils/responsive";
 
 import Animated, {
   runOnJS,
@@ -613,7 +614,7 @@ const styles = StyleSheet.create({
 
   counterText: {
     color: "#fff",
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "600",
   },
 

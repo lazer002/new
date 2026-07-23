@@ -7,6 +7,7 @@ import {
   Dimensions,
   Pressable,
 } from "react-native";
+import { normalize } from "@/utils/responsive";
 import Carousel from "react-native-reanimated-carousel";
 import { LinearGradient } from "expo-linear-gradient";
 import GlassCard from "@/components/GlassCard";
@@ -127,19 +128,19 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: "#7CFF6B",
-    fontSize: 11,
+    fontSize: normalize(11),
     fontWeight: "800",
     letterSpacing: 1,
   },
   title: {
     color: "#fff",
-    fontSize: 26,
+    fontSize: normalize(26),
     fontWeight: "900",
-    lineHeight: 30,
+    lineHeight: normalize(30),
   },
   subtitle: {
     color: "rgba(255,255,255,0.85)",
-    fontSize: 16,
+    fontSize: normalize(16),
     fontWeight: "600",
     marginTop: 2,
   },

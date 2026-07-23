@@ -11,6 +11,7 @@ import {
   Alert,
   ScrollView,
 } from "react-native";
+import { normalize } from "@/utils/responsive";
 import { useEffect, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
@@ -228,7 +229,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 26,
+    fontSize: normalize(26),
     fontWeight: "900",
     marginBottom: 20,
   },
@@ -256,7 +257,7 @@ const styles = StyleSheet.create({
 
   changeText: {
     marginTop: 8,
-    fontSize: 12,
+    fontSize: normalize(12),
     opacity: 0.6,
   },
 
@@ -276,7 +277,7 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    fontSize: 12,
+    fontSize: normalize(12),
     opacity: 0.6,
     marginBottom: 5,
   },
@@ -286,7 +287,7 @@ const styles = StyleSheet.create({
     borderColor: "#eee",
     borderRadius: 10,
     padding: 12,
-    fontSize: 14,
+    fontSize: normalize(14),
   },
 
   disabled: {
@@ -304,7 +305,7 @@ const styles = StyleSheet.create({
   btnText: {
     color: "#fff",
     fontWeight: "800",
-    fontSize: 15,
+    fontSize: normalize(15),
   },
 
   center: {

@@ -1093,7 +1093,7 @@ fullAddress:{
 
   color:"#444",
 
-  lineHeight:22,
+  lineHeight:normalize(22),
 
 },
 
@@ -1240,7 +1240,7 @@ productTitle:{
 
   color:"#111",
 
-  lineHeight:21,
+  lineHeight:normalize(21),
 
 },
 
@@ -1298,7 +1298,7 @@ metaChip:{
 
 metaChipText:{
 
-  fontSize:11,
+  fontSize:normalize(11),
 
   color:"#666",
 
@@ -1320,7 +1320,7 @@ metaChipGreen:{
 
 metaChipGreenText:{
 
-  fontSize:11,
+  fontSize:normalize(11),
 
   color:"#111",
 
@@ -1336,7 +1336,7 @@ productBottom:{
 
 productPrice:{
 
-  fontSize:22,
+  fontSize:normalize(22),
 
   fontWeight:"900",
 
@@ -1380,7 +1380,7 @@ subImage:{
 
 subTitle:{
 
-  fontSize:13,
+  fontSize:normalize(13),
 
   fontWeight:"800",
 
@@ -1392,7 +1392,7 @@ subMeta:{
 
   marginTop:2,
 
-  fontSize:11,
+  fontSize:normalize(11),
 
   color:"#888",
 
@@ -1412,14 +1412,14 @@ subMeta:{
   },
 
   heading: {
-    fontSize: 24,
+    fontSize: normalize(24),
     fontWeight: "700",
     color: "#000",
     marginBottom: 6,
   },
 
   subHeading: {
-    fontSize: 14,
+    fontSize: normalize(14),
     color: "#777",
     marginBottom: 24,
   },
@@ -1443,7 +1443,7 @@ subMeta:{
 
   primaryBtnText: {
     color: "#fff",
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "600",
   },
 hero:{
@@ -1496,7 +1496,7 @@ orderChipText:{
 
   fontWeight:"900",
 
-  fontSize:11,
+  fontSize:normalize(11),
 
   letterSpacing:1,
 
@@ -1506,9 +1506,9 @@ heroTitle:{
 
   marginTop:24,
 
-  fontSize:width*.11,
+  fontSize: normalize(43),
 
-  lineHeight:width*.11,
+  lineHeight: normalize(43),
 
   color:"#FFF",
 
@@ -1522,7 +1522,7 @@ heroSubtitle:{
 
   color:"#AFAFAF",
 
-  fontSize:14,
+  fontSize:normalize(14),
 
   letterSpacing:1,
 
@@ -1552,7 +1552,7 @@ heroDivider:{
 
 heroSmall:{
 
-  fontSize:10,
+  fontSize:normalize(10),
 
   color:"#888",
 
@@ -1566,7 +1566,7 @@ heroPrice:{
 
   marginTop:6,
 
-  fontSize:28,
+  fontSize:normalize(28),
 
   color:"#B6FF2E",
 
@@ -1578,7 +1578,7 @@ heroValue:{
 
   marginTop:6,
 
-  fontSize:17,
+  fontSize:normalize(17),
 
   color:"#FFF",
 
@@ -1586,7 +1586,7 @@ heroValue:{
 
 },
   orderTitle: {
-    fontSize: 20,
+    fontSize: normalize(20),
     fontWeight: "700",
     color: "#000",
   },
@@ -1602,7 +1602,7 @@ heroValue:{
 
   statusText: {
     color: "#fff",
-    fontSize: 12,
+    fontSize: normalize(12),
     textTransform: "capitalize",
   },
 
@@ -1612,7 +1612,7 @@ heroValue:{
 
   marginBottom:14,
 
-  fontSize:13,
+  fontSize:normalize(13),
 
   color:"#777",
 
@@ -1726,7 +1726,7 @@ timelineContent:{
 
 timelineTitle:{
 
-  fontSize:16,
+  fontSize:normalize(16),
 
   fontWeight:"800",
 
@@ -1752,7 +1752,7 @@ timelineSubtitle:{
 
   marginTop:4,
 
-  fontSize:12,
+  fontSize:normalize(12),
 
   color:"#888",
 
@@ -1767,7 +1767,7 @@ timelineSubtitle:{
   },
 
   cardTitle: {
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "600",
     marginBottom: 12,
     color: "#000",
@@ -1780,18 +1780,18 @@ timelineSubtitle:{
   },
 
   itemName: {
-    fontSize: 14,
+    fontSize: normalize(14),
     color: "#000",
     flex: 1,
   },
 
   itemQty: {
-    fontSize: 13,
+    fontSize: normalize(13),
     color: "#777",
   },
 
   text: {
-    fontSize: 14,
+    fontSize: normalize(14),
     color: "#555",
     marginBottom: 3,
   },
@@ -1803,12 +1803,12 @@ timelineSubtitle:{
   },
 
   label: {
-    fontSize: 14,
+    fontSize: normalize(14),
     color: "#777",
   },
 
   value: {
-    fontSize: 14,
+    fontSize: normalize(14),
     color: "#000",
   },
 
@@ -1822,7 +1822,7 @@ timelineSubtitle:{
   },
 
   totalText: {
-    fontSize: 16,
+    fontSize: normalize(16),
     fontWeight: "700",
     color: "#000",
   },
@@ -1844,9 +1844,9 @@ searchHero: {
 
   alignItems: "center",
 
-  paddingHorizontal: width * 0.08,
+  paddingHorizontal: scale(31),
 
-  marginTop: height * 0.08,
+  marginTop: verticalScale(68),
 
 },
 
@@ -1870,9 +1870,9 @@ searchTitle: {
 
   marginTop: 28,
 
-  fontSize: width * 0.11,
+  fontSize: normalize(43),
 
-  lineHeight: width * 0.11,
+  lineHeight: normalize(43),
 
   fontWeight: "900",
 
@@ -1886,13 +1886,13 @@ searchSubtitle: {
 
   marginTop: 18,
 
-  fontSize: 15,
+  fontSize: normalize(15),
 
   color: "#777",
 
   textAlign: "center",
 
-  lineHeight: 24,
+  lineHeight: normalize(24),
 
 },
 
@@ -1900,7 +1900,7 @@ searchCard: {
 
   marginTop: 42,
 
-  marginHorizontal: width * 0.06,
+  marginHorizontal: scale(23),
 
   backgroundColor: "#FFF",
 
@@ -1916,7 +1916,7 @@ searchCard: {
 
 inputLabel: {
 
-  fontSize: 11,
+  fontSize: normalize(11),
 
   fontWeight: "800",
 
@@ -1952,7 +1952,7 @@ input: {
 
   marginLeft: 12,
 
-  fontSize: 17,
+  fontSize: normalize(17),
 
   fontWeight: "700",
 
@@ -1980,7 +1980,7 @@ trackButton: {
 
 trackButtonText: {
 
-  fontSize: 15,
+  fontSize: normalize(15),
 
   fontWeight: "900",
 
@@ -1992,7 +1992,7 @@ trackButtonText: {
 
 },
 itemVariant: {
-  fontSize: 12,
+  fontSize: normalize(12),
   color: "#777",
   marginTop: 2,
 },
@@ -2029,7 +2029,7 @@ timelineTextInactive: {
 },
 
 timelineSubText: {
-  fontSize: 12,
+  fontSize: normalize(12),
   color: "#999",
 },header:{
 

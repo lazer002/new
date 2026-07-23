@@ -9,6 +9,7 @@ import {
   Modal,
   Dimensions
 } from "react-native";
+import { normalize, scale } from "@/utils/responsive";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -657,7 +658,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     flex: 1,
     textAlign: 'center',
-    fontSize: 22,
+    fontSize: normalize(22),
     fontWeight: '700',
     color: '#111',
   },
@@ -740,7 +741,7 @@ const styles = StyleSheet.create({
 
     paddingHorizontal: 16,
 
-    borderRadius: width * 8,
+    borderRadius: 999,
 
     justifyContent: "center",
 
@@ -766,7 +767,7 @@ const styles = StyleSheet.create({
 
   price: {
     color: "#FFF",
-    fontSize: 24,
+    fontSize: normalize(24),
     fontWeight: "900",
   },
 
@@ -871,7 +872,7 @@ const styles = StyleSheet.create({
   saveText: {
     color: "#111",
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     fontWeight: "900",
 
@@ -936,7 +937,7 @@ const styles = StyleSheet.create({
 
     color: "#B6FF2E",
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     fontWeight: "900",
 
@@ -982,7 +983,7 @@ const styles = StyleSheet.create({
 
     fontWeight: "900",
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     color: "#111",
 
@@ -1008,7 +1009,7 @@ const styles = StyleSheet.create({
 
     fontWeight: "900",
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     letterSpacing: .8,
 
@@ -1043,7 +1044,7 @@ const styles = StyleSheet.create({
   info: { padding: 10 },
 
   title: {
-    fontSize: 14,
+    fontSize: normalize(14),
     fontWeight: '600',
     color: '#111',
     marginBottom: 4,
@@ -1064,7 +1065,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
     marginLeft: 6,
-    fontSize: 13,
+    fontSize: normalize(13),
   },
 
   bundleBtn: {
@@ -1088,7 +1089,7 @@ const styles = StyleSheet.create({
 
   emptyText: {
     marginTop: 12,
-    fontSize: 16,
+    fontSize: normalize(16),
     color: '#777',
   },
 
@@ -1106,7 +1107,7 @@ const styles = StyleSheet.create({
   },
 
   modalTitle: {
-    fontSize: 18,
+    fontSize: normalize(18),
     fontWeight: '700',
     marginBottom: 16,
   },
@@ -1161,7 +1162,7 @@ const styles = StyleSheet.create({
   },
 
   sheetTitle: {
-    fontSize: 18,
+    fontSize: normalize(18),
     fontWeight: "700",
     marginBottom: 16,
   },
@@ -1219,7 +1220,7 @@ const styles = StyleSheet.create({
 
     marginTop: 30,
 
-    fontSize: 42,
+    fontSize: normalize(42),
 
     color: "#111",
 
@@ -1233,11 +1234,11 @@ const styles = StyleSheet.create({
 
     marginTop: 10,
 
-    fontSize: 16,
+    fontSize: normalize(16),
 
     color: "#777",
 
-    lineHeight: 24,
+    lineHeight: normalize(24),
 
   },
 
@@ -1283,7 +1284,7 @@ const styles = StyleSheet.create({
 
     marginTop: 28,
 
-    fontSize: 28,
+    fontSize: normalize(28),
 
     color: "#111",
 
@@ -1297,9 +1298,9 @@ const styles = StyleSheet.create({
 
     color: "#777",
 
-    fontSize: 15,
+    fontSize: normalize(15),
 
-    lineHeight: 24,
+    lineHeight: normalize(24),
 
     textAlign: "center",
 
@@ -1322,7 +1323,7 @@ const styles = StyleSheet.create({
 
   sheetHeading: {
 
-    fontSize: 30,
+    fontSize: normalize(30),
 
     fontWeight: "900",
 
@@ -1338,7 +1339,7 @@ const styles = StyleSheet.create({
 
     marginBottom: 28,
 
-    fontSize: 15,
+    fontSize: normalize(15),
 
     color: "#777",
 
@@ -1386,7 +1387,7 @@ const styles = StyleSheet.create({
 
   sizeLabel: {
 
-    fontSize: 16,
+    fontSize: normalize(16),
 
     fontWeight: "900",
 
@@ -1422,7 +1423,7 @@ const styles = StyleSheet.create({
 
     marginLeft: 10,
 
-    fontSize: 15,
+    fontSize: normalize(15),
 
     fontWeight: "900",
 
@@ -1444,7 +1445,7 @@ const styles = StyleSheet.create({
 
   closeSheetText: {
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     fontWeight: "800",
 
@@ -1502,7 +1503,7 @@ const styles = StyleSheet.create({
 
     fontWeight: "900",
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     letterSpacing: 0.8,
   },
@@ -1535,7 +1536,7 @@ const styles = StyleSheet.create({
 
     fontWeight: "900",
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     letterSpacing: 0.8,
   },
@@ -1543,7 +1544,7 @@ const styles = StyleSheet.create({
 
     color: "#111",
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     fontWeight: "900",
 
@@ -1577,7 +1578,7 @@ const styles = StyleSheet.create({
     // left: 16,
     // right: 16,
 
-    top: width * 0.08,
+    top: scale(31),
 
     zIndex: 999,
 
@@ -1605,7 +1606,7 @@ const styles = StyleSheet.create({
 
     textAlign: "center",
 
-    fontSize: 18,
+    fontSize: normalize(18),
 
     fontWeight: "900",
 

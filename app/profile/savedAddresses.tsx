@@ -7,6 +7,7 @@ import {
   StyleSheet,
   StatusBar,
 } from "react-native";
+import { normalize } from "@/utils/responsive";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -449,7 +450,7 @@ const styles = StyleSheet.create({
   },
 
   headerLabel: {
-    fontSize: 10,
+    fontSize: normalize(10),
     fontWeight: "700",
     letterSpacing: 1.6,
     color: MUTED,
@@ -457,7 +458,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 28,
+    fontSize: normalize(28),
     fontWeight: "800",
     letterSpacing: -0.8,
     color: BLACK,
@@ -483,14 +484,14 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    fontSize: 11,
+    fontSize: normalize(11),
     fontWeight: "700",
     letterSpacing: 1.4,
     color: MUTED,
   },
 
   count: {
-    fontSize: 12,
+    fontSize: normalize(12),
     fontWeight: "700",
     color: BLACK,
   },
@@ -565,27 +566,27 @@ const styles = StyleSheet.create({
   },
 
   name: {
-    fontSize: 18,
+    fontSize: normalize(18),
     fontWeight: "700",
     color: BLACK,
   },
 
   phone: {
-    fontSize: 12,
+    fontSize: normalize(12),
     fontWeight: "500",
     color: MUTED,
     marginTop: 3,
   },
 
   address: {
-    fontSize: 14,
-    lineHeight: 21,
+    fontSize: normalize(14),
+    lineHeight: normalize(21),
     color: "#333333",
     marginTop: 14,
   },
 
   meta: {
-    fontSize: 13,
+    fontSize: normalize(13),
     color: MUTED,
     marginTop: 3,
   },
@@ -612,7 +613,7 @@ const styles = StyleSheet.create({
   },
 
   defaultText: {
-    fontSize: 9,
+    fontSize: normalize(9),
     fontWeight: "800",
     letterSpacing: 1,
     color: BLACK,
@@ -645,14 +646,14 @@ const styles = StyleSheet.create({
   },
 
   actionText: {
-    fontSize: 10,
+    fontSize: normalize(10),
     fontWeight: "800",
     letterSpacing: 1,
     color: BLACK,
   },
 
   deleteText: {
-    fontSize: 10,
+    fontSize: normalize(10),
     fontWeight: "800",
     letterSpacing: 1,
     color: "#D92D20",
@@ -687,7 +688,7 @@ const styles = StyleSheet.create({
   },
 
   addButtonText: {
-    fontSize: 11,
+    fontSize: normalize(11),
     fontWeight: "800",
     letterSpacing: 1,
     color: BLACK,
@@ -711,7 +712,7 @@ const styles = StyleSheet.create({
 
   deliverText: {
     color: "#FFFFFF",
-    fontSize: 11,
+    fontSize: normalize(11),
     fontWeight: "800",
     letterSpacing: 1.2,
   },
@@ -754,15 +755,15 @@ const styles = StyleSheet.create({
   },
 
   emptyTitle: {
-    fontSize: 22,
+    fontSize: normalize(22),
     fontWeight: "800",
     letterSpacing: -0.3,
     color: BLACK,
   },
 
   emptyDescription: {
-    fontSize: 13,
-    lineHeight: 20,
+    fontSize: normalize(13),
+    lineHeight: normalize(20),
     color: MUTED,
     textAlign: "center",
     marginTop: 10,
@@ -783,7 +784,7 @@ const styles = StyleSheet.create({
 
   emptyButtonText: {
     color: "#FFFFFF",
-    fontSize: 11,
+    fontSize: normalize(11),
     fontWeight: "800",
     letterSpacing: 1.2,
   },

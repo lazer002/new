@@ -47,10 +47,12 @@ import {
   useWishlist,
 } from "@/context/WishlistContext";
 
+import { normalize, scale, verticalScale } from "@/utils/responsive";
+
 const { width, height } =
   Dimensions.get("window");
 
-const HERO_HEIGHT = height * 0.62;
+const HERO_HEIGHT = verticalScale(523);
 
 export default function ProductScreen() {
   const router = useRouter();
@@ -466,7 +468,7 @@ ref={scrollRef}
         setActiveIndex(page);
         
         thumbnailRef.current?.scrollTo({
-          x: Math.max(0, page * (width * 0.15 + height * 0.012) - width / 2),
+          x: Math.max(0, page * (scale(59) + verticalScale(10)) - width / 2),
           animated: true,
         });
 
@@ -1326,11 +1328,11 @@ rightButtons: {
 
 },wishlistButton: {
 
-  width:width * 0.13,
+  width:scale(51),
 
-  height: width * 0.13,
+  height: scale(51),
 
-  marginTop: height * 0.014,
+  marginTop: verticalScale(12),
 
   borderRadius: 18,
 
@@ -1356,9 +1358,9 @@ rightButtons: {
 },
 
   glassButton: {
-    width: width * 0.13,
-    height: width * 0.13,
-    borderRadius: (width * 0.13) / 2,
+    width: scale(51),
+    height: scale(51),
+    borderRadius: (scale(51)) / 2,
     overflow: "hidden",
     justifyContent: "center",
     alignItems: "center",
@@ -1369,8 +1371,8 @@ rightButtons: {
 
   counter: {
     position: "absolute",
-    right: width * 0.05,
-    bottom: height * 0.118,
+    right: scale(20),
+    bottom: verticalScale(100),
     backgroundColor: "rgba(0,0,0,.55)",
     borderRadius: 20,
     paddingHorizontal: 14,
@@ -1379,22 +1381,22 @@ rightButtons: {
 
   counterText: {
     color: "#FFF",
-    fontSize: 13,
+    fontSize: normalize(13),
     fontWeight: "800",
   },
 
   thumbnailContainer: {
     position: "absolute",
-    bottom: height * 0.02,
+    bottom: verticalScale(17),
     left: 0,
     right: 0,
   },
 
   thumbnail: {
-    width: width * 0.15,
-    height: height * 0.08,
+    width: scale(59),
+    height: verticalScale(68),
     borderRadius: 18,
-    marginRight: height * 0.012,
+    marginRight: verticalScale(10),
     borderWidth: 2,
     borderColor: "transparent",
   },
@@ -1408,18 +1410,18 @@ rightButtons: {
     backgroundColor: "#FFF",
     borderTopLeftRadius: 36,
     borderTopRightRadius: 36,
-    paddingHorizontal: height * 0.018,
-    paddingTop: height * 0.028,
-    paddingBottom: height * 0.04,
+    paddingHorizontal: verticalScale(15),
+    paddingTop: verticalScale(24),
+    paddingBottom: verticalScale(34),
   },
 
   bottomBar: {
     position: "absolute",
-    left: width * 0.04,
-    right: width * 0.04,
-    bottom: height * 0.02,
-    height: height * 0.09,
-    borderRadius: height * 0.028,
+    left: scale(16),
+    right: scale(16),
+    bottom: verticalScale(17),
+    height: verticalScale(76),
+    borderRadius: verticalScale(24),
     backgroundColor: "#111",
     paddingHorizontal: 22,
     flexDirection: "row",
@@ -1430,7 +1432,7 @@ rightButtons: {
 
   bottomLabel: {
     color: "#999",
-    fontSize: 11,
+    fontSize: normalize(11),
     fontWeight: "700",
     letterSpacing: 2,
   },
@@ -1438,14 +1440,14 @@ rightButtons: {
   bottomPrice: {
     marginTop: 4,
     color: "#FFF",
-    fontSize: height * 0.03,
+    fontSize: normalize(25),
     fontWeight: "900",
   },
 
   cartButton: {
-    width: width * 0.45,
-    height: height * 0.07,
-    borderRadius: height * 0.028,
+    width: scale(176),
+    height: verticalScale(59),
+    borderRadius: verticalScale(24),
     backgroundColor: "#B6FF2E",
     flexDirection: "row",
     justifyContent: "space-between",
@@ -1456,14 +1458,14 @@ rightButtons: {
   cartButtonText: {
     color: "#111",
     fontWeight: "900",
-    fontSize: 15,
+    fontSize: normalize(15),
     letterSpacing: 1,
   },
 
   arrowCircle: {
-    width: width * 0.11,
-    height: width * 0.11,
-    borderRadius: (width * 0.13) / 2,
+    width: scale(43),
+    height: scale(43),
+    borderRadius: (scale(51)) / 2,
     backgroundColor: "#FFF",
     justifyContent: "center",
     alignItems: "center",
@@ -1477,13 +1479,13 @@ rightButtons: {
   labelBadge: {
     backgroundColor: "#111",
     borderRadius: 18,
-    paddingHorizontal: width * 0.04,
+    paddingHorizontal: scale(16),
     paddingVertical: 8,
   },
 
   labelText: {
     color: "#FFF",
-    fontSize: 11,
+    fontSize: normalize(11),
     fontWeight: "900",
     letterSpacing: 1.5,
   },
@@ -1495,28 +1497,28 @@ rightButtons: {
 
   rating: {
     marginLeft: 5,
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "800",
     color: "#111",
   },
 
   productTitle: {
-    marginTop:height * 0.018,
-    fontSize: height * 0.04,
-    lineHeight: height * 0.04 * 1.2,
+    marginTop:verticalScale(15),
+    fontSize: normalize(34),
+    lineHeight: normalize(41),
     fontWeight: "900",
     color: "#111",
   },
 
   productSubtitle: {
     // marginTop: height * 0.01,
-    fontSize: height * 0.016,
+    fontSize: normalize(14),
     color: "#777",
-    letterSpacing: height * 0.002,
+    letterSpacing: verticalScale(2),
   },
 
   priceRow: {
-    marginTop: height * 0.01,
+    marginTop: verticalScale(8),
     
     flexDirection: "row",
     justifyContent: "space-between",
@@ -1524,7 +1526,7 @@ rightButtons: {
   },
 
   price: {
-    fontSize: height * 0.04,
+    fontSize: normalize(34),
     fontWeight: "900",
     color: "#111",
   },
@@ -1538,8 +1540,8 @@ rightButtons: {
 
 oldPrice: {
   color: "#9A9A9A",
-  fontSize: height * 0.023,
-  lineHeight: height * 0.03 * 1.2,
+  fontSize: normalize(19),
+  lineHeight: normalize(30),
   includeFontPadding: false, // Android
   textAlignVertical: "center",
 },
@@ -1564,13 +1566,13 @@ oldPriceStrike: {
   saveText: {
     color: "#111",
     fontWeight: "900",
-    fontSize: 12,
+    fontSize: normalize(12),
     letterSpacing: .8,
   },
 
   infoRow: {
-    marginTop: height * 0.03,
-    height: height * 0.1,
+    marginTop: verticalScale(25),
+    height: verticalScale(84),
     borderRadius: 28,
     backgroundColor: "#111",
     flexDirection: "row",
@@ -1587,13 +1589,13 @@ oldPriceStrike: {
     marginTop: 8,
     color: "#FFF",
     fontWeight: "800",
-    fontSize: width * 0.03,
+    fontSize: normalize(12),
   },
 
   infoSub: {
     marginTop: 3,
     color: "#8D8D8D",
-    fontSize: width * 0.025,
+    fontSize: normalize(10),
   },
 
   divider: {
@@ -1614,7 +1616,7 @@ oldPriceStrike: {
   },
 
   sectionTitle: {
-    fontSize: width * 0.06,
+    fontSize: normalize(23),
     fontWeight: "900",
     color: "#111",
   },
@@ -1622,7 +1624,7 @@ oldPriceStrike: {
   sizeGuide: {
     color: "#73D01C",
     fontWeight: "800",
-    fontSize: width * 0.03,
+    fontSize: normalize(12),
   },
 
   sizeGrid: {
@@ -1651,13 +1653,13 @@ floatingHeader:{
 
   position:"absolute",
 
-  top:height*0.045,
+  top:verticalScale(38),
 
   left:16,
 
   right:16,
 
-  height: height * 0.068,
+  height: verticalScale(57),
 
   flexDirection:"row",
 
@@ -1696,7 +1698,7 @@ headerTitle:{
 
   color:"#FFF",
 
-  fontSize: width * 0.04,
+  fontSize: normalize(16),
 
   fontWeight:"800",
 
@@ -1716,9 +1718,9 @@ headerActions:{
 
 iconButton:{
 
-  width: width * 0.15,
+  width: scale(59),
 
-  height: width * 0.15,
+  height: scale(59),
 
   justifyContent:"center",
 
@@ -1727,7 +1729,7 @@ iconButton:{
 },
   sizeCard: {
     width: "31.5%",
-    height: height * 0.085,
+    height: verticalScale(72),
     borderRadius: 22,
     backgroundColor: "#F8F8F8",
     borderWidth: 1,
@@ -1747,7 +1749,7 @@ iconButton:{
   },
 
   sizeValue: {
-    fontSize: width * 0.04,
+    fontSize: normalize(16),
     fontWeight: "900",
     color: "#111",
   },
@@ -1758,7 +1760,7 @@ iconButton:{
 
   stockLabel: {
     marginTop: 6,
-    fontSize: width * 0.025,
+    fontSize: normalize(10),
     color: "#777",
   },
 
@@ -1771,7 +1773,7 @@ iconButton:{
   },
 
   descriptionCard: {
-    marginTop: height * 0.016,
+    marginTop: verticalScale(14),
     backgroundColor: "#FAFAFA",
     borderRadius: 24,
     borderWidth: 1,
@@ -1780,7 +1782,7 @@ iconButton:{
   },
 
   featureGrid: {
-    marginTop: height * 0.016,
+    marginTop: verticalScale(14),
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
@@ -1796,22 +1798,22 @@ iconButton:{
 
   featureTitle: {
     marginTop: 14,
-    fontSize: width * 0.04,
+    fontSize: normalize(16),
     fontWeight: "900",
     color: "#111",
   },
 
   featureSub: {
     marginTop: 8,
-    fontSize: width * 0.03,
-    lineHeight: 21,
+    fontSize: normalize(12),
+    lineHeight: normalize(21),
     color: "#777",
   },
 
   viewAll: {
     color: "#73D01C",
     fontWeight: "800",
-    fontSize: width * 0.03,
+    fontSize: normalize(12),
   },
 
   relatedCard: {
@@ -1835,19 +1837,19 @@ iconButton:{
 
   relatedContent: {
     position: "absolute",
-    left: width * 0.04,
-    right: width * 0.04,
-    bottom: width * 0.04,
+    left: scale(16),
+    right: scale(16),
+    bottom: scale(16),
   },
 
   relatedTitle: {
     color: "#FFF",
-    fontSize: width * 0.04,
+    fontSize: normalize(16),
     fontWeight: "900",
   },
 
   relatedBottom: {
-    marginTop: height * 0.016,
+    marginTop: verticalScale(14),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -1855,7 +1857,7 @@ iconButton:{
 
   relatedPrice: {
     color: "#FFF",
-    fontSize: width * 0.06,
+    fontSize: normalize(23),
     fontWeight: "900",
   },
 

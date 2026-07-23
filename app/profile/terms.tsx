@@ -16,6 +16,8 @@ import Screen from "@/components/Screen";
 
 import Octicons from "@expo/vector-icons/Octicons";
 
+import { normalize, scale, verticalScale } from "@/utils/responsive";
+
 const { width, height } = Dimensions.get("window");
 
 if (Platform.OS === "android") {
@@ -182,7 +184,7 @@ export default function TermsPrivacyScreen() {
 
                   <Octicons
                     name={item.icon as any}
-                    size={height * 0.024}
+                    size={verticalScale(20)}
                     color="#111"
                   />
 
@@ -290,7 +292,7 @@ export default function TermsPrivacyScreen() {
 
               <Octicons
                 name="mail"
-                size={height * 0.024}
+                size={verticalScale(20)}
                 color="#111"
               />
 
@@ -303,7 +305,7 @@ export default function TermsPrivacyScreen() {
             style={[
               styles.contactCard,
               {
-                marginTop: height * 0.02,
+                marginTop: verticalScale(17),
               },
             ]}
           >
@@ -324,7 +326,7 @@ export default function TermsPrivacyScreen() {
 
               <Octicons
                 name="device-mobile"
-                size={height * 0.024}
+                size={verticalScale(20)}
                 color="#111"
               />
 
@@ -392,47 +394,47 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    paddingBottom: height * 0.06,
+    paddingBottom: verticalScale(51),
   },
 
   /* ---------------- HERO ---------------- */
 
   hero: {
     backgroundColor: "#111",
-    paddingTop: height * 0.075,
-    paddingBottom: height * 0.055,
-    paddingHorizontal: width * 0.06,
-    borderBottomLeftRadius: width * 0.09,
-    borderBottomRightRadius: width * 0.09,
+    paddingTop: verticalScale(63),
+    paddingBottom: verticalScale(46),
+    paddingHorizontal: scale(23),
+    borderBottomLeftRadius: scale(35),
+    borderBottomRightRadius: scale(35),
   },
 
   label: {
     color: "#B6FF2E",
-    fontSize: width * 0.03,
+    fontSize: normalize(12),
     fontWeight: "900",
     letterSpacing: 3,
   },
 
   heroTitle: {
-    marginTop: height * 0.015,
+    marginTop: verticalScale(13),
     color: "#FFF",
-    fontSize: width * 0.12,
+    fontSize: normalize(47),
     fontWeight: "900",
-    lineHeight: width * 0.12,
+    lineHeight: normalize(47),
     letterSpacing: -2,
   },
 
   heroSubtitle: {
-    marginTop: height * 0.022,
+    marginTop: verticalScale(19),
     color: "#9A9A9A",
     width: "88%",
-    fontSize: width * 0.038,
-    lineHeight: height * 0.03,
+    fontSize: normalize(15),
+    lineHeight: normalize(25),
   },
 
   greenLine: {
-    marginTop: height * 0.03,
-    width: width * 0.22,
+    marginTop: verticalScale(25),
+    width: scale(86),
     height: 4,
     borderRadius: 20,
     backgroundColor: "#B6FF2E",
@@ -441,11 +443,11 @@ const styles = StyleSheet.create({
   /* ---------------- INTRO ---------------- */
 
   introCard: {
-    marginTop: -height * 0.03,
-    marginHorizontal: width * 0.06,
+    marginTop: -verticalScale(25),
+    marginHorizontal: scale(23),
     backgroundColor: "#FFF",
-    borderRadius: width * 0.07,
-    padding: width * 0.06,
+    borderRadius: scale(27),
+    padding: scale(23),
 
     shadowColor: "#000",
     shadowOpacity: 0.06,
@@ -460,29 +462,29 @@ const styles = StyleSheet.create({
 
   introTitle: {
     color: "#111",
-    fontSize: width * 0.034,
+    fontSize: normalize(13),
     fontWeight: "900",
     letterSpacing: 2,
   },
 
   introText: {
-    marginTop: height * 0.018,
+    marginTop: verticalScale(15),
     color: "#777",
-    fontSize: width * 0.038,
-    lineHeight: height * 0.03,
+    fontSize: normalize(15),
+    lineHeight: normalize(25),
   },
 
   /* ---------------- CARD ---------------- */
 
   card: {
-    marginTop: height * 0.02,
-    marginHorizontal: width * 0.06,
+    marginTop: verticalScale(17),
+    marginHorizontal: scale(23),
     backgroundColor: "#FFF",
-    borderRadius: width * 0.065,
+    borderRadius: scale(25),
     borderWidth: 1,
     borderColor: "#ECECEC",
-    paddingHorizontal: width * 0.05,
-    paddingVertical: height * 0.025,
+    paddingHorizontal: scale(20),
+    paddingVertical: verticalScale(21),
   },
 
   cardActive: {
@@ -495,9 +497,9 @@ const styles = StyleSheet.create({
   },
 
   iconCircle: {
-    width: width * 0.13,
-    height: width * 0.13,
-    borderRadius: width * 0.065,
+    width: scale(51),
+    height: scale(51),
+    borderRadius: scale(25),
     backgroundColor: "#B6FF2E",
     justifyContent: "center",
     alignItems: "center",
@@ -505,14 +507,14 @@ const styles = StyleSheet.create({
 
   cardTitle: {
     color: "#111",
-    fontSize: width * 0.05,
+    fontSize: normalize(20),
     fontWeight: "900",
   },
 
   arrowCircle: {
-    width: width * 0.1,
-    height: width * 0.1,
-    borderRadius: width * 0.05,
+    width: scale(39),
+    height: scale(39),
+    borderRadius: scale(20),
     backgroundColor: "#111",
     justifyContent: "center",
     alignItems: "center",
@@ -523,31 +525,31 @@ const styles = StyleSheet.create({
   },
 
   answerContainer: {
-    marginTop: height * 0.02,
+    marginTop: verticalScale(17),
   },
 
   divider: {
     width: "100%",
     height: 1,
     backgroundColor: "#ECECEC",
-    marginBottom: height * 0.018,
+    marginBottom: verticalScale(15),
   },
 
   answer: {
     color: "#777",
-    fontSize: width * 0.038,
-    lineHeight: height * 0.03,
+    fontSize: normalize(15),
+    lineHeight: normalize(25),
   },
     /* ---------------- CONTACT ---------------- */
 
   contactSection: {
-    marginTop: height * 0.055,
-    marginHorizontal: width * 0.06,
+    marginTop: verticalScale(46),
+    marginHorizontal: scale(23),
   },
 
   sectionLabel: {
     color: "#73D01C",
-    fontSize: width * 0.03,
+    fontSize: normalize(12),
     fontWeight: "900",
     letterSpacing: 2.5,
   },
@@ -555,17 +557,17 @@ const styles = StyleSheet.create({
   sectionHeading: {
     marginTop: 4,
     color: "#111",
-    fontSize: width * 0.075,
+    fontSize: normalize(29),
     fontWeight: "900",
     letterSpacing: -1,
-    marginBottom: height * 0.025,
+    marginBottom: verticalScale(21),
   },
 
   contactCard: {
     backgroundColor: "#111",
-    borderRadius: width * 0.07,
-    paddingHorizontal: width * 0.06,
-    paddingVertical: height * 0.03,
+    borderRadius: scale(27),
+    paddingHorizontal: scale(23),
+    paddingVertical: verticalScale(25),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -583,22 +585,22 @@ const styles = StyleSheet.create({
 
   contactTitle: {
     color: "#B6FF2E",
-    fontSize: width * 0.03,
+    fontSize: normalize(12),
     fontWeight: "900",
     letterSpacing: 2,
   },
 
   contactText: {
-    marginTop: height * 0.01,
+    marginTop: verticalScale(8),
     color: "#FFF",
-    fontSize: width * 0.045,
+    fontSize: normalize(18),
     fontWeight: "700",
   },
 
   contactIcon: {
-    width: width * 0.14,
-    height: width * 0.14,
-    borderRadius: width * 0.07,
+    width: scale(55),
+    height: scale(55),
+    borderRadius: scale(27),
     backgroundColor: "#B6FF2E",
     justifyContent: "center",
     alignItems: "center",
@@ -607,62 +609,62 @@ const styles = StyleSheet.create({
   /* ---------------- FOOTER ---------------- */
 
   footerCard: {
-    marginHorizontal: width * 0.06,
-    marginTop: height * 0.055,
-    marginBottom: height * 0.06,
+    marginHorizontal: scale(23),
+    marginTop: verticalScale(46),
+    marginBottom: verticalScale(51),
     backgroundColor: "#111",
-    borderRadius: width * 0.08,
-    paddingHorizontal: width * 0.065,
-    paddingVertical: height * 0.04,
+    borderRadius: scale(31),
+    paddingHorizontal: scale(25),
+    paddingVertical: verticalScale(34),
   },
 
   footerLabel: {
     color: "#B6FF2E",
-    fontSize: width * 0.03,
+    fontSize: normalize(12),
     fontWeight: "900",
     letterSpacing: 3,
   },
 
   footerTitle: {
-    marginTop: height * 0.015,
+    marginTop: verticalScale(13),
     color: "#FFF",
-    fontSize: width * 0.075,
+    fontSize: normalize(29),
     fontWeight: "900",
     letterSpacing: -1,
   },
 
   footerSubtitle: {
-    marginTop: height * 0.02,
+    marginTop: verticalScale(17),
     color: "#999",
-    fontSize: width * 0.038,
-    lineHeight: height * 0.03,
+    fontSize: normalize(15),
+    lineHeight: normalize(25),
   },
 
   footerButton: {
-    marginTop: height * 0.035,
-    height: height * 0.072,
-    borderRadius: height * 0.036,
+    marginTop: verticalScale(30),
+    height: verticalScale(61),
+    borderRadius: verticalScale(30),
     backgroundColor: "#B6FF2E",
 
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
 
-    paddingLeft: width * 0.06,
-    paddingRight: width * 0.025,
+    paddingLeft: scale(23),
+    paddingRight: scale(10),
   },
 
   footerButtonText: {
     color: "#111",
-    fontSize: width * 0.037,
+    fontSize: normalize(14),
     fontWeight: "900",
     letterSpacing: 1,
   },
 
   footerArrow: {
-    width: width * 0.12,
-    height: width * 0.12,
-    borderRadius: width * 0.06,
+    width: scale(47),
+    height: scale(47),
+    borderRadius: scale(23),
     backgroundColor: "#FFF",
     justifyContent: "center",
     alignItems: "center",

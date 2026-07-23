@@ -8,6 +8,7 @@ import {
   Image,
   ActivityIndicator
 } from "react-native";
+import { normalize, verticalScale } from "@/utils/responsive";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
@@ -815,7 +816,7 @@ heroTop: {
 
     marginTop: 30,
 
-    fontSize: 42,
+    fontSize: normalize(42),
 
     fontWeight: "900",
 
@@ -829,9 +830,9 @@ heroTop: {
 
     marginTop: 8,
 
-    fontSize: 15,
+    fontSize: normalize(15),
 
-    lineHeight: 24,
+    lineHeight: normalize(24),
 
     color: "#777",
 
@@ -889,7 +890,7 @@ segment: {
 
   segmentText: {
 
-    fontSize: 13,
+    fontSize: normalize(13),
 
     fontWeight: "700",
 
@@ -916,12 +917,12 @@ segment: {
   },
 
   lightText: {
-    fontSize: 12,
+    fontSize: normalize(12),
     color: "#999", // light grey
   },
 
   darkText: {
-    fontSize: 14,
+    fontSize: normalize(14),
     color: "#111", // dark
     fontWeight: "600",
   },
@@ -946,11 +947,11 @@ segment: {
 
   status: {
     color: "#22c55e",
-    fontSize: 12,
+    fontSize: normalize(12),
   },
 
   date: {
-    fontSize: 11,
+    fontSize: normalize(11),
     color: "#777",
     marginTop: 4,
   },
@@ -969,12 +970,12 @@ segment: {
   },
 
   title: {
-    fontSize: 13,
+    fontSize: normalize(13),
     fontWeight: "500",
   },
 
   sub: {
-    fontSize: 11,
+    fontSize: normalize(11),
     color: "#777",
   },
 
@@ -983,7 +984,7 @@ segment: {
   },
 
   moreText: {
-    fontSize: 11,
+    fontSize: normalize(11),
     color: "#777",
     marginTop: 4,
   },
@@ -995,7 +996,7 @@ segment: {
 
   view: {
     marginTop: 10,
-    fontSize: 12,
+    fontSize: normalize(12),
     color: "#111",
   },
   statusBadge: {
@@ -1005,12 +1006,12 @@ segment: {
   },
 
   statusText: {
-    fontSize: 11,
+    fontSize: normalize(11),
     fontWeight: "600",
   },
 
   totalLabel: {
-    fontSize: 12,
+    fontSize: normalize(12),
     color: "#777",
     marginTop: 10,
   },
@@ -1030,7 +1031,7 @@ segment: {
   },
 
   trackText: {
-    fontSize: 12,
+    fontSize: normalize(12),
     fontWeight: "600",
   },
 
@@ -1044,14 +1045,14 @@ segment: {
 
   detailsText: {
     color: "#fff",
-    fontSize: 12,
+    fontSize: normalize(12),
     fontWeight: "600",
   },
 
 
   orderCard: {
 
-    marginBottom: height * 0.04,
+    marginBottom: verticalScale(34),
 
     backgroundColor: "#FFF",
 
@@ -1108,7 +1109,7 @@ segment: {
   },
   statusPillText: {
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     fontWeight: "900",
 
@@ -1134,7 +1135,7 @@ segment: {
 
   orderNumber: {
 
-    fontSize: 15,
+    fontSize: normalize(15),
 
     fontWeight: "900",
 
@@ -1144,7 +1145,7 @@ segment: {
 
   orderDate: {
 
-    fontSize: 12,
+    fontSize: normalize(12),
 
     color: "#888",
 
@@ -1154,11 +1155,11 @@ segment: {
 
     marginTop: 18,
 
-    fontSize: 24,
+    fontSize: normalize(24),
 
     fontWeight: "900",
 
-    lineHeight: 32,
+    lineHeight: normalize(32),
 
     color: "#111",
 
@@ -1168,7 +1169,7 @@ segment: {
 
     marginTop: 10,
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     color: "#777",
 
@@ -1186,7 +1187,7 @@ segment: {
 
   metaLabel: {
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     fontWeight: "800",
 
@@ -1200,7 +1201,7 @@ segment: {
 
     marginTop: 6,
 
-    fontSize: 28,
+    fontSize: normalize(28),
 
     fontWeight: "900",
 
@@ -1212,7 +1213,7 @@ segment: {
 
     marginTop: 6,
 
-    fontSize: 28,
+    fontSize: normalize(28),
 
     fontWeight: "900",
 
@@ -1252,7 +1253,7 @@ segment: {
 
     fontWeight: "900",
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     color: "#111",
 
@@ -1286,7 +1287,7 @@ segment: {
 
     fontWeight: "900",
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     letterSpacing: .8,
 
@@ -1331,7 +1332,7 @@ segment: {
 
     marginTop: 28,
 
-    fontSize: 30,
+    fontSize: normalize(30),
 
     fontWeight: "900",
 
@@ -1345,9 +1346,9 @@ segment: {
 
     marginTop: 12,
 
-    fontSize: 15,
+    fontSize: normalize(15),
 
-    lineHeight: 24,
+    lineHeight: normalize(24),
 
     textAlign: "center",
 
@@ -1377,7 +1378,7 @@ timelineLineActive: {
 },
   shopNowText: {
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     fontWeight: "900",
 
@@ -1419,7 +1420,7 @@ loadingContainer: {
 
 loadingText: {
   marginTop: 16,
-  fontSize: 11,
+  fontSize: normalize(11),
   fontWeight: "800",
   letterSpacing: 1.2,
   color: "#777",
@@ -1436,7 +1437,7 @@ loadingText: {
 
   heroNumber: {
 
-    fontSize: 28,
+    fontSize: normalize(28),
 
     fontWeight: "900",
 
@@ -1448,7 +1449,7 @@ loadingText: {
 
     marginTop: 6,
 
-    fontSize: 12,
+    fontSize: normalize(12),
 
     fontWeight: "700",
 
@@ -1484,7 +1485,7 @@ timelineLine: {
 
 timelineLabel: {
   marginTop: 10,
-  fontSize: 11,
+  fontSize: normalize(11),
   fontWeight: "700",
   color: "#888",
   textAlign: "center",

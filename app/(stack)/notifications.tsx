@@ -7,6 +7,7 @@ import {
   FlatList,
   RefreshControl,
 } from "react-native";
+import { normalize } from "@/utils/responsive";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import Animated, {
   useSharedValue,
@@ -286,7 +287,7 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    fontSize: 20,
+    fontSize: normalize(20),
     fontWeight: "800",
     color: "#111",
   },
@@ -345,16 +346,16 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "700",
     color: "#111",
   },
 
   body: {
-    fontSize: 13,
+    fontSize: normalize(13),
     color: "#666",
     marginTop: 4,
-    lineHeight: 18,
+    lineHeight: normalize(18),
   },
 
   footer: {
@@ -365,7 +366,7 @@ const styles = StyleSheet.create({
   },
 
   time: {
-    fontSize: 11,
+    fontSize: normalize(11),
     color: "#999",
   },
 
@@ -378,7 +379,7 @@ const styles = StyleSheet.create({
 
   newText: {
     color: "#fff",
-    fontSize: 10,
+    fontSize: normalize(10),
     fontWeight: "700",
   },
 

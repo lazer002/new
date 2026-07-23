@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
   InteractionManager
 } from "react-native";
+import { normalize } from "@/utils/responsive";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useAuth } from "@/context/AuthContext";
@@ -1399,7 +1400,7 @@ const styles = StyleSheet.create({
 
   heroLabel: {
     color: "#777",
-    fontSize: 11,
+    fontSize: normalize(11),
     fontWeight: "900",
     letterSpacing: 2.5,
   },
@@ -1409,7 +1410,7 @@ const styles = StyleSheet.create({
 
     color: "#111",
 
-    fontSize: 34,
+    fontSize: normalize(34),
     fontWeight: "900",
   },
 
@@ -1418,7 +1419,7 @@ const styles = StyleSheet.create({
 
     color: "#777",
 
-    fontSize: 14,
+    fontSize: normalize(14),
   },
 
   /* ================= SECTION ================= */
@@ -1444,7 +1445,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     color: "#111",
 
-    fontSize: 13,
+    fontSize: normalize(13),
     fontWeight: "900",
 
     letterSpacing: 2,
@@ -1526,7 +1527,7 @@ const styles = StyleSheet.create({
   savedName: {
     color: "#111",
 
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "800",
 
     marginBottom: 4,
@@ -1535,9 +1536,9 @@ const styles = StyleSheet.create({
   savedAddr: {
     color: "#777",
 
-    fontSize: 13,
+    fontSize: normalize(13),
 
-    lineHeight: 20,
+    lineHeight: normalize(20),
   },
 
   defaultChip: {
@@ -1556,7 +1557,7 @@ const styles = StyleSheet.create({
   defaultText: {
     color: "#FFF",
 
-    fontSize: 10,
+    fontSize: normalize(10),
     fontWeight: "900",
 
     letterSpacing: 1.5,
@@ -1564,7 +1565,7 @@ const styles = StyleSheet.create({
 
   emptyText: {
     color: "#888",
-    fontSize: 14,
+    fontSize: normalize(14),
   },
 
   addAddressBtn: {
@@ -1586,7 +1587,7 @@ const styles = StyleSheet.create({
 
     color: "#111",
 
-    fontSize: 13,
+    fontSize: normalize(13),
     fontWeight: "900",
 
     letterSpacing: 1.2,
@@ -1615,7 +1616,7 @@ input: {
 
   color: "#111",
 
-  fontSize: 15,
+  fontSize: normalize(15),
   fontWeight: "600",
 
   marginBottom: 14,
@@ -1645,14 +1646,14 @@ input: {
   productTitle: {
     color: "#111",
 
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "800",
   },
 
   productMeta: {
     color: "#777",
 
-    fontSize: 12,
+    fontSize: normalize(12),
 
     marginTop: 4,
   },
@@ -1662,7 +1663,7 @@ input: {
 
     color: "#999",
 
-    fontSize: 12,
+    fontSize: normalize(12),
 
     fontWeight: "700",
   },
@@ -1672,7 +1673,7 @@ input: {
 
     fontWeight: "900",
 
-    fontSize: 15,
+    fontSize: normalize(15),
   },
 
   /* ================= PAYMENT ================= */
@@ -1755,9 +1756,9 @@ orderTitleRow: {
 orderTitle: {
   flex: 1,
   color: "#111",
-  fontSize: 18,
+  fontSize: normalize(18),
   fontWeight: "900",
-  lineHeight: 24,
+  lineHeight: normalize(24),
   marginRight: 10,
 },
 bundleChip: {
@@ -1774,7 +1775,7 @@ bundleChip: {
 bundleChipText: {
   color: "#7A8900",
 
-  fontSize: 10,
+  fontSize: normalize(10),
 
   fontWeight: "900",
 
@@ -1786,7 +1787,7 @@ orderMeta: {
 
   color: "#777",
 
-  fontSize: 13,
+  fontSize: normalize(13),
 },
 
 orderBottom:{
@@ -1829,7 +1830,7 @@ itemsChip: {
 
 itemsChipText: {
   color: "#FFF",
-  fontSize: 10,
+  fontSize: normalize(10),
   fontWeight: "900",
   letterSpacing: 1,
 },
@@ -1848,7 +1849,7 @@ drawerPill: {
 drawerPillText: {
   color: "#111",
   fontWeight: "800",
-  fontSize: 12,
+  fontSize: normalize(12),
   marginRight: 8,
 },
 orderQty: {
@@ -1862,7 +1863,7 @@ orderPrice: {
 
   fontWeight: "900",
 
-  fontSize: 18,
+  fontSize: normalize(18),
 },
 
 expandButton: {
@@ -1881,7 +1882,7 @@ expandButton: {
 
     color: "#111",
 
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "700",
   },
 
@@ -1897,7 +1898,7 @@ expandButton: {
   summaryText: {
     color: "#666",
 
-    fontSize: 14,
+    fontSize: normalize(14),
   },
 
   bold: {
@@ -1941,7 +1942,7 @@ expandButton: {
 
     color: "#777",
 
-    fontSize: 13,
+    fontSize: normalize(13),
   },
 
   /* ================= FLOATING BAR ================= */
@@ -1979,7 +1980,7 @@ expandButton: {
   checkoutLabel: {
     color: "#888",
 
-    fontSize: 11,
+    fontSize: normalize(11),
 
     fontWeight: "800",
 
@@ -1991,7 +1992,7 @@ expandButton: {
 
     color: "#FFF",
 
-    fontSize: 24,
+    fontSize: normalize(24),
 
     fontWeight: "900",
   },
@@ -2015,7 +2016,7 @@ expandButton: {
 
     fontWeight: "900",
 
-    fontSize: 14,
+    fontSize: normalize(14),
 
     letterSpacing: 1.5,
   },
@@ -2033,7 +2034,7 @@ drawerDivider: {
 
 drawerTitle: {
   color: "#111",
-  fontSize: 12,
+  fontSize: normalize(12),
   fontWeight: "900",
   letterSpacing: 2,
   marginBottom: 16,
@@ -2054,19 +2055,19 @@ drawerImage: {
 
 drawerProductTitle: {
   color: "#111",
-  fontSize: 14,
+  fontSize: normalize(14),
   fontWeight: "700",
 },
 
 drawerMeta: {
   marginTop: 6,
   color: "#888",
-  fontSize: 12,
+  fontSize: normalize(12),
 },
 
 drawerPrice: {
   color: "#111",
-  fontSize: 15,
+  fontSize: normalize(15),
   fontWeight: "900",
 },
 
@@ -2109,13 +2110,13 @@ bundleFooterText: {
 
   fontWeight: "700",
 
-  fontSize: 14,
+  fontSize: normalize(14),
 },
 
 bundleFooterPrice: {
   color: "#111",
 
-  fontSize: 20,
+  fontSize: normalize(20),
 
   fontWeight: "900",
 },
@@ -2159,7 +2160,7 @@ saveIcon:{
 },
 
 saveTitle:{
-  fontSize:11,
+  fontSize:normalize(11),
   fontWeight:"900",
   letterSpacing:1,
   color:"#111",
@@ -2167,7 +2168,7 @@ saveTitle:{
 
 saveSubtitle:{
   marginTop:2,
-  fontSize:11,
+  fontSize:normalize(11),
   color:"#444",
 },
 pricePill: {
@@ -2189,19 +2190,19 @@ pricePill: {
 
 pricePillPrice: {
   color: "#111",
-  fontSize: 16,
+  fontSize: normalize(16),
   fontWeight: "900",
 },
 
 pricePillSave: {
   marginTop: 2,
   color: "#111",
-  fontSize: 10,
+  fontSize: normalize(10),
   fontWeight: "800",
   letterSpacing: 0.5,
 },
 saveAmount:{
-  fontSize:18,
+  fontSize:normalize(18),
   fontWeight:"900",
   color:"#111",
 },
@@ -2235,7 +2236,7 @@ paymentLoaderCard: {
 paymentLoaderTitle: {
   marginTop: 24,
   color: "#111",
-  fontSize: 20,
+  fontSize: normalize(20),
   fontWeight: "900",
   letterSpacing: 1.5,
 },
@@ -2243,7 +2244,7 @@ paymentLoaderTitle: {
 paymentLoaderText: {
   marginTop: 8,
   color: "#555",
-  fontSize: 14,
+  fontSize: normalize(14),
   fontWeight: "600",
 },
 });

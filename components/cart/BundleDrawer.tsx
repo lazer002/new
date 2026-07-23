@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import { normalize } from "@/utils/responsive";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, {
   useSharedValue,
@@ -214,7 +215,7 @@ const styles = StyleSheet.create({
   },
 
   name: {
-    fontSize: 14,
+    fontSize: normalize(14),
     fontWeight: "800",
     color: "#111",
   },
@@ -222,6 +223,6 @@ const styles = StyleSheet.create({
   size: {
     marginTop: 3,
     color: "#777",
-    fontSize: 12,
+    fontSize: normalize(12),
   },
 });

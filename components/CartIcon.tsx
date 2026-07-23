@@ -5,6 +5,7 @@ import {
   Pressable,
   StyleSheet,
 } from "react-native";
+import { normalize } from "@/utils/responsive";
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -113,7 +114,7 @@ badgeText:{
 
   color:"#111",
 
-  fontSize:10,
+  fontSize:normalize(10),
 
   fontWeight:"900",
 

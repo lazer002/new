@@ -8,6 +8,7 @@ import {
   Image,
   ScrollView,
 } from "react-native";
+import { normalize } from "@/utils/responsive";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -177,7 +178,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
 
-  headerTitle: { fontSize: 18, fontWeight: "700" },
+  headerTitle: { fontSize: normalize(18), fontWeight: "700" },
 
   card: {
     margin: 16,
@@ -186,9 +187,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
 
-  title: { fontSize: 16, fontWeight: "700" },
+  title: { fontSize: normalize(16), fontWeight: "700" },
   body: { marginTop: 6, color: "#555" },
-  time: { marginTop: 8, fontSize: 12, color: "#999" },
+  time: { marginTop: 8, fontSize: normalize(12), color: "#999" },
 
   orderId: { fontWeight: "700" },
   status: { color: "#22c55e", marginTop: 6 },
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
   },
 
   itemName: { fontWeight: "600" },
-  itemMeta: { fontSize: 12, color: "#666" },
+  itemMeta: { fontSize: normalize(12), color: "#666" },
   price: { fontWeight: "600" },
 
   btn: {

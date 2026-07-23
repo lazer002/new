@@ -9,6 +9,7 @@ import {
     Text,
     View,
 } from "react-native";
+import { normalize, scale } from "@/utils/responsive";
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -17,7 +18,7 @@ import Animated, {
 } from "react-native-reanimated";
 const { width, height } = Dimensions.get("window");
 
-const DRAWER_WIDTH = width * 0.84;
+const DRAWER_WIDTH = scale(328);
 
 type Props = {
   visible: boolean;
@@ -712,7 +713,7 @@ onPress={() => {
     color:"#B6FF2E",
     marginLeft:16,
     fontWeight:"700",
-    fontSize:17
+    fontSize:normalize(17)
   }}
 >
 
@@ -877,7 +878,7 @@ brandRow: {
 
 brand: {
   color: "#FFF",
-  fontSize: 30,
+  fontSize: normalize(30),
   fontWeight: "900",
   letterSpacing: 5,
 },
@@ -885,7 +886,7 @@ brand: {
 brandSub: {
   marginTop: 6,
   color: "#7D7D7D",
-  fontSize: 14,
+  fontSize: normalize(14),
 },
 
 closeButton: {
@@ -951,20 +952,20 @@ avatar: {
 
 avatarText: {
   color: "#111",
-  fontSize: 24,
+  fontSize: normalize(24),
   fontWeight: "900",
 },
 
 userName: {
   color: "#FFF",
-  fontSize: 19,
+  fontSize: normalize(19),
   fontWeight: "800",
 },
 
 userPlan: {
   marginTop: 6,
   color: "#B6FF2E",
-  fontSize: 14,
+  fontSize: normalize(14),
   fontWeight: "600",
 },
 
@@ -991,7 +992,7 @@ menuText: {
 
   color: "#FFF",
 
-  fontSize: 17,
+  fontSize: normalize(17),
 
   fontWeight: "700",
 
@@ -1035,7 +1036,7 @@ subMenuText: {
 
   color: "#B5B5B5",
 
-  fontSize: 15,
+  fontSize: normalize(15),
 
 },
 drawerBottom: {
@@ -1070,7 +1071,7 @@ logoutText: {
 
   color: "#FF5A5F",
 
-  fontSize: 17,
+  fontSize: normalize(17),
 
   fontWeight: "700",
 
@@ -1114,7 +1115,7 @@ bottomAvatar: {
 
 bottomAvatarText: {
 
-  fontSize: 20,
+  fontSize: normalize(20),
 
   fontWeight: "900",
 
@@ -1160,7 +1161,7 @@ bottomName: {
 
   color: "#FFF",
 
-  fontSize: 18,
+  fontSize: normalize(18),
 
   fontWeight: "800",
 
@@ -1182,7 +1183,7 @@ version: {
 
   color: "#666",
 
-  fontSize: 12,
+  fontSize: normalize(12),
 
   textAlign: "center",
 

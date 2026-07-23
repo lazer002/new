@@ -9,6 +9,7 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
+import { normalize } from "@/utils/responsive";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import Toast from "react-native-toast-message";
@@ -922,15 +923,15 @@ const styles = StyleSheet.create({
 
   eyebrow: {
     color: "#777777",
-    fontSize: 11,
+    fontSize: normalize(11),
     fontWeight: "800",
     letterSpacing: 2,
   },
 
   header: {
     color: "#111111",
-    fontSize: 42,
-    lineHeight: 43,
+    fontSize: normalize(42),
+    lineHeight: normalize(43),
     fontWeight: "900",
     letterSpacing: -1.8,
   },
@@ -938,8 +939,8 @@ const styles = StyleSheet.create({
   subHeader: {
     maxWidth: 340,
     color: "#777777",
-    fontSize: 14,
-    lineHeight: 21,
+    fontSize: normalize(14),
+    lineHeight: normalize(21),
     fontWeight: "500",
     marginTop: 12,
   },
@@ -965,7 +966,7 @@ const styles = StyleSheet.create({
 
   stepNumber: {
     color: "#999999",
-    fontSize: 11,
+    fontSize: normalize(11),
     fontWeight: "800",
   },
 
@@ -991,7 +992,7 @@ const styles = StyleSheet.create({
 
   stepLabel: {
     color: "#999999",
-    fontSize: 8,
+    fontSize: normalize(8),
     fontWeight: "800",
     letterSpacing: 0.7,
   },
@@ -1009,7 +1010,7 @@ const styles = StyleSheet.create({
   sectionNumber: {
     color: "#B6FF2E",
     backgroundColor: "#111111",
-    fontSize: 11,
+    fontSize: normalize(11),
     fontWeight: "900",
     paddingHorizontal: 9,
     paddingVertical: 7,
@@ -1024,15 +1025,15 @@ const styles = StyleSheet.create({
 
   sectionTitle: {
     color: "#111111",
-    fontSize: 20,
+    fontSize: normalize(20),
     fontWeight: "900",
     letterSpacing: -0.5,
   },
 
   sectionDescription: {
     color: "#777777",
-    fontSize: 12,
-    lineHeight: 18,
+    fontSize: normalize(12),
+    lineHeight: normalize(18),
     marginTop: 4,
     maxWidth: 400,
   },
@@ -1051,7 +1052,7 @@ const styles = StyleSheet.create({
 
   inputLabel: {
     color: "#111111",
-    fontSize: 10,
+    fontSize: normalize(10),
     fontWeight: "800",
     letterSpacing: 1.2,
     marginBottom: 8,
@@ -1066,7 +1067,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingHorizontal: 16,
     color: "#111111",
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "600",
   },
 
@@ -1089,7 +1090,7 @@ const styles = StyleSheet.create({
 
   primaryBtnText: {
     color: "#111111",
-    fontSize: 12,
+    fontSize: normalize(12),
     fontWeight: "900",
     letterSpacing: 1,
   },
@@ -1105,7 +1106,7 @@ const styles = StyleSheet.create({
 
   buttonArrowText: {
     color: "#B6FF2E",
-    fontSize: 21,
+    fontSize: normalize(21),
     fontWeight: "500",
   },
 
@@ -1130,7 +1131,7 @@ const styles = StyleSheet.create({
 
   helpIconText: {
     color: "#111111",
-    fontSize: 14,
+    fontSize: normalize(14),
     fontWeight: "900",
   },
 
@@ -1140,15 +1141,15 @@ const styles = StyleSheet.create({
 
   helpTitle: {
     color: "#111111",
-    fontSize: 10,
+    fontSize: normalize(10),
     fontWeight: "900",
     letterSpacing: 1,
   },
 
   helpText: {
     color: "#777777",
-    fontSize: 11,
-    lineHeight: 16,
+    fontSize: normalize(11),
+    lineHeight: normalize(16),
     marginTop: 3,
   },
 
@@ -1164,14 +1165,14 @@ const styles = StyleSheet.create({
 
   orderInfoLabel: {
     color: "#999999",
-    fontSize: 9,
+    fontSize: normalize(9),
     fontWeight: "800",
     letterSpacing: 1.5,
   },
 
   orderInfoValue: {
     color: "#FFFFFF",
-    fontSize: 16,
+    fontSize: normalize(16),
     fontWeight: "800",
     marginTop: 4,
   },
@@ -1209,7 +1210,7 @@ const styles = StyleSheet.create({
 
   statusText: {
     color: "#111111",
-    fontSize: 9,
+    fontSize: normalize(9),
     fontWeight: "900",
     letterSpacing: 0.6,
   },
@@ -1235,7 +1236,7 @@ const styles = StyleSheet.create({
 
   infoIconText: {
     color: "#FFFFFF",
-    fontSize: 12,
+    fontSize: normalize(12),
     fontWeight: "900",
   },
 
@@ -1245,15 +1246,15 @@ const styles = StyleSheet.create({
 
   infoTitle: {
     color: "#111111",
-    fontSize: 10,
+    fontSize: normalize(10),
     fontWeight: "900",
     letterSpacing: 0.8,
   },
 
   infoText: {
     color: "#777777",
-    fontSize: 11,
-    lineHeight: 16,
+    fontSize: normalize(11),
+    lineHeight: normalize(16),
     marginTop: 3,
   },
 
@@ -1306,7 +1307,7 @@ const styles = StyleSheet.create({
 
   itemIndexText: {
     color: "#B6FF2E",
-    fontSize: 8,
+    fontSize: normalize(8),
     fontWeight: "900",
   },
 
@@ -1317,7 +1318,7 @@ const styles = StyleSheet.create({
 
   productTag: {
     color: "#999999",
-    fontSize: 8,
+    fontSize: normalize(8),
     fontWeight: "900",
     letterSpacing: 1.4,
     marginBottom: 5,
@@ -1325,8 +1326,8 @@ const styles = StyleSheet.create({
 
   title: {
     color: "#111111",
-    fontSize: 14,
-    lineHeight: 19,
+    fontSize: normalize(14),
+    lineHeight: normalize(19),
     fontWeight: "800",
   },
 
@@ -1338,7 +1339,7 @@ const styles = StyleSheet.create({
 
   meta: {
     color: "#777777",
-    fontSize: 9,
+    fontSize: normalize(9),
     fontWeight: "700",
     letterSpacing: 0.5,
   },
@@ -1368,7 +1369,7 @@ const styles = StyleSheet.create({
 
   checkmark: {
     color: "#111111",
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "900",
   },
 
@@ -1395,14 +1396,14 @@ const styles = StyleSheet.create({
 
   formNumber: {
     color: "#999999",
-    fontSize: 9,
+    fontSize: normalize(9),
     fontWeight: "900",
     marginRight: 7,
   },
 
   label: {
     color: "#111111",
-    fontSize: 10,
+    fontSize: normalize(10),
     fontWeight: "900",
     letterSpacing: 1,
   },
@@ -1410,7 +1411,7 @@ const styles = StyleSheet.create({
   optional: {
     marginLeft: "auto",
     color: "#AAAAAA",
-    fontSize: 8,
+    fontSize: normalize(8),
     fontWeight: "800",
     letterSpacing: 0.7,
   },
@@ -1463,7 +1464,7 @@ const styles = StyleSheet.create({
 
   chipText: {
     color: "#555555",
-    fontSize: 9,
+    fontSize: normalize(9),
     fontWeight: "800",
     letterSpacing: 0.4,
   },
@@ -1490,7 +1491,7 @@ const styles = StyleSheet.create({
   dropdownText: {
     flex: 1,
     color: "#111111",
-    fontSize: 13,
+    fontSize: normalize(13),
     fontWeight: "600",
   },
 
@@ -1514,7 +1515,7 @@ const styles = StyleSheet.create({
 
   dropdownArrowText: {
     color: "#111111",
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "800",
   },
 
@@ -1544,14 +1545,14 @@ const styles = StyleSheet.create({
   dropdownItemText: {
     flex: 1,
     color: "#333333",
-    fontSize: 12,
+    fontSize: normalize(12),
     fontWeight: "500",
     paddingRight: 10,
   },
 
   dropdownItemArrow: {
     color: "#999999",
-    fontSize: 14,
+    fontSize: normalize(14),
   },
 
   textArea: {
@@ -1563,13 +1564,13 @@ const styles = StyleSheet.create({
     padding: 14,
     paddingTop: 14,
     color: "#111111",
-    fontSize: 13,
-    lineHeight: 20,
+    fontSize: normalize(13),
+    lineHeight: normalize(20),
   },
 
   characterCount: {
     color: "#AAAAAA",
-    fontSize: 9,
+    fontSize: normalize(9),
     textAlign: "right",
     marginTop: 5,
   },
@@ -1598,7 +1599,7 @@ const styles = StyleSheet.create({
 
   uploadIconText: {
     color: "#111111",
-    fontSize: 21,
+    fontSize: normalize(21),
     fontWeight: "500",
   },
 
@@ -1608,21 +1609,21 @@ const styles = StyleSheet.create({
 
   uploadTitle: {
     color: "#111111",
-    fontSize: 10,
+    fontSize: normalize(10),
     fontWeight: "900",
     letterSpacing: 0.8,
   },
 
   uploadText: {
     color: "#888888",
-    fontSize: 10,
-    lineHeight: 14,
+    fontSize: normalize(10),
+    lineHeight: normalize(14),
     marginTop: 3,
   },
 
   uploadArrow: {
     color: "#111111",
-    fontSize: 18,
+    fontSize: normalize(18),
     marginLeft: 6,
   },
 // Add to StyleSheet.create({ ... })
@@ -1653,7 +1654,7 @@ sizeButtonActive: {
 
 sizeButtonText: {
   color: "#555555",
-  fontSize: 12,
+  fontSize: normalize(12),
   fontWeight: "900",
 },
 
@@ -1701,7 +1702,7 @@ sizeSelectedDot: {
 
   previewNumberText: {
     color: "#B6FF2E",
-    fontSize: 8,
+    fontSize: normalize(8),
     fontWeight: "900",
   },
 
@@ -1723,14 +1724,14 @@ sizeSelectedDot: {
 
   submitBtnText: {
     color: "#111111",
-    fontSize: 13,
+    fontSize: normalize(13),
     fontWeight: "900",
     letterSpacing: 0.8,
   },
 
   submitBtnSubtext: {
     color: "#555555",
-    fontSize: 8,
+    fontSize: normalize(8),
     fontWeight: "700",
     letterSpacing: 0.6,
     marginTop: 3,
@@ -1747,7 +1748,7 @@ sizeSelectedDot: {
 
   submitArrowText: {
     color: "#B6FF2E",
-    fontSize: 22,
+    fontSize: normalize(22),
   },
 
   successContainer: {
@@ -1771,13 +1772,13 @@ sizeSelectedDot: {
 
   successBadgeText: {
     color: "#111111",
-    fontSize: 28,
+    fontSize: normalize(28),
     fontWeight: "900",
   },
 
   successEyebrow: {
     color: "#B6FF2E",
-    fontSize: 9,
+    fontSize: normalize(9),
     fontWeight: "900",
     letterSpacing: 2,
     marginBottom: 12,
@@ -1785,8 +1786,8 @@ sizeSelectedDot: {
 
   success: {
     color: "#FFFFFF",
-    fontSize: 42,
-    lineHeight: 42,
+    fontSize: normalize(42),
+    lineHeight: normalize(42),
     fontWeight: "900",
     letterSpacing: -1.5,
     textAlign: "center",
@@ -1795,8 +1796,8 @@ sizeSelectedDot: {
   successDescription: {
     maxWidth: 340,
     color: "#999999",
-    fontSize: 12,
-    lineHeight: 19,
+    fontSize: normalize(12),
+    lineHeight: normalize(19),
     textAlign: "center",
     marginTop: 16,
   },
@@ -1811,7 +1812,7 @@ sizeSelectedDot: {
 
   successFooter: {
     color: "#777777",
-    fontSize: 8,
+    fontSize: normalize(8),
     fontWeight: "800",
     letterSpacing: 1.4,
     textAlign: "center",
